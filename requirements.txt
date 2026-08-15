@@ -1,0 +1,6 @@
+pytest
+pytest-asyncio
+cryptography
+fastapi
+uvicorn
+websockets
