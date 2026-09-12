@@ -1,18 +1,3 @@
-"""Real-socket Transport implementation, used for laptop demos.
-
-Follows the per-message-type transport choice in docs/project-plan.md
-section 7.4:
-  - broadcast() (HELLO, and LINK_STATE-style flooding) -> UDP multicast,
-    since loss is tolerable and the whole point is "shout to everyone".
-  - send() (DATA, ACK -- addressed to one specific node) -> TCP, so each
-    hop is ordered and reliable without reimplementing TCP over UDP.
-
-There is no discovery module yet (that is a later phase, section 6.3 task
-1), so this transport does not learn peer addresses on its own. Callers
-register known peers with ``add_peer()``. Nothing above the Transport
-interface needs to change when discovery is added later -- it will just
-call ``add_peer`` as HELLOs arrive.
-"""
 
 from __future__ import annotations
 
