@@ -112,8 +112,16 @@ class MeshGraph:
 
 LINK_STATE_INTERVAL = 5.0  # seconds, per section 7.3
 
-_ENTRY_FORMAT = ">8s f B"  # neighbour node id, link_quality (float32), recent_failures
+# node id, link_quality (float32), recent_failures, role code
+_ENTRY_FORMAT = ">8s f B B"
 _ENTRY_SIZE = struct.calcsize(_ENTRY_FORMAT)
+
+# Role travels alongside each entry -- a node only ever learns a far-away
+# peer's role (GATEWAY/RESCUE) through gossip, since roles come from HELLOs
+# that only reach direct neighbours (section 8.3's RESCUE__ handling needs
+# this to work more than one hop out).
+_ROLE_CODES = {NodeRole.NORMAL: 0, NodeRole.GATEWAY: 1, NodeRole.RESCUE: 2}
+_ROLE_NAMES = {code: role for role, code in _ROLE_CODES.items()}
 
 
 def _encode_node_id(node_id: str) -> bytes:
@@ -127,25 +135,45 @@ def _decode_node_id(raw: bytes) -> str:
     return raw.rstrip(b"\x00").decode("ascii")
 
 
-def encode_report(entries: dict[str, EdgeInfo]) -> bytes:
-    """Serialise "my neighbours and how good each link is" into a LINK_STATE
-    payload: one fixed-size entry per neighbour, concatenated."""
+@dataclass
+class ReportEntry:
+    """One neighbour as described in a LINK_STATE report: how good the
+    reporting node's link to it is, and what role it advertises."""
+
+    link_quality: float = 1.0
+    recent_failures: int = 0
+    role: str = NodeRole.NORMAL
+
+
+def encode_report(entries: dict[str, ReportEntry]) -> bytes:
+    """Serialise "my neighbours, how good each link is, and their roles"
+    into a LINK_STATE payload: one fixed-size entry per neighbour."""
     return b"".join(
-        struct.pack(_ENTRY_FORMAT, _encode_node_id(node_id), info.link_quality, min(info.recent_failures, 0xFF))
-        for node_id, info in entries.items()
+        struct.pack(
+            _ENTRY_FORMAT,
+            _encode_node_id(node_id),
+            entry.link_quality,
+            min(entry.recent_failures, 0xFF),
+            _ROLE_CODES.get(entry.role, 0),
+        )
+        for node_id, entry in entries.items()
     )
 
 
-def decode_report(payload: bytes) -> dict[str, EdgeInfo]:
+def decode_report(payload: bytes) -> dict[str, ReportEntry]:
     """Inverse of ``encode_report``. Raises ``ValueError`` on truncated input."""
     if len(payload) % _ENTRY_SIZE != 0:
         raise ValueError(f"link-state payload not a multiple of entry size ({_ENTRY_SIZE})")
-    entries: dict[str, EdgeInfo] = {}
+    entries: dict[str, ReportEntry] = {}
     for offset in range(0, len(payload), _ENTRY_SIZE):
-        node_id_raw, quality, failures = struct.unpack(
+        node_id_raw, quality, failures, role_code = struct.unpack(
             _ENTRY_FORMAT, payload[offset: offset + _ENTRY_SIZE]
         )
-        entries[_decode_node_id(node_id_raw)] = EdgeInfo(link_quality=quality, recent_failures=failures)
+        entries[_decode_node_id(node_id_raw)] = ReportEntry(
+            link_quality=quality,
+            recent_failures=failures,
+            role=_ROLE_NAMES.get(role_code, NodeRole.NORMAL),
+        )
     return entries
 
 
@@ -169,16 +197,22 @@ class LinkStateGossip:
         transport: Transport,
         graph: MeshGraph,
         neighbours_provider: Callable[[], Iterable[str]],
+        role_provider: Optional[Callable[[str], str]] = None,
         interval: float = LINK_STATE_INTERVAL,
     ) -> None:
         self.node_id = node_id
         self.graph = graph
         self._transport = transport
         self._neighbours_provider = neighbours_provider
+        # looks up a direct neighbour's advertised role (from its HELLO,
+        # tracked by discovery.py) so it can be included in our report --
+        # this is how a far-away node learns a distant GATEWAY/RESCUE role.
+        self._role_provider = role_provider or (lambda _neighbour_id: NodeRole.NORMAL)
         self._interval = interval
 
         self._own_edges: dict[str, EdgeInfo] = {}
         self.on_topology_change: Optional[Callable[[], None]] = None
+        self.on_role_learned: Optional[Callable[[str, str], None]] = None
 
         self._task: Optional[asyncio.Task] = None
 
@@ -235,7 +269,15 @@ class LinkStateGossip:
     async def send_report(self) -> None:
         self._sync_own_edges()
         neighbour_ids = list(self._neighbours_provider())
-        payload = encode_report({n: self.graph.edge(self.node_id, n) for n in neighbour_ids})
+        report = {
+            n: ReportEntry(
+                link_quality=self.graph.edge(self.node_id, n).link_quality,
+                recent_failures=self.graph.edge(self.node_id, n).recent_failures,
+                role=self._role_provider(n),
+            )
+            for n in neighbour_ids
+        }
+        payload = encode_report(report)
         for neighbour_id in neighbour_ids:
             pkt = Packet(
                 type=PacketType.LINK_STATE,
@@ -266,11 +308,13 @@ class LinkStateGossip:
             return
 
         changed = False
-        for neighbour_id, info in entries.items():
+        for neighbour_id, entry in entries.items():
             existing = self.graph.edge(sender_id, neighbour_id)
-            if existing is None or existing.link_quality != info.link_quality or existing.recent_failures != info.recent_failures:
+            if existing is None or existing.link_quality != entry.link_quality or existing.recent_failures != entry.recent_failures:
                 changed = True
-            self.graph.set_edge(sender_id, neighbour_id, info.link_quality, info.recent_failures)
+            self.graph.set_edge(sender_id, neighbour_id, entry.link_quality, entry.recent_failures)
+            if self.on_role_learned is not None:
+                self.on_role_learned(neighbour_id, entry.role)
 
         if changed:
             self._fire_topology_change()

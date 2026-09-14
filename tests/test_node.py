@@ -11,6 +11,7 @@ from mesh.core.transport_sim import SimulatedNetwork, SimulatedTransport
 def make_node(node_id, network, **kwargs):
     kwargs.setdefault("hello_interval", 0.02)
     kwargs.setdefault("neighbour_timeout", 0.3)
+    kwargs.setdefault("link_state_interval", 0.03)
     transport = SimulatedTransport(node_id, network)
     return Node(node_id, transport, **kwargs)
 
@@ -157,3 +158,78 @@ async def test_neighbours_property_matches_discovery_table():
 
     assert a.neighbours is a.discovery.neighbours
     assert "B" in a.neighbours
+
+
+@pytest.mark.asyncio
+async def test_router_forwards_beyond_direct_neighbours_via_gossip():
+    """A -> B -> C -> D: D is not B's direct neighbour, so B's static
+    next-hop table has no entry for it. B can only forward this correctly
+    once link-state gossip has told it C leads to D -- proving
+    ``route_resolver`` (Router.next_hop) is actually doing the work, not
+    just the direct-neighbour shortcut the other tests exercise."""
+    net = SimulatedNetwork(seed=6)
+    net.set_link("A", "B")
+    net.set_link("B", "C")
+    net.set_link("C", "D")
+    a = make_node("A", net)
+    b = make_node("B", net)
+    c = make_node("C", net)
+    d = make_node("D", net)
+
+    delivered_at_d = []
+    d.on_deliver = delivered_at_d.append
+
+    await a.start()
+    await b.start()
+    await c.start()
+    await d.start()
+    await asyncio.sleep(0.2)  # discovery + at least one gossip round to converge
+
+    # B never discovered D directly, so it has no static entry for it
+    assert "D" not in b.relay._next_hop
+    # but the graph gossip built it into knows a path exists
+    assert b.router.next_hop("D") == "C"
+
+    pkt = Packet(type=PacketType.DATA, priority=Priority.NORMAL, src="A", dst="D", path=["A"], payload=b"go the distance")
+    await a.transport.send("B", pkt.pack())
+    await asyncio.sleep(0.05)
+
+    await a.stop()
+    await b.stop()
+    await c.stop()
+    await d.stop()
+
+    assert len(delivered_at_d) == 1
+    assert delivered_at_d[0].path == ["A", "B", "C"]
+    assert delivered_at_d[0].hop_count == 2
+
+
+@pytest.mark.asyncio
+async def test_rescue_dst_routes_to_gateway_across_multiple_hops():
+    net = SimulatedNetwork(seed=7)
+    net.set_link("A", "B")
+    net.set_link("B", "GW")
+    a = make_node("A", net)
+    b = make_node("B", net)
+    gw = make_node("GW", net, role=NodeRole.GATEWAY)
+
+    delivered_at_gw = []
+    gw.on_deliver = delivered_at_gw.append
+
+    await a.start()
+    await b.start()
+    await gw.start()
+    await asyncio.sleep(0.2)
+
+    assert a.router.next_hop("RESCUE__") == "B"
+
+    from mesh.core.packet import RESCUE_DST
+    pkt = Packet(type=PacketType.DATA, priority=Priority.SOS, src="A", dst=RESCUE_DST, payload=b"help")
+    await a.transport.send("B", pkt.pack())
+    await asyncio.sleep(0.05)
+
+    await a.stop()
+    await b.stop()
+    await gw.stop()
+
+    assert len(delivered_at_gw) == 1
