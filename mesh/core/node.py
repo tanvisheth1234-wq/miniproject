@@ -22,7 +22,19 @@ from .packet import DEFAULT_TTL, FLAG_NEEDS_ACK, Packet, PacketType, Priority, R
 from .relay import RelayNode
 from .reliability import ACK_TIMEOUT, AckTracker, DedupSet, MAX_RETRIES, SF_RETRY_INTERVAL, StoreForwardQueue
 from .routing import LINK_STATE_INTERVAL, LinkStateGossip, MeshGraph, Router
+from .store import Store
 from .transport import Transport, TransportError
+
+# section 9: relay.py's drop reasons ("ttl_expired", "loop_detected", ...)
+# mapped onto the section 11 event log's kind naming convention
+# ("drop_ttl", "drop_dup", ...).
+_DROP_EVENT_KIND = {
+    "ttl_expired": "drop_ttl",
+    "duplicate": "drop_dup",
+    "loop_detected": "drop_loop",
+    "no_route": "drop_no_route",
+    "send_failed": "drop_send_failed",
+}
 
 
 class Node:
@@ -40,9 +52,11 @@ class Node:
         max_retries: int = MAX_RETRIES,
         ack_poll_interval: float = 0.5,
         sf_retry_interval: float = SF_RETRY_INTERVAL,
+        db_path: str = ":memory:",
     ) -> None:
         self.node_id = node_id
         self.transport = transport
+        self.store = Store(db_path)
 
         self.discovery = Discovery(
             node_id,
@@ -62,7 +76,7 @@ class Node:
             role_provider=self._role_of,
             interval=link_state_interval,
         )
-        self.gossip.on_topology_change = self.router.invalidate
+        self.gossip.on_topology_change = self._on_topology_change
         self.gossip.on_role_learned = self.router.set_role
 
         self.dedup = DedupSet()
@@ -90,8 +104,8 @@ class Node:
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
         self.on_drop: Optional[Callable[[Packet, str], None]] = None
         self.relay.on_deliver = self._on_relay_deliver
-        self.relay.on_forward = lambda pkt, next_hop: self._call(self.on_forward, pkt, next_hop)
-        self.relay.on_drop = lambda pkt, reason: self._call(self.on_drop, pkt, reason)
+        self.relay.on_forward = self._on_relay_forward
+        self.relay.on_drop = self._on_relay_drop
 
     async def start(self) -> None:
         await self.transport.start()
@@ -121,6 +135,7 @@ class Node:
         await self.gossip.stop()
         await self.discovery.stop()
         await self.transport.stop()
+        self.store.close()
 
     @property
     def neighbours(self):
@@ -132,6 +147,10 @@ class Node:
         beyond one hop."""
         info = self.discovery.neighbours.get(neighbour_id)
         return info.role if info is not None else NodeRole.NORMAL
+
+    def _on_topology_change(self) -> None:
+        self.router.invalidate()
+        self.store.record_event("route_change")
 
     def _is_rescue_terminal(self, dst: str) -> bool:
         """Section 8.3: a node advertising GATEWAY or RESCUE is a valid
@@ -147,11 +166,14 @@ class Node:
         self.relay.set_next_hop(peer_id, peer_id)
         self.graph.set_edge(self.node_id, peer_id)
         self.router.set_role(peer_id, role)
+        self.store.upsert_peer(peer_id, role=role)
+        self.store.record_event("peer_up", peer=peer_id)
 
     def _on_peer_down(self, peer_id: str) -> None:
         self.relay.clear_next_hop(peer_id)
         self.router.forget_role(peer_id)
         self.gossip.forget_neighbour(peer_id)  # drops the graph edge and invalidates routes
+        self.store.record_event("peer_down", peer=peer_id)
 
     # -- originating messages (section 9: ACK + retry, store-and-forward) --------
 
@@ -177,6 +199,10 @@ class Node:
             flags=FLAG_NEEDS_ACK if needs_ack else 0,
             payload=payload,
         )
+        self.store.record_message(
+            str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
+            direction="sent", status="pending", created_ms=pkt.timestamp,
+        )
         await self._dispatch(pkt, track_ack=True)
         return pkt
 
@@ -186,16 +212,27 @@ class Node:
         actually sent."""
         next_hop = self.router.next_hop(pkt.dst)
         if next_hop is None:
-            self.store_forward.enqueue(pkt)
+            self._queue_for_store_forward(pkt)
             return False
         try:
             await self.transport.send(next_hop, pkt.pack())
         except TransportError:
-            self.store_forward.enqueue(pkt)
+            self._queue_for_store_forward(pkt)
             return False
+        self.store.record_event("sent", msg_id=str(pkt.msg_id), peer=next_hop)
         if track_ack and pkt.needs_ack:
             self.ack_tracker.register(pkt, next_hop)
+        elif pkt.type == PacketType.DATA:
+            # best-effort send with no ACK requested: nothing left to
+            # confirm, so this is as "delivered" as this node can attest to
+            self.store.update_message_status(str(pkt.msg_id), "delivered")
         return True
+
+    def _queue_for_store_forward(self, pkt: Packet) -> None:
+        self.store_forward.enqueue(pkt)
+        if pkt.type == PacketType.DATA:
+            self.store.update_message_status(str(pkt.msg_id), "queued_sf")
+        self.store.record_event("sf_queue", msg_id=str(pkt.msg_id))
 
     def _on_relay_deliver(self, pkt: Packet) -> None:
         """A packet addressed to us (or a RESCUE__ we resolve to) just
@@ -204,10 +241,32 @@ class Node:
         the user callback fires."""
         if pkt.type == PacketType.ACK:
             self.ack_tracker.acknowledge(pkt.msg_id)
+            self.store.record_event("ack", msg_id=str(pkt.msg_id))
+            self.store.update_message_status(str(pkt.msg_id), "delivered")
             return
+        self.store.record_message(
+            str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
+            direction="received", status="delivered",
+            hop_count=pkt.hop_count, path=pkt.path,
+        )
+        self.store.record_event("recv", msg_id=str(pkt.msg_id))
         if pkt.needs_ack:
             self._send_ack_for(pkt)
         self._call(self.on_deliver, pkt)
+
+    def _on_relay_forward(self, pkt: Packet, next_hop: str) -> None:
+        self.store.record_message(
+            str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
+            direction="forwarded", status="delivered",
+            hop_count=pkt.hop_count, path=pkt.path,
+        )
+        self.store.record_event("forward", msg_id=str(pkt.msg_id), peer=next_hop)
+        self._call(self.on_forward, pkt, next_hop)
+
+    def _on_relay_drop(self, pkt: Packet, reason: str) -> None:
+        kind = _DROP_EVENT_KIND.get(reason, f"drop_{reason}")
+        self.store.record_event(kind, msg_id=str(pkt.msg_id), detail=reason)
+        self._call(self.on_drop, pkt, reason)
 
     def _send_ack_for(self, original: Packet) -> None:
         ack = Packet(
@@ -231,12 +290,13 @@ class Node:
                     # died" is exactly the failure this recompute avoids)
                     next_hop = self.router.next_hop(entry.pkt.dst)
                     if next_hop is not None:
+                        self.store.record_event("retry", msg_id=str(entry.pkt.msg_id), peer=next_hop)
                         asyncio.create_task(self._resend(next_hop, entry.pkt))
                     # else: no route right now -- leave it tracked, it'll
                     # either get a route by the next poll or exhaust its
                     # retries and fall into `failed` below.
                 for entry in failed:
-                    self.store_forward.enqueue(entry.pkt)
+                    self._queue_for_store_forward(entry.pkt)
 
     async def _resend(self, next_hop: str, pkt: Packet) -> None:
         with contextlib.suppress(TransportError):
@@ -257,10 +317,13 @@ class Node:
         try:
             await self.transport.send(next_hop, pkt.pack())
         except TransportError:
-            self.store_forward.enqueue(pkt)  # still no reliable path -- try again next round
+            self._queue_for_store_forward(pkt)  # still no reliable path -- try again next round
             return
+        self.store.record_event("sf_flush", msg_id=str(pkt.msg_id), peer=next_hop)
         if pkt.needs_ack:
             self.ack_tracker.register(pkt, next_hop)
+        else:
+            self.store.update_message_status(str(pkt.msg_id), "delivered")
 
     def _on_receive(self, sender_id: str, data: bytes) -> None:
         # the single dispatch point: each of these already ignores packet
