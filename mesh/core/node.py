@@ -18,6 +18,7 @@ from typing import Callable, Iterable, Optional
 from .discovery import PRUNE_INTERVAL, Discovery, NodeRole
 from .packet import Packet, RESCUE_DST
 from .relay import RelayNode
+from .reliability import DedupSet
 from .routing import LINK_STATE_INTERVAL, LinkStateGossip, MeshGraph, Router
 from .transport import Transport
 
@@ -58,10 +59,12 @@ class Node:
         self.gossip.on_topology_change = self.router.invalidate
         self.gossip.on_role_learned = self.router.set_role
 
+        self.dedup = DedupSet()
         self.relay = RelayNode(
             node_id, transport,
             route_resolver=self.router.next_hop,
             accepts_dst=self._is_rescue_terminal,
+            dedup=self.dedup,
         )
 
         self.discovery.on_peer_up = self._on_peer_up

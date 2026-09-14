@@ -4,6 +4,7 @@ import pytest
 
 from mesh.core.packet import Packet, PacketType, Priority
 from mesh.core.relay import RelayNode
+from mesh.core.reliability import DedupSet
 from mesh.core.transport import TransportError
 
 
@@ -216,3 +217,79 @@ async def test_two_hop_relay_a_to_b_to_c():
     assert len(delivered_at_c) == 1
     assert delivered_at_c[0].path == ["A", "B"]
     assert delivered_at_c[0].hop_count == 1
+
+
+# --- dedup ------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_duplicate_delivery_is_dropped():
+    transport = _FakeTransport()
+    relay = RelayNode("C", transport, dedup=DedupSet())
+    relay.register()
+
+    delivered = []
+    relay.on_deliver = delivered.append
+    drops = []
+    relay.on_drop = lambda pkt, reason: drops.append(reason)
+
+    pkt = make_data_packet(dst="C")  # same msg_id both times
+    transport.callback("A", pkt.pack())
+    transport.callback("A", pkt.pack())
+    await _settle()
+
+    assert len(delivered) == 1
+    assert drops == ["duplicate"]
+
+
+@pytest.mark.asyncio
+async def test_duplicate_forward_is_dropped_not_resent():
+    transport = _FakeTransport()
+    relay = RelayNode("B", transport, dedup=DedupSet())
+    relay.set_next_hop("C", "C")
+    relay.register()
+
+    drops = []
+    relay.on_drop = lambda pkt, reason: drops.append(reason)
+
+    pkt = make_data_packet(src="A", dst="C", path=["A"])
+    transport.callback("A", pkt.pack())  # arrives via one path
+    transport.callback("A", pkt.pack())  # same message arrives again via another path
+    await _settle()
+
+    assert len(transport.sent) == 1  # forwarded exactly once
+    assert drops == ["duplicate"]
+
+
+@pytest.mark.asyncio
+async def test_different_messages_not_treated_as_duplicates():
+    transport = _FakeTransport()
+    relay = RelayNode("C", transport, dedup=DedupSet())
+    relay.register()
+
+    delivered = []
+    relay.on_deliver = delivered.append
+
+    transport.callback("A", make_data_packet(dst="C").pack())
+    transport.callback("A", make_data_packet(dst="C").pack())  # fresh msg_id (default_factory)
+    await _settle()
+
+    assert len(delivered) == 2
+
+
+@pytest.mark.asyncio
+async def test_no_dedup_configured_allows_reprocessing():
+    """Backward-compat: dedup is opt-in, so relays built without it
+    (as every earlier test in this file does) behave exactly as before."""
+    transport = _FakeTransport()
+    relay = RelayNode("C", transport)  # no dedup passed
+    relay.register()
+
+    delivered = []
+    relay.on_deliver = delivered.append
+
+    pkt = make_data_packet(dst="C")
+    transport.callback("A", pkt.pack())
+    transport.callback("A", pkt.pack())
+    await _settle()
+
+    assert len(delivered) == 2
