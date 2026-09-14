@@ -1,10 +1,10 @@
 """Minimal packet relay: forward DATA/ACK packets not addressed to us.
 
-This is the "receiver task" from docs/project-plan.md section 6.3, scoped
-down for the week 2 milestone ("single-hop relay A->B->C") to a static
-next-hop table rather than routing.py's graph -- Dijkstra and the weighted
-cost function don't land until week 5. It exists to prove forwarding works
-end-to-end before the graph is built on top of it.
+This is the "receiver task" from docs/project-plan.md section 6.3. It
+started (week 2) as a static next-hop table for direct neighbours only;
+``route_resolver`` is the seam routing.py's ``Router.next_hop`` now plugs
+into for destinations beyond a direct link -- the static table still
+wins when both know a route, since a direct link never needs Dijkstra.
 """
 
 from __future__ import annotations
@@ -26,10 +26,18 @@ class RelayNode:
         node_id: str,
         transport: Transport,
         next_hop: Optional[dict[str, str]] = None,
+        route_resolver: Optional[Callable[[str], Optional[str]]] = None,
+        accepts_dst: Optional[Callable[[str], bool]] = None,
     ) -> None:
         self.node_id = node_id
         self._transport = transport
         self._next_hop: dict[str, str] = dict(next_hop or {})
+        self._route_resolver = route_resolver
+        # a packet's dst stays symbolic (e.g. RESCUE__) as it travels --
+        # it is never rewritten to the resolved node id -- so a node also
+        # needs a way to say "this symbolic destination means me" (section
+        # 8.3: any GATEWAY/RESCUE node is a valid RESCUE__ terminal).
+        self._accepts_dst = accepts_dst
 
         self.on_deliver: Optional[Callable[[Packet], None]] = None
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
@@ -56,7 +64,7 @@ class RelayNode:
         if pkt.type not in (PacketType.DATA, PacketType.ACK):
             return  # HELLO/LINK_STATE belong to discovery.py, not the relay
 
-        if pkt.dst == self.node_id:
+        if pkt.dst == self.node_id or (self._accepts_dst is not None and self._accepts_dst(pkt.dst)):
             if self.on_deliver is not None:
                 self.on_deliver(pkt)
             return
@@ -71,6 +79,8 @@ class RelayNode:
             self._drop(pkt, "loop_detected")
             return
         next_hop = self._next_hop.get(pkt.dst)
+        if next_hop is None and self._route_resolver is not None:
+            next_hop = self._route_resolver(pkt.dst)
         if next_hop is None:
             self._drop(pkt, "no_route")
             return
