@@ -13,14 +13,16 @@ destination isn't a direct neighbour.
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 from typing import Callable, Iterable, Optional
 
 from .discovery import PRUNE_INTERVAL, Discovery, NodeRole
-from .packet import Packet, RESCUE_DST
+from .packet import DEFAULT_TTL, FLAG_NEEDS_ACK, Packet, PacketType, Priority, RESCUE_DST
 from .relay import RelayNode
-from .reliability import DedupSet
+from .reliability import ACK_TIMEOUT, AckTracker, DedupSet, MAX_RETRIES, SF_RETRY_INTERVAL, StoreForwardQueue
 from .routing import LINK_STATE_INTERVAL, LinkStateGossip, MeshGraph, Router
-from .transport import Transport
+from .transport import Transport, TransportError
 
 
 class Node:
@@ -34,6 +36,10 @@ class Node:
         neighbour_timeout: float = 10.0,
         prune_interval: float = PRUNE_INTERVAL,
         link_state_interval: float = LINK_STATE_INTERVAL,
+        ack_timeout: float = ACK_TIMEOUT,
+        max_retries: int = MAX_RETRIES,
+        ack_poll_interval: float = 0.5,
+        sf_retry_interval: float = SF_RETRY_INTERVAL,
     ) -> None:
         self.node_id = node_id
         self.transport = transport
@@ -71,12 +77,19 @@ class Node:
         self.discovery.on_peer_down = self._on_peer_down
         self.router.set_role(node_id, role)
 
+        self.ack_tracker = AckTracker(timeout_s=ack_timeout, max_retries=max_retries)
+        self.store_forward = StoreForwardQueue()
+        self._ack_poll_interval = ack_poll_interval
+        self._sf_retry_interval = sf_retry_interval
+        self._ack_retry_task: Optional[asyncio.Task] = None
+        self._sf_flush_task: Optional[asyncio.Task] = None
+
         # re-exposed so callers (demos, tests, eventually store.py) can
         # observe delivery/forward/drop without reaching into self.relay
         self.on_deliver: Optional[Callable[[Packet], None]] = None
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
         self.on_drop: Optional[Callable[[Packet, str], None]] = None
-        self.relay.on_deliver = lambda pkt: self._call(self.on_deliver, pkt)
+        self.relay.on_deliver = self._on_relay_deliver
         self.relay.on_forward = lambda pkt, next_hop: self._call(self.on_forward, pkt, next_hop)
         self.relay.on_drop = lambda pkt, reason: self._call(self.on_drop, pkt, reason)
 
@@ -92,8 +105,19 @@ class Node:
         await self.discovery.start()
         await self.gossip.start()
         self.transport.on_receive(self._on_receive)
+        self._ack_retry_task = asyncio.create_task(self._ack_retry_loop())
+        self._sf_flush_task = asyncio.create_task(self._sf_flush_loop())
 
     async def stop(self) -> None:
+        for task in (self._ack_retry_task, self._sf_flush_task):
+            if task is not None:
+                task.cancel()
+        for task in (self._ack_retry_task, self._sf_flush_task):
+            if task is not None:
+                with contextlib.suppress(asyncio.CancelledError):
+                    await task
+        self._ack_retry_task = None
+        self._sf_flush_task = None
         await self.gossip.stop()
         await self.discovery.stop()
         await self.transport.stop()
@@ -128,6 +152,115 @@ class Node:
         self.relay.clear_next_hop(peer_id)
         self.router.forget_role(peer_id)
         self.gossip.forget_neighbour(peer_id)  # drops the graph edge and invalidates routes
+
+    # -- originating messages (section 9: ACK + retry, store-and-forward) --------
+
+    async def send(
+        self,
+        dst: str,
+        payload: bytes,
+        priority: int = Priority.NORMAL,
+        needs_ack: bool = False,
+        ttl: int = DEFAULT_TTL,
+    ) -> Packet:
+        """Originate a new message. Sent immediately if a route to ``dst``
+        exists (which may be ``RESCUE__``, resolved by ``routing.Router``);
+        otherwise queued in store-and-forward rather than dropped. Returns
+        the constructed ``Packet`` (its ``msg_id`` is how callers correlate
+        a later ACK or check ``store_forward``/``ack_tracker`` state)."""
+        pkt = Packet(
+            type=PacketType.DATA,
+            priority=priority,
+            src=self.node_id,
+            dst=dst,
+            ttl=ttl,
+            flags=FLAG_NEEDS_ACK if needs_ack else 0,
+            payload=payload,
+        )
+        await self._dispatch(pkt, track_ack=True)
+        return pkt
+
+    async def _dispatch(self, pkt: Packet, track_ack: bool = False) -> bool:
+        """Resolve a next hop for ``pkt.dst`` and send it; store-and-forward
+        if no route exists or the send itself fails. Returns whether it was
+        actually sent."""
+        next_hop = self.router.next_hop(pkt.dst)
+        if next_hop is None:
+            self.store_forward.enqueue(pkt)
+            return False
+        try:
+            await self.transport.send(next_hop, pkt.pack())
+        except TransportError:
+            self.store_forward.enqueue(pkt)
+            return False
+        if track_ack and pkt.needs_ack:
+            self.ack_tracker.register(pkt, next_hop)
+        return True
+
+    def _on_relay_deliver(self, pkt: Packet) -> None:
+        """A packet addressed to us (or a RESCUE__ we resolve to) just
+        arrived. ACKs are this node's own bookkeeping, not a user-visible
+        message; a DATA packet asking for one gets one sent back before
+        the user callback fires."""
+        if pkt.type == PacketType.ACK:
+            self.ack_tracker.acknowledge(pkt.msg_id)
+            return
+        if pkt.needs_ack:
+            self._send_ack_for(pkt)
+        self._call(self.on_deliver, pkt)
+
+    def _send_ack_for(self, original: Packet) -> None:
+        ack = Packet(
+            type=PacketType.ACK,
+            priority=Priority.STATUS,
+            src=self.node_id,
+            dst=original.src,
+            msg_id=original.msg_id,  # same id: how the sender's AckTracker correlates it
+            ttl=DEFAULT_TTL,
+        )
+        asyncio.create_task(self._dispatch(ack))
+
+    async def _ack_retry_loop(self) -> None:
+        with contextlib.suppress(asyncio.CancelledError):
+            while True:
+                await asyncio.sleep(self._ack_poll_interval)
+                to_retry, failed = self.ack_tracker.poll_timeouts()
+                for entry in to_retry:
+                    # route may have changed since the original send
+                    # (section 9: "retrying down a path that has since
+                    # died" is exactly the failure this recompute avoids)
+                    next_hop = self.router.next_hop(entry.pkt.dst)
+                    if next_hop is not None:
+                        asyncio.create_task(self._resend(next_hop, entry.pkt))
+                    # else: no route right now -- leave it tracked, it'll
+                    # either get a route by the next poll or exhaust its
+                    # retries and fall into `failed` below.
+                for entry in failed:
+                    self.store_forward.enqueue(entry.pkt)
+
+    async def _resend(self, next_hop: str, pkt: Packet) -> None:
+        with contextlib.suppress(TransportError):
+            await self.transport.send(next_hop, pkt.pack())
+
+    async def _sf_flush_loop(self) -> None:
+        with contextlib.suppress(asyncio.CancelledError):
+            while True:
+                await asyncio.sleep(self._sf_retry_interval)
+                for pkt in self.store_forward.all():
+                    next_hop = self.router.next_hop(pkt.dst)
+                    if next_hop is None:
+                        continue
+                    self.store_forward.remove(pkt.msg_id)
+                    asyncio.create_task(self._flush_one(next_hop, pkt))
+
+    async def _flush_one(self, next_hop: str, pkt: Packet) -> None:
+        try:
+            await self.transport.send(next_hop, pkt.pack())
+        except TransportError:
+            self.store_forward.enqueue(pkt)  # still no reliable path -- try again next round
+            return
+        if pkt.needs_ack:
+            self.ack_tracker.register(pkt, next_hop)
 
     def _on_receive(self, sender_id: str, data: bytes) -> None:
         # the single dispatch point: each of these already ignores packet

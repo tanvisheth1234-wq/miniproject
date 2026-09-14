@@ -233,3 +233,92 @@ async def test_rescue_dst_routes_to_gateway_across_multiple_hops():
     await gw.stop()
 
     assert len(delivered_at_gw) == 1
+
+
+# --- Node.send(): originating messages, ACK, store-and-forward ------------------
+
+@pytest.mark.asyncio
+async def test_send_without_route_queues_to_store_forward():
+    net = SimulatedNetwork(seed=8)
+    a = make_node("A", net)  # no links at all -- nobody to route through
+    await a.start()
+
+    pkt = await a.send("Z", b"help")
+
+    assert pkt.msg_id in a.store_forward
+    await a.stop()
+
+
+@pytest.mark.asyncio
+async def test_send_with_ack_delivers_and_gets_acknowledged():
+    net = SimulatedNetwork(seed=9)
+    net.set_link("A", "B")
+    a = make_node("A", net)
+    b = make_node("B", net)
+
+    delivered_at_b = []
+    b.on_deliver = delivered_at_b.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)  # let discovery converge
+
+    pkt = await a.send("B", b"hello", needs_ack=True)
+    assert pkt.msg_id in a.ack_tracker  # registered on send
+
+    await asyncio.sleep(0.05)  # B delivers, auto-ACKs, A processes the ACK
+
+    assert len(delivered_at_b) == 1
+    assert delivered_at_b[0].payload == b"hello"
+    assert pkt.msg_id not in a.ack_tracker  # acknowledged, no longer pending
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward():
+    """A link exists (so the send itself succeeds and gets ack-tracked),
+    but nothing at "Z" ever answers -- section 9's failure case: retries
+    exhaust, and the message goes to store-and-forward instead of
+    vanishing."""
+    net = SimulatedNetwork(seed=10)
+    net.set_link("A", "Z")  # a real link, but no Node ever registers as "Z"
+    a = make_node("A", net, ack_timeout=0.03, max_retries=1, ack_poll_interval=0.02)
+    a.graph.set_edge("A", "Z")  # seed a known route without a full discovery handshake
+    await a.start()
+
+    pkt = await a.send("Z", b"help", needs_ack=True)
+    assert pkt.msg_id in a.ack_tracker
+
+    await asyncio.sleep(0.15)  # well past ack_timeout with max_retries=1
+
+    assert pkt.msg_id not in a.ack_tracker
+    assert pkt.msg_id in a.store_forward
+
+    await a.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_forward_flushes_once_a_route_appears():
+    net = SimulatedNetwork(seed=11)
+    a = make_node("A", net, sf_retry_interval=0.03)
+    b = make_node("B", net)
+
+    delivered_at_b = []
+    b.on_deliver = delivered_at_b.append
+
+    await a.start()
+    pkt = await a.send("B", b"queued for later")
+    assert pkt.msg_id in a.store_forward  # no route yet
+
+    net.set_link("A", "B")
+    await b.start()
+    await asyncio.sleep(0.15)  # discovery converges, then the flush loop fires
+
+    assert pkt.msg_id not in a.store_forward
+    assert len(delivered_at_b) == 1
+    assert delivered_at_b[0].payload == b"queued for later"
+
+    await a.stop()
+    await b.stop()
