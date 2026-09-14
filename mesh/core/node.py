@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+from dataclasses import replace
 from typing import Callable, Iterable, Optional
 
+from . import crypto
 from .discovery import PRUNE_INTERVAL, Discovery, NodeRole
-from .packet import DEFAULT_TTL, FLAG_NEEDS_ACK, Packet, PacketType, Priority, RESCUE_DST
+from .packet import DEFAULT_TTL, FLAG_ENCRYPTED, FLAG_NEEDS_ACK, Packet, PacketType, Priority, RESCUE_DST
 from .relay import RelayNode
 from .reliability import ACK_TIMEOUT, AckTracker, DedupSet, MAX_RETRIES, SF_RETRY_INTERVAL, StoreForwardQueue
 from .routing import LINK_STATE_INTERVAL, LinkStateGossip, MeshGraph, Router
@@ -37,6 +39,13 @@ _DROP_EVENT_KIND = {
 }
 
 
+def _safe_text(payload: bytes) -> str:
+    """For the store's TEXT body column -- payloads are expected to be
+    plain text messages (section 4's examples), but never let a stray
+    non-UTF-8 byte crash logging."""
+    return payload.decode("utf-8", errors="replace")
+
+
 class Node:
     def __init__(
         self,
@@ -53,10 +62,15 @@ class Node:
         ack_poll_interval: float = 0.5,
         sf_retry_interval: float = SF_RETRY_INTERVAL,
         db_path: str = ":memory:",
+        session_key: Optional[bytes] = None,
     ) -> None:
         self.node_id = node_id
         self.transport = transport
         self.store = Store(db_path)
+        # section 10, Phase 1: every node pre-shares the same AES-256 key
+        # out of band. None (the default) means "run unencrypted" -- opt-in,
+        # same as dedup/priority-queue elsewhere in this codebase.
+        self._session_key = session_key
 
         self.discovery = Discovery(
             node_id,
@@ -190,18 +204,25 @@ class Node:
         otherwise queued in store-and-forward rather than dropped. Returns
         the constructed ``Packet`` (its ``msg_id`` is how callers correlate
         a later ACK or check ``store_forward``/``ack_tracker`` state)."""
+        flags = FLAG_NEEDS_ACK if needs_ack else 0
+        wire_payload = payload
+        if self._session_key is not None:
+            wire_payload = crypto.encrypt_payload(self._session_key, payload)
+            flags |= FLAG_ENCRYPTED
+
         pkt = Packet(
             type=PacketType.DATA,
             priority=priority,
             src=self.node_id,
             dst=dst,
             ttl=ttl,
-            flags=FLAG_NEEDS_ACK if needs_ack else 0,
-            payload=payload,
+            flags=flags,
+            payload=wire_payload,
         )
         self.store.record_message(
             str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
             direction="sent", status="pending", created_ms=pkt.timestamp,
+            body=_safe_text(payload),  # our own plaintext -- we're the src
         )
         await self._dispatch(pkt, track_ack=True)
         return pkt
@@ -244,10 +265,25 @@ class Node:
             self.store.record_event("ack", msg_id=str(pkt.msg_id))
             self.store.update_message_status(str(pkt.msg_id), "delivered")
             return
+
+        if pkt.encrypted:
+            if self._session_key is None:
+                self.store.record_event("drop_no_key", msg_id=str(pkt.msg_id))
+                return
+            try:
+                plaintext = crypto.decrypt_payload(self._session_key, pkt.payload)
+            except crypto.CryptoError:
+                # section 10: GCM's tag catches a relay tampering with the
+                # payload -- treat a failed decrypt as exactly that.
+                self.store.record_event("drop_decrypt_failed", msg_id=str(pkt.msg_id))
+                return
+            pkt = replace(pkt, payload=plaintext)
+
         self.store.record_message(
             str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
             direction="received", status="delivered",
             hop_count=pkt.hop_count, path=pkt.path,
+            body=_safe_text(pkt.payload),  # our own plaintext -- we're the dst
         )
         self.store.record_event("recv", msg_id=str(pkt.msg_id))
         if pkt.needs_ack:
