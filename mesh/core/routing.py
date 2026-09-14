@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import heapq
 import struct
 from dataclasses import dataclass
 from typing import Callable, Iterable, Optional
 
-from .packet import NODE_ID_SIZE, Packet, PacketError, PacketType, Priority
+from .discovery import NodeRole
+from .packet import NODE_ID_SIZE, Packet, PacketError, PacketType, Priority, RESCUE_DST
 from .transport import Transport, TransportError
 
 
@@ -276,3 +278,108 @@ class LinkStateGossip:
     def _fire_topology_change(self) -> None:
         if self.on_topology_change is not None:
             self.on_topology_change()
+
+
+# --- Section 8.3 path selection ----------------------------------------------
+
+class Router:
+    """Computes the cheapest path from this node to any destination over a
+    ``MeshGraph``, via Dijkstra (section 8.3). Caches results per
+    destination; call ``invalidate()`` on any topology change (wire this to
+    ``LinkStateGossip.on_topology_change`` in node.py) or the cache goes
+    stale.
+
+    ``dst == RESCUE__`` is not looked up directly -- section 8.3 says any
+    node advertising role GATEWAY or RESCUE is a valid terminal, so this
+    computes distances to everywhere and picks the cheapest such node.
+    """
+
+    def __init__(self, node_id: str, graph: MeshGraph) -> None:
+        self.node_id = node_id
+        self.graph = graph
+        self._roles: dict[str, str] = {}
+        self._cache: dict[str, Optional[list[str]]] = {}
+
+    def set_role(self, node_id: str, role: str) -> None:
+        """Record ``node_id``'s advertised role (from its HELLO), so
+        RESCUE__ routing knows which nodes are valid terminals."""
+        self._roles[node_id] = role
+        self.invalidate()
+
+    def forget_role(self, node_id: str) -> None:
+        self._roles.pop(node_id, None)
+
+    def invalidate(self) -> None:
+        """Drop every cached route -- call after any topology change."""
+        self._cache.clear()
+
+    def shortest_path(self, dst: str) -> Optional[list[str]]:
+        """The cheapest path from self to ``dst``, as a list of node IDs
+        starting with ``self.node_id`` and ending with the resolved
+        destination (which may not be ``dst`` itself, for RESCUE__).
+        ``None`` if unreachable -- callers should fall back to
+        store-and-forward (section 8.3) rather than dropping the message."""
+        if dst in self._cache:
+            return self._cache[dst]
+
+        dist, prev = self._dijkstra_from_self()
+
+        if dst == RESCUE_DST:
+            target = self._cheapest_terminal(dist)
+        else:
+            target = dst if dst in dist else None
+
+        path = self._reconstruct(prev, target) if target is not None else None
+        self._cache[dst] = path
+        return path
+
+    def next_hop(self, dst: str) -> Optional[str]:
+        """The immediate neighbour to forward toward ``dst``, or ``None``
+        if there is no known route (or ``dst`` is this node itself)."""
+        path = self.shortest_path(dst)
+        if path is None or len(path) < 2:
+            return None
+        return path[1]
+
+    def _cheapest_terminal(self, dist: dict[str, float]) -> Optional[str]:
+        candidates = [
+            node_id
+            for node_id in dist
+            if self._roles.get(node_id) in (NodeRole.GATEWAY, NodeRole.RESCUE)
+        ]
+        if not candidates:
+            return None
+        return min(candidates, key=lambda node_id: dist[node_id])
+
+    def _dijkstra_from_self(self) -> tuple[dict[str, float], dict[str, str]]:
+        """Standard Dijkstra with a binary heap: O((V + E) log V), per
+        section 24.2's complexity table."""
+        dist: dict[str, float] = {self.node_id: 0.0}
+        prev: dict[str, str] = {}
+        visited: set[str] = set()
+        heap: list[tuple[float, str]] = [(0.0, self.node_id)]
+
+        while heap:
+            d, u = heapq.heappop(heap)
+            if u in visited:
+                continue
+            visited.add(u)
+            for v, edge in self.graph.neighbours_of(u).items():
+                if v in visited:
+                    continue
+                nd = d + edge.cost
+                if nd < dist.get(v, float("inf")):
+                    dist[v] = nd
+                    prev[v] = u
+                    heapq.heappush(heap, (nd, v))
+
+        return dist, prev
+
+    @staticmethod
+    def _reconstruct(prev: dict[str, str], target: str) -> Optional[list[str]]:
+        path = [target]
+        while target in prev:
+            target = prev[target]
+            path.append(target)
+        path.reverse()
+        return path
