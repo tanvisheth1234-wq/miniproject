@@ -139,6 +139,35 @@ def test_len_and_bool():
     assert bool(q) is True
 
 
+def test_push_with_item_returns_item_not_packet():
+    """relay.py queues (next_hop, pkt) pairs so the sender loop knows
+    where each packet is headed without a second lookup."""
+    q = MessagePriorityQueue()
+    pkt = _pkt(Priority.SOS, timestamp=1)
+    q.push(pkt, item=("C", pkt))
+
+    assert q.pop() == ("C", pkt)
+
+
+def test_push_without_item_defaults_to_packet_itself():
+    q = MessagePriorityQueue()
+    pkt = _pkt(Priority.NORMAL, timestamp=1)
+    q.push(pkt)
+
+    assert q.pop() is pkt
+
+
+def test_ordering_uses_packet_priority_even_with_custom_item():
+    q = MessagePriorityQueue()
+    normal_pkt = _pkt(Priority.NORMAL, timestamp=1)
+    sos_pkt = _pkt(Priority.SOS, timestamp=2)
+    q.push(normal_pkt, item=("X", normal_pkt))
+    q.push(sos_pkt, item=("Y", sos_pkt))
+
+    assert q.pop() == ("Y", sos_pkt)
+    assert q.pop() == ("X", normal_pkt)
+
+
 def test_sos_reapplied_mid_route_overtakes_already_queued_normal():
     """Section 9.1: the queue is re-applied at every hop, not only at the
     source -- so an SOS pushed after a NORMAL is already queued still

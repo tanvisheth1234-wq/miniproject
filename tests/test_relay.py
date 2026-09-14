@@ -276,6 +276,48 @@ async def test_different_messages_not_treated_as_duplicates():
     assert len(delivered) == 2
 
 
+# --- priority-queued sending (section 9.1) --------------------------------------
+
+@pytest.mark.asyncio
+async def test_sos_forwarded_before_already_queued_normal():
+    """Section 9.1: the priority queue is re-applied at every hop -- if a
+    NORMAL and an SOS are both waiting to go out through this relay, the
+    SOS leaves first even though it was queued second."""
+    transport = _FakeTransport()
+    relay = RelayNode("B", transport)
+    relay.set_next_hop("C", "C")
+    relay.register()
+
+    normal = make_data_packet(src="A", dst="C", priority=Priority.NORMAL, path=["A"])
+    sos = make_data_packet(src="A", dst="C", priority=Priority.SOS, path=["A"])
+
+    # both arrive back-to-back, before the drain task gets a chance to run
+    transport.callback("A", normal.pack())
+    transport.callback("A", sos.pack())
+    await _settle()
+
+    assert len(transport.sent) == 2
+    first_sent = Packet.unpack(transport.sent[0][1])
+    second_sent = Packet.unpack(transport.sent[1][1])
+    assert first_sent.priority == Priority.SOS
+    assert second_sent.priority == Priority.NORMAL
+
+
+@pytest.mark.asyncio
+async def test_single_forward_still_sent_immediately():
+    """No competing traffic -- a lone forward still goes out without
+    waiting around, same as before this change."""
+    transport = _FakeTransport()
+    relay = RelayNode("B", transport)
+    relay.set_next_hop("C", "C")
+    relay.register()
+
+    transport.callback("A", make_data_packet(src="A", dst="C", path=["A"]).pack())
+    await _settle()
+
+    assert len(transport.sent) == 1
+
+
 @pytest.mark.asyncio
 async def test_no_dedup_configured_allows_reprocessing():
     """Backward-compat: dedup is opt-in, so relays built without it
