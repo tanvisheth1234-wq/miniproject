@@ -39,6 +39,12 @@ class RelayNode:
         """Route messages for ``dst_id`` toward ``peer_id``."""
         self._next_hop[dst_id] = peer_id
 
+    def clear_next_hop(self, dst_id: str) -> None:
+        """Forget the route to ``dst_id`` -- e.g. because that neighbour
+        just went down. Messages for it will drop as "no_route" until a
+        route is learned again."""
+        self._next_hop.pop(dst_id, None)
+
     def register(self) -> None:
         self._transport.on_receive(self._on_receive)
 
