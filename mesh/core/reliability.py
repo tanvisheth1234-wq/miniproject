@@ -12,6 +12,7 @@ import heapq
 import itertools
 import time
 import uuid
+from dataclasses import dataclass
 from typing import Optional
 
 from .packet import Packet
@@ -95,3 +96,102 @@ class MessagePriorityQueue:
 
     def __bool__(self) -> bool:
         return bool(self._heap)
+
+
+# --- ACK + retry ----------------------------------------------------------------
+
+@dataclass
+class PendingSend:
+    pkt: Packet
+    next_hop: str
+    attempts: int
+    sent_at_ms: int
+
+
+class AckTracker:
+    """Tracks messages awaiting an ACK (section 9's "ACK + retry"): the
+    sender retries up to ``max_retries`` times, timing out after
+    ``timeout_s`` each time. This class only owns the timing/attempt
+    bookkeeping -- recomputing the route and actually resending is the
+    caller's job (node.py, wired to ``routing.Router`` later), since
+    retrying "down a path that has since died" is exactly the failure
+    this mechanism exists to prevent (section 9's pairs table).
+    """
+
+    def __init__(self, timeout_s: float = ACK_TIMEOUT, max_retries: int = MAX_RETRIES) -> None:
+        self._timeout_ms = int(timeout_s * 1000)
+        self._max_retries = max_retries
+        self._pending: dict[uuid.UUID, PendingSend] = {}
+
+    def register(self, pkt: Packet, next_hop: str, now_ms: Optional[int] = None) -> None:
+        """Call right after sending a packet with ``needs_ack`` set."""
+        now_ms = _now_ms() if now_ms is None else now_ms
+        self._pending[pkt.msg_id] = PendingSend(pkt=pkt, next_hop=next_hop, attempts=1, sent_at_ms=now_ms)
+
+    def acknowledge(self, msg_id: uuid.UUID) -> bool:
+        """Call when an ACK for ``msg_id`` arrives. Returns True if it
+        matched something we were actually waiting on."""
+        return self._pending.pop(msg_id, None) is not None
+
+    def poll_timeouts(self, now_ms: Optional[int] = None) -> tuple[list[PendingSend], list[PendingSend]]:
+        """Check every pending send against the timeout.
+
+        Returns ``(to_retry, failed)``:
+        - ``to_retry``: still under ``max_retries`` attempts -- attempt
+          count bumped and the timer reset here, but the caller must
+          still recompute the route (it may have changed) and resend.
+        - ``failed``: already used every attempt -- removed from
+          tracking; the caller should hand the packet to
+          ``StoreForwardQueue`` rather than drop it (section 9).
+        """
+        now_ms = _now_ms() if now_ms is None else now_ms
+        to_retry: list[PendingSend] = []
+        failed: list[PendingSend] = []
+
+        for msg_id, entry in list(self._pending.items()):
+            if now_ms - entry.sent_at_ms < self._timeout_ms:
+                continue
+            if entry.attempts >= self._max_retries:
+                failed.append(entry)
+                del self._pending[msg_id]
+            else:
+                entry.attempts += 1
+                entry.sent_at_ms = now_ms
+                to_retry.append(entry)
+
+        return to_retry, failed
+
+    def __len__(self) -> int:
+        return len(self._pending)
+
+    def __contains__(self, msg_id: uuid.UUID) -> bool:
+        return msg_id in self._pending
+
+
+# --- store-and-forward ------------------------------------------------------------
+
+class StoreForwardQueue:
+    """Holds messages that have no known route right now, instead of
+    dropping them (section 9's "Store-and-forward"). A periodic flush
+    (every ``SF_RETRY_INTERVAL``, driven by node.py) attempts each queued
+    message again -- if a route has since appeared (a node walked out,
+    a gateway came back), it sends and clears the queue entry."""
+
+    def __init__(self) -> None:
+        self._queue: dict[uuid.UUID, Packet] = {}
+
+    def enqueue(self, pkt: Packet) -> None:
+        self._queue[pkt.msg_id] = pkt
+
+    def remove(self, msg_id: uuid.UUID) -> None:
+        self._queue.pop(msg_id, None)
+
+    def all(self) -> list[Packet]:
+        """Every currently-queued packet, oldest insertion order first."""
+        return list(self._queue.values())
+
+    def __len__(self) -> int:
+        return len(self._queue)
+
+    def __contains__(self, msg_id: uuid.UUID) -> bool:
+        return msg_id in self._queue
