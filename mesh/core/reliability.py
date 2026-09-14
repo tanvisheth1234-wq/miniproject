@@ -66,29 +66,34 @@ class DedupSet:
 # --- priority queue -------------------------------------------------------------
 
 class MessagePriorityQueue:
-    """Outgoing packets, ordered by priority rather than arrival order
+    """Items ordered by a packet's priority rather than arrival order
     (section 9.1). Meant to be re-applied at *every* hop, not only at the
     source -- so an SOS doesn't just start first, it overtakes ordinary
     traffic repeatedly along the whole route. Ties broken by timestamp,
     oldest first. Lower ``Packet.priority`` sorts first: SOS=0, NORMAL=1,
-    STATUS=2, matching packet.py's ``Priority`` values directly."""
+    STATUS=2, matching packet.py's ``Priority`` values directly.
+
+    Ordering is always taken from ``pkt``, but what actually comes back
+    out of ``pop``/``peek`` is ``item`` (defaulting to ``pkt`` itself) --
+    e.g. relay.py queues ``(next_hop, pkt)`` pairs so the sender loop
+    knows where each packet is headed without a second lookup."""
 
     def __init__(self) -> None:
-        self._heap: list[tuple[int, int, int, Packet]] = []
+        self._heap: list[tuple[int, int, int, object]] = []
         self._counter = itertools.count()
 
-    def push(self, pkt: Packet) -> None:
+    def push(self, pkt: Packet, item: object = None) -> None:
         # the counter breaks ties beyond (priority, timestamp) so heapq
-        # never has to compare two Packet objects directly (they aren't
-        # orderable, and priority+timestamp collisions are routine when
-        # packets are generated in the same millisecond).
-        heapq.heappush(self._heap, (pkt.priority, pkt.timestamp, next(self._counter), pkt))
+        # never has to compare two items directly (Packet isn't orderable,
+        # and priority+timestamp collisions are routine when packets are
+        # generated in the same millisecond).
+        heapq.heappush(self._heap, (pkt.priority, pkt.timestamp, next(self._counter), item if item is not None else pkt))
 
-    def pop(self) -> Packet:
-        """Highest-priority (then oldest) packet. Raises ``IndexError`` if empty."""
+    def pop(self) -> object:
+        """Highest-priority (then oldest) item. Raises ``IndexError`` if empty."""
         return heapq.heappop(self._heap)[-1]
 
-    def peek(self) -> Optional[Packet]:
+    def peek(self) -> Optional[object]:
         return self._heap[0][-1] if self._heap else None
 
     def __len__(self) -> int:

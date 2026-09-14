@@ -14,7 +14,7 @@ from dataclasses import replace
 from typing import Callable, Optional
 
 from .packet import Packet, PacketError, PacketType
-from .reliability import DedupSet
+from .reliability import DedupSet, MessagePriorityQueue
 from .transport import Transport, TransportError
 
 
@@ -45,6 +45,16 @@ class RelayNode:
         # relay would forward every copy, and a multi-path mesh would
         # flood itself (a broadcast storm) instead of converging.
         self._dedup = dedup
+
+        # section 9.1: priority is re-applied at every hop, so forwarded
+        # packets are queued rather than sent the instant they're decided
+        # -- if several are pending at once, the queue lets SOS leave
+        # before already-waiting NORMAL/STATUS traffic. A single drain
+        # task processes the whole queue in priority order each time
+        # something is added; when it empties, the task simply ends, and
+        # the next _forward() spins up a fresh one.
+        self._queue = MessagePriorityQueue()
+        self._drain_task: Optional[asyncio.Task] = None
 
         self.on_deliver: Optional[Callable[[Packet], None]] = None
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
@@ -104,7 +114,15 @@ class RelayNode:
         )
         if self.on_forward is not None:
             self.on_forward(forwarded, next_hop)
-        asyncio.create_task(self._send(next_hop, forwarded))
+
+        self._queue.push(forwarded, item=(next_hop, forwarded))
+        if self._drain_task is None or self._drain_task.done():
+            self._drain_task = asyncio.create_task(self._drain_queue())
+
+    async def _drain_queue(self) -> None:
+        while self._queue:
+            next_hop, pkt = self._queue.pop()
+            await self._send(next_hop, pkt)
 
     async def _send(self, next_hop: str, pkt: Packet) -> None:
         try:
