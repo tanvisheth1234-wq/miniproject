@@ -14,6 +14,7 @@ from dataclasses import replace
 from typing import Callable, Optional
 
 from .packet import Packet, PacketError, PacketType
+from .reliability import DedupSet
 from .transport import Transport, TransportError
 
 
@@ -28,6 +29,7 @@ class RelayNode:
         next_hop: Optional[dict[str, str]] = None,
         route_resolver: Optional[Callable[[str], Optional[str]]] = None,
         accepts_dst: Optional[Callable[[str], bool]] = None,
+        dedup: Optional[DedupSet] = None,
     ) -> None:
         self.node_id = node_id
         self._transport = transport
@@ -38,6 +40,11 @@ class RelayNode:
         # needs a way to say "this symbolic destination means me" (section
         # 8.3: any GATEWAY/RESCUE node is a valid RESCUE__ terminal).
         self._accepts_dst = accepts_dst
+        # section 9's "Dedup set": in a mesh with more than one path, the
+        # same message can arrive here more than once. Without this, a
+        # relay would forward every copy, and a multi-path mesh would
+        # flood itself (a broadcast storm) instead of converging.
+        self._dedup = dedup
 
         self.on_deliver: Optional[Callable[[Packet], None]] = None
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
@@ -63,6 +70,10 @@ class RelayNode:
             return
         if pkt.type not in (PacketType.DATA, PacketType.ACK):
             return  # HELLO/LINK_STATE belong to discovery.py, not the relay
+
+        if self._dedup is not None and self._dedup.seen_before(pkt.msg_id):
+            self._drop(pkt, "duplicate")
+            return
 
         if pkt.dst == self.node_id or (self._accepts_dst is not None and self._accepts_dst(pkt.dst)):
             if self.on_deliver is not None:
