@@ -276,6 +276,102 @@ async def test_send_with_ack_delivers_and_gets_acknowledged():
     await b.stop()
 
 
+# --- store.py event/message logging -----------------------------------------------
+
+@pytest.mark.asyncio
+async def test_store_logs_sent_message_and_delivery_lifecycle():
+    net = SimulatedNetwork(seed=20)
+    net.set_link("A", "B")
+    a = make_node("A", net)
+    b = make_node("B", net)
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    pkt = a_pkt = await a.send("B", b"hello store", needs_ack=True)
+    await asyncio.sleep(0.05)
+
+    # sender side: message recorded, moved to delivered once the ACK lands
+    sent_row = a.store.get_message(str(pkt.msg_id))
+    assert sent_row["direction"] == "sent"
+    assert sent_row["status"] == "delivered"
+    assert a.store.count_events("sent") == 1
+    assert a.store.count_events("ack") == 1
+
+    # receiver side: a separate row in B's own log, direction "received"
+    recv_row = b.store.get_message(str(pkt.msg_id))
+    assert recv_row["direction"] == "received"
+    assert recv_row["status"] == "delivered"
+    assert b.store.count_events("recv") == 1
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_logs_forward_on_middle_node():
+    net = SimulatedNetwork(seed=21)
+    net.set_link("A", "B")
+    net.set_link("B", "C")
+    a = make_node("A", net)
+    b = make_node("B", net)
+    c = make_node("C", net)
+
+    await a.start()
+    await b.start()
+    await c.start()
+    await asyncio.sleep(0.15)
+
+    pkt = await a.send("C", b"relay me")
+    await asyncio.sleep(0.05)
+
+    forwarded_row = b.store.get_message(str(pkt.msg_id))
+    assert forwarded_row["direction"] == "forwarded"
+    assert b.store.count_events("forward") == 1
+
+    await a.stop()
+    await b.stop()
+    await c.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_logs_peer_up_and_down():
+    net = SimulatedNetwork(seed=22)
+    net.set_link("A", "B")
+    a = make_node("A", net, neighbour_timeout=0.08, prune_interval=0.02)
+    b = make_node("B", net)
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.06)
+    assert a.store.get_peer("B")["role"] == NodeRole.NORMAL
+    assert a.store.count_events("peer_up") == 1
+
+    await b.stop()
+    await asyncio.sleep(0.15)
+    assert a.store.count_events("peer_down") == 1
+
+    await a.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_logs_drop_reason():
+    net = SimulatedNetwork(seed=23)
+    a = make_node("A", net)
+    await a.start()
+
+    # feed a stray DATA packet for an unknown destination straight into A's
+    # own dispatcher, bypassing discovery -- guaranteed "no_route"
+    stray = Packet(type=PacketType.DATA, priority=Priority.NORMAL, src="X", dst="Z", payload=b"lost")
+    a.transport._callback("X", stray.pack())
+    await asyncio.sleep(0.02)
+
+    assert a.store.count_events("drop_no_route") == 1
+
+    await a.stop()
+
+
 @pytest.mark.asyncio
 async def test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward():
     """A link exists (so the send itself succeeds and gets ack-tracked),
