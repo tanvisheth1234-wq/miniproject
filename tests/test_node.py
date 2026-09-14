@@ -372,6 +372,138 @@ async def test_store_logs_drop_reason():
     await a.stop()
 
 
+# --- crypto: payload encryption (section 10) -------------------------------------
+
+@pytest.mark.asyncio
+async def test_encrypted_payload_decrypts_correctly_at_destination():
+    from mesh.core.crypto import generate_session_key
+
+    key = generate_session_key()
+    net = SimulatedNetwork(seed=30)
+    net.set_link("A", "B")
+    a = make_node("A", net, session_key=key)
+    b = make_node("B", net, session_key=key)
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    await a.send("B", b"four of us in room 302")
+    await asyncio.sleep(0.05)
+
+    assert len(delivered) == 1
+    assert delivered[0].payload == b"four of us in room 302"  # plaintext to the app layer
+    assert b.store.get_message(str(delivered[0].msg_id))["body"] == "four of us in room 302"
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_relay_never_sees_plaintext_payload():
+    """Section 10's threat model: a relay must not be able to read a
+    message it forwards -- it only ever touches the ciphertext bytes."""
+    from mesh.core.crypto import generate_session_key
+    from mesh.core.packet import Packet as _Packet
+
+    key = generate_session_key()
+    net = SimulatedNetwork(seed=31)
+    net.set_link("A", "B")
+    net.set_link("B", "C")
+    a = make_node("A", net, session_key=key)
+    b = make_node("B", net)  # the relay -- deliberately has NO key
+    c = make_node("C", net, session_key=key)
+
+    forwarded_raw = []
+    original_send = b.transport.send
+
+    async def spy_send(node_id, data):
+        # link-state gossip also flows through transport.send -- only
+        # DATA packets are relevant to this test
+        if _Packet.unpack(data).type == PacketType.DATA:
+            forwarded_raw.append(data)
+        await original_send(node_id, data)
+
+    b.transport.send = spy_send
+
+    await a.start()
+    await b.start()
+    await c.start()
+    await asyncio.sleep(0.15)
+
+    await a.send("C", b"trapped east stairwell")
+    await asyncio.sleep(0.05)
+
+    assert len(forwarded_raw) == 1
+    forwarded_pkt = _Packet.unpack(forwarded_raw[0])
+    assert b"trapped east stairwell" not in forwarded_pkt.payload
+    # and B's own log never records a plaintext body for it either
+    row = b.store.get_message(str(forwarded_pkt.msg_id))
+    assert row["body"] is None
+
+    await a.stop()
+    await b.stop()
+    await c.stop()
+
+
+@pytest.mark.asyncio
+async def test_wrong_session_key_is_rejected_not_delivered():
+    from mesh.core.crypto import generate_session_key
+
+    key_a = generate_session_key()
+    key_b = generate_session_key()  # different key -- simulates a misconfigured node
+    net = SimulatedNetwork(seed=32)
+    net.set_link("A", "B")
+    a = make_node("A", net, session_key=key_a)
+    b = make_node("B", net, session_key=key_b)
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    await a.send("B", b"secret")
+    await asyncio.sleep(0.05)
+
+    assert delivered == []
+    assert b.store.count_events("drop_decrypt_failed") == 1
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_no_key_configured_drops_encrypted_message():
+    from mesh.core.crypto import generate_session_key
+
+    key = generate_session_key()
+    net = SimulatedNetwork(seed=33)
+    net.set_link("A", "B")
+    a = make_node("A", net, session_key=key)
+    b = make_node("B", net)  # never configured with a key at all
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    await a.send("B", b"secret")
+    await asyncio.sleep(0.05)
+
+    assert delivered == []
+    assert b.store.count_events("drop_no_key") == 1
+
+    await a.stop()
+    await b.stop()
+
+
 @pytest.mark.asyncio
 async def test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward():
     """A link exists (so the send itself succeeds and gets ack-tracked),
