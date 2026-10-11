@@ -22,6 +22,8 @@ HELLO_INTERVAL = 3.0        # seconds
 NEIGHBOUR_TIMEOUT = 10.0    # seconds
 PRUNE_INTERVAL = 1.0        # how often the prune loop checks for dead neighbours
 
+PUBLIC_KEY_SIZE = 32  # raw Ed25519 public key, appended to a HELLO's payload
+
 
 class NodeRole:
     NORMAL = "NORMAL"
@@ -40,6 +42,7 @@ class NeighbourInfo:
     node_id: str
     role: str
     last_seen_ms: int
+    public_key: Optional[bytes] = None
 
 
 class NeighbourTable:
@@ -53,12 +56,16 @@ class NeighbourTable:
     def __init__(self) -> None:
         self._neighbours: dict[str, NeighbourInfo] = {}
 
-    def update(self, node_id: str, role: str, now_ms: Optional[int] = None) -> bool:
+    def update(
+        self, node_id: str, role: str, now_ms: Optional[int] = None, public_key: Optional[bytes] = None
+    ) -> bool:
         """Record a HELLO from ``node_id``. Returns True if this is a
         previously-unseen (or previously-dead) neighbour."""
         now_ms = _now_ms() if now_ms is None else now_ms
         is_new = node_id not in self._neighbours
-        self._neighbours[node_id] = NeighbourInfo(node_id=node_id, role=role, last_seen_ms=now_ms)
+        self._neighbours[node_id] = NeighbourInfo(
+            node_id=node_id, role=role, last_seen_ms=now_ms, public_key=public_key
+        )
         return is_new
 
     def prune(self, timeout_s: float, now_ms: Optional[int] = None) -> list[str]:
@@ -109,10 +116,15 @@ class Discovery:
         hello_interval: float = HELLO_INTERVAL,
         neighbour_timeout: float = NEIGHBOUR_TIMEOUT,
         prune_interval: float = PRUNE_INTERVAL,
+        public_key: Optional[bytes] = None,
     ) -> None:
         self.node_id = node_id
         self.role = role
         self.neighbours = NeighbourTable()
+        # distributed with every HELLO (section 10, SEC-6) so a neighbour
+        # can verify our signatures without a separate key-exchange step;
+        # None means this node doesn't sign -- opt-in, like session_key.
+        self._public_key = public_key
 
         self._transport = transport
         self._visible_neighbours = (
@@ -153,13 +165,16 @@ class Discovery:
                 await asyncio.sleep(self._hello_interval)
 
     async def _send_hello(self) -> None:
+        payload = self.role.encode("ascii")
+        if self._public_key is not None:
+            payload += self._public_key  # fixed 32 bytes appended after the role
         pkt = Packet(
             type=PacketType.HELLO,
             priority=Priority.STATUS,
             src=self.node_id,
             dst=BROADCAST_DST,
             ttl=1,  # HELLO is a single-hop shout, never relayed
-            payload=self.role.encode("ascii"),
+            payload=payload,
         )
         await self._transport.broadcast(pkt.pack())
 
@@ -183,11 +198,19 @@ class Discovery:
         if self._visible_neighbours is not None and pkt.src not in self._visible_neighbours:
             return  # range emulation, section 14.1
 
+        # a public key, if present, is always the last PUBLIC_KEY_SIZE bytes
+        # (role names top out well under that, so this never misreads a
+        # legacy no-key payload as carrying a truncated key)
+        public_key: Optional[bytes] = None
+        role_bytes = pkt.payload
+        if len(pkt.payload) > PUBLIC_KEY_SIZE:
+            role_bytes, public_key = pkt.payload[:-PUBLIC_KEY_SIZE], pkt.payload[-PUBLIC_KEY_SIZE:]
+
         try:
-            role = pkt.payload.decode("ascii") or NodeRole.NORMAL
+            role = role_bytes.decode("ascii") or NodeRole.NORMAL
         except UnicodeDecodeError:
             role = NodeRole.NORMAL
 
-        is_new = self.neighbours.update(pkt.src, role)
+        is_new = self.neighbours.update(pkt.src, role, public_key=public_key)
         if is_new and self.on_peer_up is not None:
             self.on_peer_up(pkt.src, role)

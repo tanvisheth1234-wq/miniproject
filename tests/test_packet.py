@@ -291,3 +291,85 @@ def test_default_ttl_is_10():
 def test_hop_count_defaults_to_zero():
     pkt = make_packet()
     assert pkt.hop_count == 0
+
+
+# --- signable_bytes() ---------------------------------------------------------
+
+def test_signable_bytes_excludes_payload_and_signature():
+    small = make_packet(payload=b"x")
+    big = make_packet(payload=b"x" * 1000)
+    # payload differs but header+path content (apart from payload_len) is the
+    # same shape; signable_bytes must not grow with payload size the way
+    # pack() does, since payload itself isn't part of what's signed
+    assert len(small.signable_bytes()) == len(big.signable_bytes())
+
+
+def test_signable_bytes_matches_pack_header_and_path_region():
+    pkt = make_packet(path=["X", "Y"])
+    packed = pkt.pack()
+    signable = pkt.signable_bytes()
+    # pack() = header + path + payload (+ signature); signable_bytes() =
+    # header + path only, so it must be a prefix of pack()'s output here
+    assert packed[: len(signable)] == signable
+    assert len(signable) == HEADER_SIZE + 2 * NODE_ID_SIZE
+
+
+def test_signable_bytes_reflects_flags_as_currently_set():
+    """The caller is responsible for setting FLAG_SIGNED on self.flags
+    before calling this, if the packet will end up signed -- otherwise the
+    bytes actually signed won't match the final on-wire header."""
+    unsigned = make_packet(flags=0)
+    signed_flagged = make_packet(flags=FLAG_SIGNED)
+    assert unsigned.signable_bytes() != signed_flagged.signable_bytes()
+
+
+def test_signable_bytes_changes_if_path_changes():
+    a = make_packet(path=["X"])
+    b = make_packet(path=["X", "Y"])
+    assert a.signable_bytes() != b.signable_bytes()
+
+
+def test_signable_bytes_validates_like_pack():
+    pkt = make_packet(ttl=999)  # out of range for a 1-byte field
+    with pytest.raises(PacketError):
+        pkt.signable_bytes()
+
+
+# --- identity_bytes() ------------------------------------------------------------
+
+def test_identity_bytes_survives_a_relay_hop_unchanged():
+    """The exact mutation relay.py applies at every hop -- ttl down,
+    hop_count up, own id appended to path -- must not change
+    identity_bytes(), or an end-to-end signature could never verify past
+    the first hop."""
+    from dataclasses import replace
+
+    original = make_packet(ttl=10, hop_count=0, path=[])
+    forwarded = replace(original, ttl=9, hop_count=1, path=["B"])
+    forwarded_again = replace(forwarded, ttl=8, hop_count=2, path=["B", "C"])
+
+    assert original.identity_bytes() == forwarded.identity_bytes() == forwarded_again.identity_bytes()
+
+
+def test_identity_bytes_changes_if_payload_changes():
+    a = make_packet(payload=b"hello")
+    b = make_packet(payload=b"goodbye")
+    assert a.identity_bytes() != b.identity_bytes()
+
+
+def test_identity_bytes_changes_if_src_or_dst_changes():
+    a = make_packet(src="A", dst="C")
+    b = make_packet(src="A", dst="D")
+    assert a.identity_bytes() != b.identity_bytes()
+
+
+def test_identity_bytes_changes_if_msg_id_changes():
+    a = make_packet()
+    b = make_packet()  # fresh random msg_id via default_factory
+    assert a.identity_bytes() != b.identity_bytes()
+
+
+def test_identity_bytes_reflects_flags_as_currently_set():
+    unsigned = make_packet(flags=0)
+    flagged = make_packet(flags=FLAG_SIGNED)
+    assert unsigned.identity_bytes() != flagged.identity_bytes()

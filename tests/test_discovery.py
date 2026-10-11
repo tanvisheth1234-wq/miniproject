@@ -207,6 +207,83 @@ async def test_visible_neighbours_filters_unlisted_senders():
     assert "C" not in disc_a.neighbours
 
 
+# --- public key distribution via HELLO (SEC-6) ---------------------------------
+
+@pytest.mark.asyncio
+async def test_hello_includes_public_key_when_configured():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    disc_a = Discovery("A", a, hello_interval=0.05, public_key=b"\x01" * 32)
+    sent = []
+    orig_broadcast = a.broadcast
+
+    async def spy_broadcast(data):
+        sent.append(data)
+        await orig_broadcast(data)
+
+    a.broadcast = spy_broadcast
+
+    await disc_a.start()
+    await asyncio.sleep(0.07)
+    await disc_a.stop()
+
+    pkt = Packet.unpack(sent[0])
+    assert pkt.payload == b"NORMAL" + b"\x01" * 32
+
+
+@pytest.mark.asyncio
+async def test_hello_omits_public_key_when_not_configured():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    disc_a = Discovery("A", a, hello_interval=0.05)  # no public_key given
+    sent = []
+    orig_broadcast = a.broadcast
+
+    async def spy_broadcast(data):
+        sent.append(data)
+        await orig_broadcast(data)
+
+    a.broadcast = spy_broadcast
+
+    await disc_a.start()
+    await asyncio.sleep(0.07)
+    await disc_a.stop()
+
+    pkt = Packet.unpack(sent[0])
+    assert pkt.payload == b"NORMAL"
+
+
+@pytest.mark.asyncio
+async def test_neighbour_table_learns_public_key_from_hello():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    b = _FakeTransport("B", bus)
+    disc_a = Discovery("A", a, hello_interval=0.05)
+    disc_b = Discovery("B", b, hello_interval=0.05, public_key=b"\x02" * 32)
+
+    await disc_a.start()
+    await disc_b.start()
+    await asyncio.sleep(0.07)
+    await disc_a.stop()
+    await disc_b.stop()
+
+    assert disc_a.neighbours.get("B").public_key == b"\x02" * 32
+
+
+@pytest.mark.asyncio
+async def test_neighbour_public_key_is_none_when_peer_has_none():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    disc_a = Discovery("A", a, hello_interval=10)
+    await disc_a.start()
+
+    hello = Packet(type=PacketType.HELLO, priority=Priority.STATUS, src="B", dst="BCAST___", ttl=1, payload=b"NORMAL")
+    bus.deliver("B", hello.pack())
+    await disc_a.stop()
+
+    assert disc_a.neighbours.get("B").public_key is None
+
+
 @pytest.mark.asyncio
 async def test_stop_cancels_background_tasks():
     bus = _Bus()

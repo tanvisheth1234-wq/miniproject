@@ -91,6 +91,17 @@ def test_encode_caps_failures_at_255():
     assert decoded["B"].recent_failures == 255
 
 
+def test_public_key_round_trips():
+    key = bytes(range(32))
+    payload = encode_report({"B": ReportEntry(public_key=key)})
+    assert decode_report(payload)["B"].public_key == key
+
+
+def test_no_public_key_decodes_as_none():
+    payload = encode_report({"B": ReportEntry()})  # public_key defaults to None
+    assert decode_report(payload)["B"].public_key is None
+
+
 # --- LinkStateGossip: sending --------------------------------------------------
 
 @pytest.mark.asyncio
@@ -244,6 +255,58 @@ async def test_receiving_report_teaches_learned_role():
     gossip_a._on_receive("B", report.pack())
 
     assert learned == [("GW", NodeRole.GATEWAY)]
+
+
+@pytest.mark.asyncio
+async def test_receiving_report_teaches_learned_public_key():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: [])
+    learned = []
+    gossip_a.on_public_key_learned = lambda node_id, key: learned.append((node_id, key))
+
+    key = bytes(range(32))
+    payload = encode_dated_report("B", 1, {"GW": ReportEntry(public_key=key)})
+    report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", ttl=1, payload=payload)
+    gossip_a._on_receive("B", report.pack())
+
+    assert learned == [("GW", key)]
+
+
+@pytest.mark.asyncio
+async def test_unknown_public_key_does_not_fire_on_public_key_learned():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: [])
+    learned = []
+    gossip_a.on_public_key_learned = lambda node_id, key: learned.append((node_id, key))
+
+    payload = encode_dated_report("B", 1, {"GW": ReportEntry()})  # no key known
+    report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", ttl=1, payload=payload)
+    gossip_a._on_receive("B", report.pack())
+
+    assert learned == []
+
+
+def test_send_report_includes_public_key_from_provider():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    key = bytes(range(32))
+    gossip_a = LinkStateGossip(
+        "A", a, graph_a,
+        neighbours_provider=lambda: ["B"],
+        public_key_provider=lambda node_id: key if node_id == "B" else None,
+    )
+
+    asyncio.run(gossip_a.send_report())
+
+    _, data = a.sent[0]
+    pkt = Packet.unpack(data)
+    _, _, decoded = decode_dated_report(pkt.payload)
+    assert decoded["B"].public_key == key
 
 
 def test_send_report_includes_role_from_role_provider():

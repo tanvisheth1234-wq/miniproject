@@ -2,9 +2,10 @@ import asyncio
 
 import pytest
 
+from mesh.core import crypto
 from mesh.core.discovery import NodeRole
 from mesh.core.node import Node
-from mesh.core.packet import Packet, PacketType, Priority
+from mesh.core.packet import FLAG_SIGNED, Packet, PacketType, Priority
 from mesh.core.transport_sim import SimulatedNetwork, SimulatedTransport
 
 
@@ -642,3 +643,157 @@ async def test_store_forward_expires_messages_past_max_age():
     assert a.store.count_events("expired") == 1
 
     await a.stop()
+
+
+# --- signing: public key distribution + Ed25519 verification (section 10) --------
+
+@pytest.mark.asyncio
+async def test_signed_message_verifies_and_delivers_one_hop():
+    key_a = crypto.generate_keypair()
+    key_b = crypto.generate_keypair()
+    net = SimulatedNetwork(seed=20)
+    net.set_link("A", "B")
+    a = make_node("A", net, keypair=key_a)
+    b = make_node("B", net, keypair=key_b)
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    await a.send("B", b"signed hello")
+    await asyncio.sleep(0.05)
+
+    assert len(delivered) == 1
+    assert delivered[0].payload == b"signed hello"
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_signature_survives_multi_hop_relay_and_verifies_at_destination():
+    """A-B-C-D chain, A signs, D verifies. This is the exact scenario that
+    would fail if the signature covered ttl/hop_count/path (each mutated
+    at every hop) instead of identity_bytes()'s stable fields -- proving
+    the fix actually works end-to-end, not just at a single hop."""
+    key_a = crypto.generate_keypair()
+    net = SimulatedNetwork(seed=21)
+    net.set_link("A", "B")
+    net.set_link("B", "C")
+    net.set_link("C", "D")
+    a = make_node("A", net, keypair=key_a)
+    b = make_node("B", net)
+    c = make_node("C", net)
+    d = make_node("D", net)
+
+    delivered_at_d = []
+    d.on_deliver = delivered_at_d.append
+
+    await a.start()
+    await b.start()
+    await c.start()
+    await d.start()
+    await asyncio.sleep(0.3)  # discovery + gossip rounds so D learns A's key via re-flooding
+
+    assert d._known_keys.get("A") == key_a.public_bytes  # learned multi-hop, not first-hand
+
+    await a.send("D", b"signed across three hops")
+    await asyncio.sleep(0.05)
+
+    await a.stop()
+    await b.stop()
+    await c.stop()
+    await d.stop()
+
+    assert len(delivered_at_d) == 1
+    assert delivered_at_d[0].payload == b"signed across three hops"
+
+
+@pytest.mark.asyncio
+async def test_forged_signature_is_rejected_not_delivered():
+    """B signs with its own key but claims to be A (forges src=A) -- the
+    destination must reject this using A's real known key, not B's."""
+    key_a = crypto.generate_keypair()
+    key_attacker = crypto.generate_keypair()
+    net = SimulatedNetwork(seed=22)
+    net.set_link("A", "B")
+    a = make_node("A", net, keypair=key_a)
+    b = make_node("B", net)
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    from dataclasses import replace
+    forged = Packet(type=PacketType.DATA, priority=Priority.SOS, src="A", dst="B", payload=b"fake SOS")
+    forged = replace(forged, flags=forged.flags | FLAG_SIGNED)
+    signature = crypto.sign(key_attacker.private_key, forged.identity_bytes())  # signed with the WRONG key
+    forged = replace(forged, signature=signature)
+    b.transport._callback("A", forged.pack())
+    await asyncio.sleep(0.02)
+
+    assert delivered == []
+    assert b.store.count_events("drop_signature_invalid") == 1
+
+    await a.stop()
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_unknown_signer_is_rejected():
+    """A signed packet from a node B has never discovered or heard about
+    through gossip at all -- there is no key to verify against, so it
+    must be rejected rather than accepted on trust."""
+    phantom_key = crypto.generate_keypair()
+    net = SimulatedNetwork(seed=23)
+    b = make_node("B", net)  # B never links to or hears from "Z" at all
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await b.start()
+
+    from dataclasses import replace
+    pkt = Packet(type=PacketType.DATA, priority=Priority.NORMAL, src="Z", dst="B", payload=b"who are you")
+    pkt = replace(pkt, flags=pkt.flags | FLAG_SIGNED)
+    signature = crypto.sign(phantom_key.private_key, pkt.identity_bytes())
+    pkt = replace(pkt, signature=signature)
+    b.transport._callback("Z", pkt.pack())
+    await asyncio.sleep(0.02)
+
+    assert delivered == []
+    assert b.store.count_events("drop_unknown_signer") == 1
+
+    await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_unsigned_messages_still_work_when_no_keypair_configured():
+    """Backward compatibility / opt-in: nodes with no keypair at all
+    must behave exactly as before signing existed."""
+    net = SimulatedNetwork(seed=24)
+    net.set_link("A", "B")
+    a = make_node("A", net)  # no keypair
+    b = make_node("B", net)  # no keypair
+
+    delivered = []
+    b.on_deliver = delivered.append
+
+    await a.start()
+    await b.start()
+    await asyncio.sleep(0.1)
+
+    await a.send("B", b"plain old unsigned message")
+    await asyncio.sleep(0.05)
+
+    assert len(delivered) == 1
+    assert delivered[0].payload == b"plain old unsigned message"
+
+    await a.stop()
+    await b.stop()
