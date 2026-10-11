@@ -110,8 +110,7 @@ class Packet:
 
     # -- (de)serialisation -----------------------------------------------
 
-    def pack(self) -> bytes:
-        """Serialise this packet to bytes per section 7."""
+    def _validate_fields(self) -> None:
         if not (0 <= self.type <= 0xFF):
             raise PacketError(f"type out of range: {self.type}")
         if not (0 <= self.priority <= 0xFF):
@@ -127,17 +126,8 @@ class Packet:
         if self.timestamp < 0 or self.timestamp > 0xFFFFFFFFFFFFFFFF:
             raise PacketError(f"timestamp out of range: {self.timestamp}")
 
-        flags = self.flags
-        if self.signature is not None:
-            if len(self.signature) != SIGNATURE_SIZE:
-                raise PacketError(
-                    f"signature must be {SIGNATURE_SIZE} bytes, got {len(self.signature)}"
-                )
-            flags |= FLAG_SIGNED
-        elif flags & FLAG_SIGNED:
-            raise PacketError("flags bit3 (signed) set but no signature provided")
-
-        header = struct.pack(
+    def _build_header(self, flags: int) -> bytes:
+        return struct.pack(
             HEADER_FORMAT,
             MAGIC,
             self.version,
@@ -155,10 +145,73 @@ class Packet:
             0,  # reserved
         )
 
+    def pack(self) -> bytes:
+        """Serialise this packet to bytes per section 7."""
+        self._validate_fields()
+
+        flags = self.flags
+        if self.signature is not None:
+            if len(self.signature) != SIGNATURE_SIZE:
+                raise PacketError(
+                    f"signature must be {SIGNATURE_SIZE} bytes, got {len(self.signature)}"
+                )
+            flags |= FLAG_SIGNED
+        elif flags & FLAG_SIGNED:
+            raise PacketError("flags bit3 (signed) set but no signature provided")
+
+        header = self._build_header(flags)
         body = header + b"".join(_encode_node_id(p) for p in self.path) + self.payload
         if self.signature is not None:
             body += self.signature
         return body
+
+    def signable_bytes(self) -> bytes:
+        """Header + path bytes, byte-for-byte identical to what ``pack()``
+        will put on the wire (section 7.2's "header + path"), for Ed25519
+        signing. Call this only after ``self.flags`` already includes
+        ``FLAG_SIGNED`` (if the packet will carry a signature) -- the
+        signed bytes must match the final on-wire header exactly, or a
+        correctly-signed packet will fail verification purely because the
+        flags byte differs between what was signed and what was sent.
+
+        Note: this literally matches section 7.2's wording, but ``ttl``,
+        ``hop_count`` and ``path`` are part of the header/path region and
+        all three are legitimately mutated by every relay a message
+        passes through (see ``relay.py``'s forwarding step). A signature
+        over this exact byte string can therefore only ever be verified
+        at the first hop, not end to end. Use ``identity_bytes()`` for an
+        end-to-end signature that actually survives multi-hop relaying.
+        """
+        self._validate_fields()
+        header = self._build_header(self.flags)
+        return header + b"".join(_encode_node_id(p) for p in self.path)
+
+    def identity_bytes(self) -> bytes:
+        """The fields that stay constant across every hop -- everything
+        except ``ttl``, ``hop_count`` and ``path``, which each relay
+        legitimately rewrites in transit (section 6.3's forwarding step).
+        This is what an end-to-end Ed25519 signature (section 10, SEC-3)
+        actually needs to cover: identity and payload, not the per-hop
+        bookkeeping fields. Verified once, at the destination, against
+        whatever the packet's header/path/ttl happen to be by the time it
+        arrives -- those were never part of what the originator attested
+        to in the first place."""
+        self._validate_fields()
+        return (
+            struct.pack(
+                ">BBBBH",
+                self.version,
+                self.type,
+                self.priority,
+                self.flags,
+                len(self.payload),
+            )
+            + self.msg_id.bytes
+            + _encode_node_id(self.src)
+            + _encode_node_id(self.dst)
+            + struct.pack(">Q", self.timestamp)
+            + self.payload
+        )
 
     @classmethod
     def unpack(cls, data: bytes) -> "Packet":

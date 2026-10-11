@@ -20,7 +20,16 @@ from typing import Callable, Iterable, Optional
 
 from . import crypto
 from .discovery import PRUNE_INTERVAL, Discovery, NodeRole
-from .packet import DEFAULT_TTL, FLAG_ENCRYPTED, FLAG_NEEDS_ACK, Packet, PacketType, Priority, RESCUE_DST
+from .packet import (
+    DEFAULT_TTL,
+    FLAG_ENCRYPTED,
+    FLAG_NEEDS_ACK,
+    FLAG_SIGNED,
+    Packet,
+    PacketType,
+    Priority,
+    RESCUE_DST,
+)
 from .relay import RelayNode
 from .reliability import (
     ACK_TIMEOUT,
@@ -74,6 +83,7 @@ class Node:
         sf_max_age: float = SF_MAX_AGE,
         db_path: str = ":memory:",
         session_key: Optional[bytes] = None,
+        keypair: Optional[crypto.KeyPair] = None,
     ) -> None:
         self.node_id = node_id
         self.transport = transport
@@ -82,6 +92,12 @@ class Node:
         # out of band. None (the default) means "run unencrypted" -- opt-in,
         # same as dedup/priority-queue elsewhere in this codebase.
         self._session_key = session_key
+        # Ed25519 identity for signing outgoing headers (section 10, SEC-3).
+        # None means this node doesn't sign -- equally opt-in. A node still
+        # *verifies* any signed packet it receives regardless of whether it
+        # signs its own traffic, as long as it knows the signer's key.
+        self._keypair = keypair
+        self._known_keys: dict[str, bytes] = {}
 
         self.discovery = Discovery(
             node_id,
@@ -91,6 +107,7 @@ class Node:
             hello_interval=hello_interval,
             neighbour_timeout=neighbour_timeout,
             prune_interval=prune_interval,
+            public_key=keypair.public_bytes if keypair is not None else None,
         )
 
         self.graph = MeshGraph()
@@ -99,10 +116,12 @@ class Node:
             node_id, transport, self.graph,
             neighbours_provider=self.discovery.neighbours.ids,
             role_provider=self._role_of,
+            public_key_provider=self._public_key_of,
             interval=link_state_interval,
         )
         self.gossip.on_topology_change = self._on_topology_change
         self.gossip.on_role_learned = self.router.set_role
+        self.gossip.on_public_key_learned = self._on_public_key_learned
 
         self.dedup = DedupSet()
         self.relay = RelayNode(
@@ -173,6 +192,17 @@ class Node:
         info = self.discovery.neighbours.get(neighbour_id)
         return info.role if info is not None else NodeRole.NORMAL
 
+    def _public_key_of(self, neighbour_id: str) -> Optional[bytes]:
+        """A direct neighbour's public key, as learned from its HELLO, for
+        inclusion in our own outgoing link-state report (section 10,
+        SEC-6) -- same propagation path as role, so a far-away node can
+        eventually verify this neighbour's signature too."""
+        info = self.discovery.neighbours.get(neighbour_id)
+        return info.public_key if info is not None else None
+
+    def _on_public_key_learned(self, node_id: str, public_key: bytes) -> None:
+        self._known_keys[node_id] = public_key
+
     def _on_topology_change(self) -> None:
         self.router.invalidate()
         self.store.record_event("route_change")
@@ -191,7 +221,10 @@ class Node:
         self.relay.set_next_hop(peer_id, peer_id)
         self.graph.set_edge(self.node_id, peer_id)
         self.router.set_role(peer_id, role)
-        self.store.upsert_peer(peer_id, role=role)
+        peer_key = self._public_key_of(peer_id)
+        if peer_key is not None:
+            self._known_keys[peer_id] = peer_key  # learned first-hand, immediately -- no gossip wait
+        self.store.upsert_peer(peer_id, role=role, public_key=peer_key)
         self.store.record_event("peer_up", peer=peer_id)
 
     def _on_peer_down(self, peer_id: str) -> None:
@@ -230,6 +263,7 @@ class Node:
             flags=flags,
             payload=wire_payload,
         )
+        pkt = self._sign(pkt)
         self.store.record_message(
             str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
             direction="sent", status="pending", created_ms=pkt.timestamp,
@@ -260,6 +294,42 @@ class Node:
             self.store.update_message_status(str(pkt.msg_id), "delivered")
         return True
 
+    def _sign(self, pkt: Packet) -> Packet:
+        """Attach an end-to-end Ed25519 signature (section 10, SEC-3) if
+        this node has a keypair configured; a no-op otherwise, matching
+        every other opt-in security feature here. Signs ``identity_bytes``
+        -- not the full header -- since ttl/hop_count/path are mutated by
+        every relay and a signature over them could never verify past the
+        first hop (see ``Packet.identity_bytes``'s docstring)."""
+        if self._keypair is None:
+            return pkt
+        pkt = replace(pkt, flags=pkt.flags | FLAG_SIGNED)
+        signature = crypto.sign(self._keypair.private_key, pkt.identity_bytes())
+        return replace(pkt, signature=signature)
+
+    def _verify(self, pkt: Packet) -> bool:
+        """True if ``pkt`` either carries no signature at all (nothing to
+        check -- signing is opt-in mesh-wide, not mandatory) or carries one
+        that verifies against the sender's known public key. False means
+        "reject this packet" either way: an unknown signer or a signature
+        that doesn't match is section 10's forged-SOS threat model, not a
+        config quirk to silently tolerate."""
+        if not pkt.signed:
+            return True
+        key_bytes = self._known_keys.get(pkt.src)
+        if key_bytes is None:
+            self.store.record_event("drop_unknown_signer", msg_id=str(pkt.msg_id))
+            return False
+        try:
+            public_key = crypto.load_public_key(key_bytes)
+        except crypto.CryptoError:
+            self.store.record_event("drop_bad_signer_key", msg_id=str(pkt.msg_id))
+            return False
+        if not crypto.verify(public_key, pkt.identity_bytes(), pkt.signature):
+            self.store.record_event("drop_signature_invalid", msg_id=str(pkt.msg_id))
+            return False
+        return True
+
     def _queue_for_store_forward(self, pkt: Packet) -> None:
         evicted = self.store_forward.enqueue(pkt)
         if pkt.type == PacketType.DATA:
@@ -276,6 +346,9 @@ class Node:
         arrived. ACKs are this node's own bookkeeping, not a user-visible
         message; a DATA packet asking for one gets one sent back before
         the user callback fires."""
+        if not self._verify(pkt):
+            return  # forged signature or unknown signer -- section 10's threat model
+
         if pkt.type == PacketType.ACK:
             self.ack_tracker.acknowledge(pkt.msg_id)
             self.store.record_event("ack", msg_id=str(pkt.msg_id))
@@ -329,6 +402,7 @@ class Node:
             msg_id=original.msg_id,  # same id: how the sender's AckTracker correlates it
             ttl=DEFAULT_TTL,
         )
+        ack = self._sign(ack)
         asyncio.create_task(self._dispatch(ack))
 
     async def _ack_retry_loop(self) -> None:

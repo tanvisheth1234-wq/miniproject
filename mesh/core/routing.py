@@ -17,7 +17,7 @@ import struct
 from dataclasses import dataclass
 from typing import Callable, Iterable, Optional
 
-from .discovery import NodeRole
+from .discovery import PUBLIC_KEY_SIZE, NodeRole
 from .packet import NODE_ID_SIZE, Packet, PacketError, PacketType, Priority, RESCUE_DST
 from .transport import Transport, TransportError
 
@@ -112,9 +112,11 @@ class MeshGraph:
 
 LINK_STATE_INTERVAL = 5.0  # seconds, per section 7.3
 
-# node id, link_quality (float32), recent_failures, role code
-_ENTRY_FORMAT = ">8s f B B"
+# node id, link_quality (float32), recent_failures, role code, public key
+# (32 zero bytes means "unknown" -- a real Ed25519 key is never all-zero)
+_ENTRY_FORMAT = f">8s f B B {PUBLIC_KEY_SIZE}s"
 _ENTRY_SIZE = struct.calcsize(_ENTRY_FORMAT)
+_NO_KEY = b"\x00" * PUBLIC_KEY_SIZE
 
 # origin node id, sequence number -- prefixed to every report so it can be
 # re-flooded network-wide (section 8.1) rather than staying neighbour-only.
@@ -143,16 +145,21 @@ def _decode_node_id(raw: bytes) -> str:
 @dataclass
 class ReportEntry:
     """One neighbour as described in a LINK_STATE report: how good the
-    reporting node's link to it is, and what role it advertises."""
+    reporting node's link to it is, what role it advertises, and its
+    public key -- a node only ever learns a far-away peer's key through
+    gossip, since HELLO (which carries it first-hand) never travels past
+    a direct neighbour (section 10, SEC-6)."""
 
     link_quality: float = 1.0
     recent_failures: int = 0
     role: str = NodeRole.NORMAL
+    public_key: Optional[bytes] = None
 
 
 def encode_report(entries: dict[str, ReportEntry]) -> bytes:
-    """Serialise "my neighbours, how good each link is, and their roles"
-    into a LINK_STATE payload: one fixed-size entry per neighbour."""
+    """Serialise "my neighbours, how good each link is, their roles, and
+    their public keys" into a LINK_STATE payload: one fixed-size entry
+    per neighbour."""
     return b"".join(
         struct.pack(
             _ENTRY_FORMAT,
@@ -160,6 +167,7 @@ def encode_report(entries: dict[str, ReportEntry]) -> bytes:
             entry.link_quality,
             min(entry.recent_failures, 0xFF),
             _ROLE_CODES.get(entry.role, 0),
+            entry.public_key if entry.public_key is not None else _NO_KEY,
         )
         for node_id, entry in entries.items()
     )
@@ -171,13 +179,14 @@ def decode_report(payload: bytes) -> dict[str, ReportEntry]:
         raise ValueError(f"link-state payload not a multiple of entry size ({_ENTRY_SIZE})")
     entries: dict[str, ReportEntry] = {}
     for offset in range(0, len(payload), _ENTRY_SIZE):
-        node_id_raw, quality, failures, role_code = struct.unpack(
+        node_id_raw, quality, failures, role_code, key_bytes = struct.unpack(
             _ENTRY_FORMAT, payload[offset: offset + _ENTRY_SIZE]
         )
         entries[_decode_node_id(node_id_raw)] = ReportEntry(
             link_quality=quality,
             recent_failures=failures,
             role=_ROLE_NAMES.get(role_code, NodeRole.NORMAL),
+            public_key=None if key_bytes == _NO_KEY else key_bytes,
         )
     return entries
 
@@ -221,6 +230,7 @@ class LinkStateGossip:
         graph: MeshGraph,
         neighbours_provider: Callable[[], Iterable[str]],
         role_provider: Optional[Callable[[str], str]] = None,
+        public_key_provider: Optional[Callable[[str], Optional[bytes]]] = None,
         interval: float = LINK_STATE_INTERVAL,
     ) -> None:
         self.node_id = node_id
@@ -231,6 +241,9 @@ class LinkStateGossip:
         # tracked by discovery.py) so it can be included in our report --
         # this is how a far-away node learns a distant GATEWAY/RESCUE role.
         self._role_provider = role_provider or (lambda _neighbour_id: NodeRole.NORMAL)
+        # same idea for public keys (section 10, SEC-6): a direct neighbour's
+        # key, learned from its HELLO, rides along in our own report too.
+        self._public_key_provider = public_key_provider or (lambda _neighbour_id: None)
         self._interval = interval
 
         self._own_edges: dict[str, EdgeInfo] = {}
@@ -240,6 +253,7 @@ class LinkStateGossip:
         self._seq: dict[str, int] = {}
         self.on_topology_change: Optional[Callable[[], None]] = None
         self.on_role_learned: Optional[Callable[[str, str], None]] = None
+        self.on_public_key_learned: Optional[Callable[[str, bytes], None]] = None
 
         self._task: Optional[asyncio.Task] = None
 
@@ -313,6 +327,7 @@ class LinkStateGossip:
                 link_quality=self.graph.edge(self.node_id, n).link_quality,
                 recent_failures=self.graph.edge(self.node_id, n).recent_failures,
                 role=self._role_provider(n),
+                public_key=self._public_key_provider(n),
             )
             for n in neighbour_ids
         }
@@ -371,6 +386,8 @@ class LinkStateGossip:
             self.graph.set_edge(origin, neighbour_id, entry.link_quality, entry.recent_failures)
             if self.on_role_learned is not None:
                 self.on_role_learned(neighbour_id, entry.role)
+            if entry.public_key is not None and self.on_public_key_learned is not None:
+                self.on_public_key_learned(neighbour_id, entry.public_key)
 
         if changed:
             self._fire_topology_change()
