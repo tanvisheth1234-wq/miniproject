@@ -321,6 +321,11 @@ class Node:
                 await asyncio.sleep(self._ack_poll_interval)
                 to_retry, failed = self.ack_tracker.poll_timeouts()
                 for entry in to_retry:
+                    # the link we actually sent over didn't deliver in time --
+                    # penalise it in the cost function (Design of Algorithms,
+                    # Algorithm 7) before recomputing, so the retry can route
+                    # around it rather than picking the same failing link again
+                    self.gossip.record_failure(entry.next_hop)
                     # route may have changed since the original send
                     # (section 9: "retrying down a path that has since
                     # died" is exactly the failure this recompute avoids)
@@ -332,6 +337,7 @@ class Node:
                     # either get a route by the next poll or exhaust its
                     # retries and fall into `failed` below.
                 for entry in failed:
+                    self.gossip.record_failure(entry.next_hop)
                     self._queue_for_store_forward(entry.pkt)
 
     async def _resend(self, next_hop: str, pkt: Packet) -> None:

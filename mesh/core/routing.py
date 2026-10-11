@@ -248,10 +248,21 @@ class LinkStateGossip:
     def record_link_quality(self, neighbour_id: str, link_quality: float) -> None:
         info = self._own_edges.setdefault(neighbour_id, EdgeInfo())
         info.link_quality = link_quality
+        self._sync_edge_now(neighbour_id, info)
 
     def record_failure(self, neighbour_id: str) -> None:
+        """An ACK timed out on the link to ``neighbour_id`` (section 9:
+        fed by reliability.py's retry logic). Takes effect immediately --
+        not just on the next periodic ``send_report`` -- so a repeatedly
+        failing link gets routed around on the very next lookup, per
+        Algorithm 7's "ROUTING.record_failure" step."""
         info = self._own_edges.setdefault(neighbour_id, EdgeInfo())
         info.recent_failures += 1
+        self._sync_edge_now(neighbour_id, info)
+
+    def _sync_edge_now(self, neighbour_id: str, info: EdgeInfo) -> None:
+        self.graph.set_edge(self.node_id, neighbour_id, info.link_quality, info.recent_failures)
+        self._fire_topology_change()
 
     def forget_neighbour(self, neighbour_id: str) -> None:
         """Neighbour went down (section 9: heartbeat) -- drop it from our
