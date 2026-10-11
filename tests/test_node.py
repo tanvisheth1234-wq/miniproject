@@ -205,6 +205,53 @@ async def test_router_forwards_beyond_direct_neighbours_via_gossip():
 
 
 @pytest.mark.asyncio
+async def test_node_originates_a_message_three_hops_away_via_reflooded_gossip():
+    """A -> B -> C -> D, same chain as above, but this time A itself calls
+    Node.send("D", ...) -- it never manually addresses a first hop the way
+    the test above does. For this to work at all, A's own graph must learn
+    about the C-D edge, which A can only learn through B re-flooding C's
+    report onward. Before link-state re-flooding existed, A's graph never
+    extended past its direct neighbour's own edges, so this exact call
+    would have gone straight to store-and-forward instead of being sent."""
+    net = SimulatedNetwork(seed=16)
+    net.set_link("A", "B")
+    net.set_link("B", "C")
+    net.set_link("C", "D")
+    a = make_node("A", net)
+    b = make_node("B", net)
+    c = make_node("C", net)
+    d = make_node("D", net)
+
+    delivered_at_d = []
+    d.on_deliver = delivered_at_d.append
+
+    await a.start()
+    await b.start()
+    await c.start()
+    await d.start()
+    await asyncio.sleep(0.3)  # discovery + two gossip rounds, so re-flooding reaches A
+
+    # A's own graph now extends three hops out, not just two
+    assert a.router.next_hop("D") == "B"
+
+    pkt = await a.send("D", b"go the distance, unassisted")
+    await asyncio.sleep(0.05)
+
+    await a.stop()
+    await b.stop()
+    await c.stop()
+    await d.stop()
+
+    assert pkt.msg_id not in a.store_forward  # never fell back to store-and-forward
+    assert len(delivered_at_d) == 1
+    assert delivered_at_d[0].payload == b"go the distance, unassisted"
+    # path accumulates only the nodes that *forwarded* it (B, then C) -- the
+    # originating node A is never appended to its own outgoing packet's path
+    assert delivered_at_d[0].path == ["B", "C"]
+    assert delivered_at_d[0].hop_count == 2
+
+
+@pytest.mark.asyncio
 async def test_rescue_dst_routes_to_gateway_across_multiple_hops():
     net = SimulatedNetwork(seed=7)
     net.set_link("A", "B")

@@ -4,7 +4,16 @@ import pytest
 
 from mesh.core.discovery import NodeRole
 from mesh.core.packet import Packet, PacketType
-from mesh.core.routing import EdgeInfo, LinkStateGossip, MeshGraph, ReportEntry, decode_report, encode_report
+from mesh.core.routing import (
+    EdgeInfo,
+    LinkStateGossip,
+    MeshGraph,
+    ReportEntry,
+    decode_dated_report,
+    decode_report,
+    encode_dated_report,
+    encode_report,
+)
 
 
 # --- a minimal in-memory Transport supporting unicast send, for testing -------
@@ -149,14 +158,19 @@ async def test_stale_own_edge_removed_when_neighbour_drops_out():
 
 
 # --- LinkStateGossip: receiving and merging -------------------------------------
+#
+# _on_receive schedules re-flooding via asyncio.create_task, so (matching how
+# it's actually invoked in production, from inside a running node) these run
+# as async tests rather than plain synchronous calls.
 
-def test_receiving_report_merges_reported_edges_into_graph():
+@pytest.mark.asyncio
+async def test_receiving_report_merges_reported_edges_into_graph():
     bus = _Bus()
     a = _FakeTransport("A", bus)
     graph_a = MeshGraph()
     gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B"])
 
-    payload = encode_report({"C": ReportEntry(link_quality=0.5, recent_failures=1)})
+    payload = encode_dated_report("B", 1, {"C": ReportEntry(link_quality=0.5, recent_failures=1)})
     report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", ttl=1, payload=payload)
 
     gossip_a._on_receive("B", report.pack())
@@ -166,7 +180,8 @@ def test_receiving_report_merges_reported_edges_into_graph():
     assert edge.recent_failures == 1
 
 
-def test_receiving_report_teaches_learned_role():
+@pytest.mark.asyncio
+async def test_receiving_report_teaches_learned_role():
     bus = _Bus()
     a = _FakeTransport("A", bus)
     graph_a = MeshGraph()
@@ -174,7 +189,7 @@ def test_receiving_report_teaches_learned_role():
     learned = []
     gossip_a.on_role_learned = lambda node_id, role: learned.append((node_id, role))
 
-    payload = encode_report({"GW": ReportEntry(role=NodeRole.GATEWAY)})
+    payload = encode_dated_report("B", 1, {"GW": ReportEntry(role=NodeRole.GATEWAY)})
     report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", ttl=1, payload=payload)
     gossip_a._on_receive("B", report.pack())
 
@@ -195,11 +210,14 @@ def test_send_report_includes_role_from_role_provider():
 
     _, data = a.sent[0]
     pkt = Packet.unpack(data)
-    decoded = decode_report(pkt.payload)
+    origin, seq, decoded = decode_dated_report(pkt.payload)
+    assert origin == "A"
+    assert seq == 1
     assert decoded["B"].role == NodeRole.RESCUE
 
 
-def test_on_topology_change_fires_when_graph_actually_changes():
+@pytest.mark.asyncio
+async def test_on_topology_change_fires_when_graph_actually_changes():
     bus = _Bus()
     a = _FakeTransport("A", bus)
     graph_a = MeshGraph()
@@ -207,14 +225,109 @@ def test_on_topology_change_fires_when_graph_actually_changes():
     fired = []
     gossip_a.on_topology_change = lambda: fired.append(True)
 
-    payload = encode_report({"C": ReportEntry(link_quality=1.0, recent_failures=0)})
+    payload = encode_dated_report("B", 1, {"C": ReportEntry(link_quality=1.0, recent_failures=0)})
     report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", ttl=1, payload=payload)
     gossip_a._on_receive("B", report.pack())
     assert len(fired) == 1
 
-    # identical report again: no real change, should not re-fire
+    # identical report again (same seq): stale, should not re-fire or re-merge
     gossip_a._on_receive("B", report.pack())
     assert len(fired) == 1
+
+
+# --- dated report encode/decode --------------------------------------------------
+
+def test_dated_report_round_trip():
+    payload = encode_dated_report("X", 7, {"Y": ReportEntry(link_quality=0.6, recent_failures=2)})
+    origin, seq, entries = decode_dated_report(payload)
+    assert origin == "X"
+    assert seq == 7
+    assert entries["Y"].link_quality == pytest.approx(0.6)
+
+
+def test_decode_dated_report_rejects_too_short_payload():
+    with pytest.raises(ValueError):
+        decode_dated_report(b"short")
+
+
+# --- re-flooding (section 8.1's "controlled re-flooding") ------------------------
+
+@pytest.mark.asyncio
+async def test_report_is_reflooded_to_other_neighbours():
+    """B relays a report that originated at C on to its other neighbour A,
+    even though A and C are not directly connected -- this is what lets a
+    node learn about links more than one hop away."""
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    b = _FakeTransport("B", bus)
+    graph_b = MeshGraph()
+    gossip_b = LinkStateGossip("B", b, graph_b, neighbours_provider=lambda: ["A", "C"])
+
+    payload = encode_dated_report("C", 1, {"D": ReportEntry(link_quality=0.9)})
+    report = Packet(type=PacketType.LINK_STATE, priority=1, src="C", dst="B", ttl=1, payload=payload)
+    gossip_b._on_receive("C", report.pack())
+
+    assert graph_b.edge("C", "D") is not None  # B merges it locally...
+    await asyncio.sleep(0.01)  # ...and the scheduled re-flood task runs
+    assert [dst for dst, _ in b.sent] == ["A"]  # B forwarded it to A, not back to C (sender/origin)
+
+
+@pytest.mark.asyncio
+async def test_report_reflooded_reaches_a_node_two_hops_away():
+    """A-B-C chain: C's own report about its neighbour D must reach A via
+    B's re-flooding, even though A and C never talk directly."""
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    b = _FakeTransport("B", bus)
+    c = _FakeTransport("C", bus)
+    graph_a, graph_b, graph_c = MeshGraph(), MeshGraph(), MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B"])
+    gossip_b = LinkStateGossip("B", b, graph_b, neighbours_provider=lambda: ["A", "C"])
+    gossip_c = LinkStateGossip("C", c, graph_c, neighbours_provider=lambda: ["B", "D"])
+    a.on_receive(gossip_a._on_receive)
+    b.on_receive(gossip_b._on_receive)
+    c.on_receive(gossip_c._on_receive)
+
+    await gossip_c.send_report()  # C tells B about C-D and C-B
+    await asyncio.sleep(0.01)  # let B's re-flood task run
+
+    assert graph_a.edge("C", "D") is not None
+    assert graph_a.edge("C", "B") is not None
+
+
+@pytest.mark.asyncio
+async def test_stale_report_is_not_reflooded_or_remerged():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    b = _FakeTransport("B", bus)
+    graph_b = MeshGraph()
+    gossip_b = LinkStateGossip("B", b, graph_b, neighbours_provider=lambda: ["A"])
+
+    first = encode_dated_report("C", 5, {"D": ReportEntry(link_quality=0.9)})
+    gossip_b._on_receive("C", Packet(type=PacketType.LINK_STATE, priority=1, src="C", dst="B", payload=first).pack())
+    await asyncio.sleep(0.01)
+    assert [dst for dst, _ in b.sent] == ["A"]  # first sighting: re-flooded to B's other neighbour
+    b.sent.clear()
+
+    stale = encode_dated_report("C", 5, {"D": ReportEntry(link_quality=0.1)})  # same seq, different content
+    gossip_b._on_receive("C", Packet(type=PacketType.LINK_STATE, priority=1, src="C", dst="B", payload=stale).pack())
+    await asyncio.sleep(0.01)
+
+    assert graph_b.edge("C", "D").link_quality == pytest.approx(0.9)  # not overwritten
+    assert b.sent == []  # not re-flooded either
+
+
+def test_own_report_looped_back_is_ignored():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B"])
+
+    payload = encode_dated_report("A", 1, {"X": ReportEntry()})
+    report = Packet(type=PacketType.LINK_STATE, priority=1, src="B", dst="A", payload=payload)
+    gossip_a._on_receive("B", report.pack())
+
+    assert "X" not in graph_a
 
 
 def test_non_link_state_packet_ignored():

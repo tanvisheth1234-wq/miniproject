@@ -116,6 +116,11 @@ LINK_STATE_INTERVAL = 5.0  # seconds, per section 7.3
 _ENTRY_FORMAT = ">8s f B B"
 _ENTRY_SIZE = struct.calcsize(_ENTRY_FORMAT)
 
+# origin node id, sequence number -- prefixed to every report so it can be
+# re-flooded network-wide (section 8.1) rather than staying neighbour-only.
+_REPORT_HEADER_FORMAT = ">8s I"
+_REPORT_HEADER_SIZE = struct.calcsize(_REPORT_HEADER_FORMAT)
+
 # Role travels alongside each entry -- a node only ever learns a far-away
 # peer's role (GATEWAY/RESCUE) through gossip, since roles come from HELLOs
 # that only reach direct neighbours (section 8.3's RESCUE__ handling needs
@@ -177,6 +182,24 @@ def decode_report(payload: bytes) -> dict[str, ReportEntry]:
     return entries
 
 
+def encode_dated_report(origin: str, seq: int, entries: dict[str, ReportEntry]) -> bytes:
+    """``encode_report`` prefixed with the true originator and a sequence
+    number, so the report survives being re-flooded past the first hop --
+    without this, a receiver has no way to tell "this is node X's report"
+    from "this is my own neighbour's report", or to reject a stale replay."""
+    header = struct.pack(_REPORT_HEADER_FORMAT, _encode_node_id(origin), seq & 0xFFFFFFFF)
+    return header + encode_report(entries)
+
+
+def decode_dated_report(payload: bytes) -> tuple[str, int, dict[str, ReportEntry]]:
+    """Inverse of ``encode_dated_report``. Raises ``ValueError`` on truncated input."""
+    if len(payload) < _REPORT_HEADER_SIZE:
+        raise ValueError("link-state payload shorter than the report header")
+    origin_raw, seq = struct.unpack(_REPORT_HEADER_FORMAT, payload[:_REPORT_HEADER_SIZE])
+    entries = decode_report(payload[_REPORT_HEADER_SIZE:])
+    return _decode_node_id(origin_raw), seq, entries
+
+
 class LinkStateGossip:
     """Periodically tells neighbours "here's who I can hear and how well",
     and merges everyone else's reports into a shared ``MeshGraph`` (section
@@ -211,6 +234,10 @@ class LinkStateGossip:
         self._interval = interval
 
         self._own_edges: dict[str, EdgeInfo] = {}
+        self._own_seq = 0
+        # highest sequence number seen per originator, so a stale or
+        # already-seen report is dropped rather than re-flooded forever
+        self._seq: dict[str, int] = {}
         self.on_topology_change: Optional[Callable[[], None]] = None
         self.on_role_learned: Optional[Callable[[str, str], None]] = None
 
@@ -230,6 +257,7 @@ class LinkStateGossip:
         """Neighbour went down (section 9: heartbeat) -- drop it from our
         own report and from the graph."""
         self._own_edges.pop(neighbour_id, None)
+        self._seq.pop(neighbour_id, None)  # a rejoining node restarts its sequence counter at 1
         self.graph.remove_node(neighbour_id)
         self._fire_topology_change()
 
@@ -277,14 +305,24 @@ class LinkStateGossip:
             )
             for n in neighbour_ids
         }
-        payload = encode_report(report)
-        for neighbour_id in neighbour_ids:
+        self._own_seq += 1
+        self._seq[self.node_id] = self._own_seq  # so our own echoed-back report is recognised as stale
+        payload = encode_dated_report(self.node_id, self._own_seq, report)
+        await self._flood(payload, exclude={self.node_id})
+
+    async def _flood(self, payload: bytes, exclude: set[str]) -> None:
+        """Unicast ``payload`` to every current neighbour not in ``exclude``
+        (section 8.1's "controlled re-flooding"). Used both for our own
+        fresh report and for re-sending someone else's report onward."""
+        for neighbour_id in self._neighbours_provider():
+            if neighbour_id in exclude:
+                continue
             pkt = Packet(
                 type=PacketType.LINK_STATE,
                 priority=Priority.STATUS,
                 src=self.node_id,
                 dst=neighbour_id,
-                ttl=1,  # neighbour-directed, never relayed
+                ttl=1,  # neighbour-directed per hop; re-flooding is explicit, not TTL-based
                 payload=payload,
             )
             try:
@@ -303,21 +341,34 @@ class LinkStateGossip:
             return  # not this component's concern
 
         try:
-            entries = decode_report(pkt.payload)
+            origin, seq, entries = decode_dated_report(pkt.payload)
         except ValueError:
             return
 
+        if origin == self.node_id:
+            return  # our own report, propagated back around to us
+        if origin in self._seq and seq <= self._seq[origin]:
+            return  # stale or already-seen -- also stops it re-flooding forever
+
+        self._seq[origin] = seq
+
         changed = False
         for neighbour_id, entry in entries.items():
-            existing = self.graph.edge(sender_id, neighbour_id)
+            existing = self.graph.edge(origin, neighbour_id)
             if existing is None or existing.link_quality != entry.link_quality or existing.recent_failures != entry.recent_failures:
                 changed = True
-            self.graph.set_edge(sender_id, neighbour_id, entry.link_quality, entry.recent_failures)
+            self.graph.set_edge(origin, neighbour_id, entry.link_quality, entry.recent_failures)
             if self.on_role_learned is not None:
                 self.on_role_learned(neighbour_id, entry.role)
 
         if changed:
             self._fire_topology_change()
+
+        # controlled re-flooding (section 8.1): pass it on to every other
+        # neighbour so nodes beyond our own radio range learn about origin's
+        # links too -- this is what makes the graph network-wide rather than
+        # stopping two hops out.
+        asyncio.create_task(self._flood(pkt.payload, exclude={origin, sender_id}))
 
     def _fire_topology_change(self) -> None:
         if self.on_topology_change is not None:
