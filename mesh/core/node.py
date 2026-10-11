@@ -22,7 +22,16 @@ from . import crypto
 from .discovery import PRUNE_INTERVAL, Discovery, NodeRole
 from .packet import DEFAULT_TTL, FLAG_ENCRYPTED, FLAG_NEEDS_ACK, Packet, PacketType, Priority, RESCUE_DST
 from .relay import RelayNode
-from .reliability import ACK_TIMEOUT, AckTracker, DedupSet, MAX_RETRIES, SF_RETRY_INTERVAL, StoreForwardQueue
+from .reliability import (
+    ACK_TIMEOUT,
+    AckTracker,
+    DedupSet,
+    MAX_RETRIES,
+    SF_MAX_AGE,
+    SF_MAX_COUNT,
+    SF_RETRY_INTERVAL,
+    StoreForwardQueue,
+)
 from .routing import LINK_STATE_INTERVAL, LinkStateGossip, MeshGraph, Router
 from .store import Store
 from .transport import Transport, TransportError
@@ -61,6 +70,8 @@ class Node:
         max_retries: int = MAX_RETRIES,
         ack_poll_interval: float = 0.5,
         sf_retry_interval: float = SF_RETRY_INTERVAL,
+        sf_max_count: int = SF_MAX_COUNT,
+        sf_max_age: float = SF_MAX_AGE,
         db_path: str = ":memory:",
         session_key: Optional[bytes] = None,
     ) -> None:
@@ -106,7 +117,7 @@ class Node:
         self.router.set_role(node_id, role)
 
         self.ack_tracker = AckTracker(timeout_s=ack_timeout, max_retries=max_retries)
-        self.store_forward = StoreForwardQueue()
+        self.store_forward = StoreForwardQueue(max_count=sf_max_count, max_age_s=sf_max_age)
         self._ack_poll_interval = ack_poll_interval
         self._sf_retry_interval = sf_retry_interval
         self._ack_retry_task: Optional[asyncio.Task] = None
@@ -250,10 +261,15 @@ class Node:
         return True
 
     def _queue_for_store_forward(self, pkt: Packet) -> None:
-        self.store_forward.enqueue(pkt)
+        evicted = self.store_forward.enqueue(pkt)
         if pkt.type == PacketType.DATA:
             self.store.update_message_status(str(pkt.msg_id), "queued_sf")
         self.store.record_event("sf_queue", msg_id=str(pkt.msg_id))
+        if evicted is not None:
+            # SNF-4/SNF-5: queue was over its count bound, lowest-priority
+            # message lost -- may be the packet we just enqueued itself
+            self.store.update_message_status(str(evicted.msg_id), "failed")
+            self.store.record_event("evicted", msg_id=str(evicted.msg_id), detail="retention queue full")
 
     def _on_relay_deliver(self, pkt: Packet) -> None:
         """A packet addressed to us (or a RESCUE__ we resolve to) just
@@ -348,6 +364,12 @@ class Node:
         with contextlib.suppress(asyncio.CancelledError):
             while True:
                 await asyncio.sleep(self._sf_retry_interval)
+                # bound by age (Algorithm 8's EXPIRE): applies regardless of
+                # priority, unlike count eviction -- a stale message is no
+                # longer useful no matter how urgent it once was
+                for expired in self.store_forward.expire():
+                    self.store.update_message_status(str(expired.msg_id), "failed")
+                    self.store.record_event("expired", msg_id=str(expired.msg_id), detail="retention period elapsed")
                 for pkt in self.store_forward.all():
                     next_hop = self.router.next_hop(pkt.dst)
                     if next_hop is None:

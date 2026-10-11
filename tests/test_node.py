@@ -605,3 +605,40 @@ async def test_store_forward_flushes_once_a_route_appears():
 
     await a.stop()
     await b.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_forward_evicts_lowest_priority_when_queue_is_full():
+    net = SimulatedNetwork(seed=12)
+    a = make_node("A", net, sf_max_count=2)  # no links -- everything queues
+    await a.start()
+
+    sos = await a.send("X", b"help", priority=Priority.SOS)
+    normal1 = await a.send("Y", b"routine 1", priority=Priority.NORMAL)
+    normal2 = await a.send("Z", b"routine 2", priority=Priority.NORMAL)  # pushes over the bound
+
+    assert sos.msg_id in a.store_forward  # SOS protected
+    assert len(a.store_forward) == 2
+    assert a.store.count_events("evicted") == 1
+    assert a.store.get_message(str(normal1.msg_id))["status"] == "failed" or \
+        a.store.get_message(str(normal2.msg_id))["status"] == "failed"
+
+    await a.stop()
+
+
+@pytest.mark.asyncio
+async def test_store_forward_expires_messages_past_max_age():
+    net = SimulatedNetwork(seed=13)
+    a = make_node("A", net, sf_retry_interval=0.03, sf_max_age=0.05)  # no links -- stays queued
+    await a.start()
+
+    pkt = await a.send("X", b"will go stale")
+    assert pkt.msg_id in a.store_forward
+
+    await asyncio.sleep(0.15)  # past max_age, flush loop's expire sweep runs
+
+    assert pkt.msg_id not in a.store_forward
+    assert a.store.get_message(str(pkt.msg_id))["status"] == "failed"
+    assert a.store.count_events("expired") == 1
+
+    await a.stop()
