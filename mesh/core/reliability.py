@@ -23,6 +23,8 @@ DEDUP_WINDOW = 300.0     # seconds
 ACK_TIMEOUT = 4.0        # seconds
 MAX_RETRIES = 3
 SF_RETRY_INTERVAL = 10.0  # seconds
+SF_MAX_COUNT = 500        # messages -- Design of Algorithms section 1.5's C_max
+SF_MAX_AGE = 1800.0       # seconds -- Design of Algorithms section 1.5's T_hold
 
 
 def _now_ms() -> int:
@@ -175,25 +177,59 @@ class AckTracker:
 
 # --- store-and-forward ------------------------------------------------------------
 
+@dataclass
+class _Retained:
+    pkt: Packet
+    retained_at_ms: int
+
+
 class StoreForwardQueue:
     """Holds messages that have no known route right now, instead of
     dropping them (section 9's "Store-and-forward"). A periodic flush
     (every ``SF_RETRY_INTERVAL``, driven by node.py) attempts each queued
     message again -- if a route has since appeared (a node walked out,
-    a gateway came back), it sends and clears the queue entry."""
+    a gateway came back), it sends and clears the queue entry.
 
-    def __init__(self) -> None:
-        self._queue: dict[uuid.UUID, Packet] = {}
+    Bounded in both count and age (Design of Algorithms, Algorithm 8,
+    SNF-4/SNF-5): past ``max_count`` messages, the lowest-priority one is
+    evicted (largest ``priority`` value, ties broken oldest-first) so an
+    SOS is never displaced by routine traffic; past ``max_age_s`` a
+    message is dropped as expired regardless of priority, since it's
+    simply too stale to still be useful.
+    """
 
-    def enqueue(self, pkt: Packet) -> None:
-        self._queue[pkt.msg_id] = pkt
+    def __init__(self, max_count: int = SF_MAX_COUNT, max_age_s: float = SF_MAX_AGE) -> None:
+        self._queue: dict[uuid.UUID, _Retained] = {}
+        self.max_count = max_count
+        self.max_age_s = max_age_s
+
+    def enqueue(self, pkt: Packet, now_ms: Optional[int] = None) -> Optional[Packet]:
+        """Returns the evicted packet if this enqueue pushed the queue
+        over ``max_count``, else ``None``. The newly-enqueued packet
+        itself may be the one evicted, if it's the lowest priority."""
+        now_ms = _now_ms() if now_ms is None else now_ms
+        self._queue[pkt.msg_id] = _Retained(pkt=pkt, retained_at_ms=now_ms)
+        if len(self._queue) <= self.max_count:
+            return None
+        victim_id = max(
+            self._queue,
+            key=lambda mid: (self._queue[mid].pkt.priority, -self._queue[mid].retained_at_ms),
+        )
+        return self._queue.pop(victim_id).pkt
 
     def remove(self, msg_id: uuid.UUID) -> None:
         self._queue.pop(msg_id, None)
 
     def all(self) -> list[Packet]:
         """Every currently-queued packet, oldest insertion order first."""
-        return list(self._queue.values())
+        return [r.pkt for r in self._queue.values()]
+
+    def expire(self, now_ms: Optional[int] = None) -> list[Packet]:
+        """Remove and return every message held longer than ``max_age_s``."""
+        now_ms = _now_ms() if now_ms is None else now_ms
+        max_age_ms = int(self.max_age_s * 1000)
+        expired_ids = [mid for mid, r in self._queue.items() if now_ms - r.retained_at_ms > max_age_ms]
+        return [self._queue.pop(mid).pkt for mid in expired_ids]
 
     def __len__(self) -> int:
         return len(self._queue)
