@@ -141,6 +141,56 @@ async def test_send_report_uses_recorded_quality_and_failures():
     assert edge.recent_failures == 1
 
 
+def test_record_failure_updates_graph_immediately_not_just_on_next_report():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B"])
+
+    gossip_a.record_failure("B")
+
+    edge = graph_a.edge("A", "B")
+    assert edge is not None  # didn't wait for send_report()/_sync_own_edges to run
+    assert edge.recent_failures == 1
+
+
+def test_record_link_quality_updates_graph_immediately():
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B"])
+
+    gossip_a.record_link_quality("B", 0.3)
+
+    assert graph_a.edge("A", "B").link_quality == pytest.approx(0.3)
+
+
+def test_record_failure_invalidates_cached_routes():
+    """A repeatedly failing link must actually change what Dijkstra picks
+    on the very next lookup -- Algorithm 7's whole point is that a retry
+    recomputes the route rather than reusing a cached one down a link
+    that keeps timing out."""
+    from mesh.core.routing import Router
+
+    bus = _Bus()
+    a = _FakeTransport("A", bus)
+    graph_a = MeshGraph()
+    graph_a.set_edge("A", "B")
+    graph_a.set_edge("B", "D")
+    graph_a.set_edge("A", "C")
+    graph_a.set_edge("C", "D")
+    router_a = Router("A", graph_a)
+    gossip_a = LinkStateGossip("A", a, graph_a, neighbours_provider=lambda: ["B", "C"])
+    gossip_a.on_topology_change = router_a.invalidate
+
+    assert router_a.shortest_path("D") == ["A", "B", "D"]  # equal cost, first found wins
+
+    for _ in range(3):
+        gossip_a.record_failure("B")  # A-B now costs more each time
+
+    assert router_a.shortest_path("D") == ["A", "C", "D"]  # routed around the failing link
+
+
 @pytest.mark.asyncio
 async def test_stale_own_edge_removed_when_neighbour_drops_out():
     bus = _Bus()

@@ -559,7 +559,12 @@ async def test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward(
     vanishing."""
     net = SimulatedNetwork(seed=10)
     net.set_link("A", "Z")  # a real link, but no Node ever registers as "Z"
-    a = make_node("A", net, ack_timeout=0.03, max_retries=1, ack_poll_interval=0.02)
+    # link_state_interval set long so the periodic gossip loop doesn't prune
+    # "Z" mid-test -- it isn't a real discovered neighbour (seeded directly
+    # below), and the gossip loop's own staleness sweep would otherwise
+    # remove it the moment record_failure starts tracking it.
+    a = make_node("A", net, ack_timeout=0.03, max_retries=1, ack_poll_interval=0.02,
+                  link_state_interval=5.0)
     a.graph.set_edge("A", "Z")  # seed a known route without a full discovery handshake
     await a.start()
 
@@ -570,6 +575,9 @@ async def test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward(
 
     assert pkt.msg_id not in a.ack_tracker
     assert pkt.msg_id in a.store_forward
+    # the timeout must have been recorded against the A-Z link itself
+    # (Design of Algorithms, Algorithm 7's ROUTING.record_failure step)
+    assert a.graph.edge("A", "Z").recent_failures >= 1
 
     await a.stop()
 
