@@ -104,3 +104,34 @@ python -m pytest -q
 ```
 Should say `256 passed`. If you add API code, put its tests under `tests/` following the
 existing naming (`test_<module>.py`), same as everything else.
+
+
+---
+
+## Phase 4 status (delivered on `develop_4`)
+
+**Done:** API + WebSocket server, mesh lab, node view, rescue dashboard, live demo, routing /
+reliability / protocol / security / simulator pages, PWA manifest and service worker, simulator
+scenarios with metrics. 283 backend tests pass; the UI was exercised in a real browser.
+
+**Engine changes made during integration** (all covered by new tests):
+- `relay.py`: the dedup key is now `(type, msg_id)` at the destination and
+  `(type, msg_id, attempt)` at relays. Before, an ACK returning along its DATA's path was
+  dropped as a duplicate at the first shared relay, and a retry was swallowed by the first relay
+  that had seen the original, so multi-hop ACK + retry did not work.
+- `packet.py`: the reserved header byte (offset 51) is now `attempt`, a retransmission counter.
+  The SRS and algorithm documents still call it "reserved" and should be updated.
+- `node.py`: re-ACKs a duplicate of a message it already accepted; records the route on the
+  sender's row from the returning ACK; optional `hop_count_routing`.
+- `discovery.py` / `routing.py`: link quality is measured from HELLO reception (it was never
+  fed before, so every link looked perfect); a link-state report replaces the origin's old edges
+  (dead nodes were routed through indefinitely); `MeshGraph.reachable_from`.
+
+**Not done / honest limits:**
+- No single-node server over `UdpTcpTransport` for the multi-laptop demo yet. The lab hosts all
+  nodes in one process over the simulated radio; `views.py` already works on any `Node`, so a
+  one-node server is a small addition.
+- The radio capacity slider and SOS-under-load numbers come from a finite-capacity radio model
+  (`api/radio.py`) that schedules by priority at every hop including the origin; the engine's own
+  priority queue only covers relayed packets.
+- Signing is opt-in mesh-wide, so an unsigned forgery is not caught (shown on the Security page).

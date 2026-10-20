@@ -48,7 +48,7 @@ _HEADER_FIELDS = [
     ("timestamp", 40, 8, "Milliseconds since the Unix epoch when the sender created it."),
     ("payload_len", 48, 2, "Length of the payload that follows the path."),
     ("path_len", 50, 1, "Number of 8-byte node ids in the relay path."),
-    ("reserved", 51, 1, "Zero. Held back for future use."),
+    ("attempt", 51, 1, "Retransmission counter: 0 on the first send, +1 per retry. Lets relays tell a retry from a duplicate."),
 ]
 
 

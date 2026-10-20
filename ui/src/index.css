@@ -1,0 +1,75 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* white page, warm ink, crimson and brown accents */
+  --color-ink: #2b1a13;
+  --color-ink-soft: #5b4538;
+  --color-muted: #8a766a;
+  --color-line: #eaded4;
+  --color-line-strong: #d9c7ba;
+  --color-wash: #fbf7f4;
+  --color-wash-2: #f6eee8;
+
+  --color-crimson-50: #fdf1f0;
+  --color-crimson-100: #fadcd9;
+  --color-crimson-200: #f2b3ad;
+  --color-crimson-400: #d9544a;
+  --color-crimson-500: #c13a30;
+  --color-crimson-600: #a62b23;
+  --color-crimson-700: #8a211b;
+  --color-crimson-800: #6e1a16;
+
+  --color-brown-50: #f8f3ee;
+  --color-brown-100: #efe4da;
+  --color-brown-200: #ddc8b6;
+  --color-brown-300: #c4a58b;
+  --color-brown-400: #a8825f;
+  --color-brown-500: #8a6444;
+  --color-brown-600: #6f4e34;
+  --color-brown-700: #573d29;
+  --color-brown-800: #3f2c1e;
+
+  --color-ok: #2f6f4a;
+  --color-ok-bg: #edf6f0;
+  --color-warn: #a36a12;
+  --color-warn-bg: #fbf3e2;
+}
+
+html { background: #fff; }
+body {
+  background: #fff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--color-crimson-100); }
+:focus-visible { outline: 2px solid var(--color-crimson-500); outline-offset: 2px; border-radius: 6px; }
+
+.font-display { letter-spacing: -0.015em; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* hairline scrollbars that stay out of the way */
+* { scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.6); opacity: 0.55; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes sos-throb {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(193, 58, 48, 0.35); }
+  50%      { box-shadow: 0 0 0 18px rgba(193, 58, 48, 0); }
+}
+@keyframes dash-flow { to { stroke-dashoffset: -24; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

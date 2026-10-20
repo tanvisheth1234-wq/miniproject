@@ -470,9 +470,17 @@ class MeshLab:
     def node_view(self, node_id: str) -> dict:
         spec = self._require_spec(node_id)
         node = self.nodes.get(node_id)
-        if node is None:
-            return views.offline_node_view(node_id, spec.role, self.stores[node_id], spec.label)
-        return views.node_view(node, spec.label)
+        view = (views.offline_node_view(node_id, spec.role, self.stores[node_id], spec.label) if node is None
+                else views.node_view(node, spec.label))
+        # a sender only learns the route from the ACK that came back; the lab
+        # can see what the destination really recorded, so show that
+        _sent, received = self._sent_and_received()
+        for m in view["thread"]:
+            if m["direction"] == "sent" and m["msg_id"] in received:
+                m["relays"] = views.split_path(received[m["msg_id"]][1]["path"])
+                m["hop_count"] = len(m["relays"])
+                m["received_by"] = received[m["msg_id"]][0]
+        return view
 
     def terminals(self) -> list[str]:
         return [nid for nid, spec in self.specs.items() if views.role_is_terminal(spec.role)]
@@ -557,11 +565,12 @@ class MeshLab:
         t0 = origin["created_ms"]
         for ev in events:
             ev["t_ms"] = ev["ts_ms"] - t0
+        received_at = receive_times(self.stores).get(msg_id) if arrived else None
         return {
             "msg_id": msg_id, "origin": origin, "arrived": arrived, "route": route,
             "hops": (len(route) - 2) if arrived else None, "events": events,
             "wire": self.wire.get(msg_id),
-            "latency_ms": (arrived and receive_times(self.stores).get(msg_id, t0) - t0) or None,
+            "latency_ms": (received_at - t0) if received_at is not None else None,
         }
 
     def graph_view(self, node_id: str) -> dict:

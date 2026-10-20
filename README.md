@@ -11,10 +11,23 @@ connectivity, or a rescue team.
   routing with network-wide gossip, reliability (priority queue, ACK/retry, dedup,
   bounded store-and-forward), security (AES-256-GCM + Ed25519, both opt-in), SQLite
   logging. 256 tests passing on `develop_3`.
-- **Phase 4 (API + UI + integration): in progress.** See
-  [`docs/PHASE4_HANDOFF.md`](docs/PHASE4_HANDOFF.md) for the backend API surface and what
-  needs building, and [`docs/FRONTEND_PROMPT.md`](docs/FRONTEND_PROMPT.md) for the
-  frontend build prompt and design-tool setup.
+- **Phase 4 (API + UI + integration): built on `develop_4`.** FastAPI + WebSocket server
+  (`api/`), a mesh lab that runs many real `Node`s in one process, a virtual-time simulator
+  with the section 16 metrics (`sim/scenarios.py`), and a React website (`ui/`) with the node
+  view, rescue dashboard, live demo, and pages for routing, reliability, wire protocol,
+  security and the simulator. See [`docs/PHASE4_HANDOFF.md`](docs/PHASE4_HANDOFF.md).
+
+## Run the website
+
+```
+pip install -r requirements.txt
+cd ui && npm install && npm run build && cd ..
+python -m api.server            # http://127.0.0.1:8000  (UI + API + WebSocket)
+```
+
+For UI development run `python -m api.server` and `npm run dev` (in `ui/`) side by side;
+the dev server on :5173 proxies `/api` and `/ws` to :8000. Simulator scenarios also run from
+the command line: `python -m sim.scenarios --scenario hopcount_vs_weighted --runs 20`.
 
 ## Documents
 
