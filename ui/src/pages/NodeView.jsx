@@ -183,14 +183,14 @@ export default function NodeView() {
       <div className="mx-auto w-full max-w-[430px]">
         <div className="overflow-hidden rounded-[32px] border border-line-strong bg-white shadow-[0_30px_70px_-30px_rgba(63,44,30,0.35)]">
           <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-            <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <Mono className="rounded-md bg-brown-800 px-2 py-1 text-sm font-semibold text-white">{nodeId}</Mono>
               <div className="min-w-0 leading-tight">
                 <div className="truncate text-sm font-semibold">{labels[nodeId] ?? nodeId}</div>
                 <div className="text-xs text-muted">{online ? 'on the mesh' : 'switched off'}</div>
               </div>
             </div>
-            <Select value={nodeId} onChange={(e) => navigate(`/node/${e.target.value}`)} className="!h-9 !w-auto !text-xs" aria-label="Which phone">
+            <Select value={nodeId} onChange={(e) => navigate(`/node/${e.target.value}`)} className="!h-9 !w-auto max-w-[46%] !text-xs" aria-label="Which phone">
               {snapshot.nodes.map((n) => <option key={n.id} value={n.id}>{n.id} · {n.label}</option>)}
             </Select>
           </div>
