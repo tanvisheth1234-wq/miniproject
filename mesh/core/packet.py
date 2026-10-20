@@ -53,7 +53,7 @@ MSG_ID_SIZE = 16
 SIGNATURE_SIZE = 64
 
 # offset: 0     2     3    4    5    6      7          8         24    32    40         48           50        51
-# field:  magic version type priority ttl flags hop_count msg_id(16) src(8) dst(8) timestamp(8) payload_len(2) path_len reserved
+# field:  magic version type priority ttl flags hop_count msg_id(16) src(8) dst(8) timestamp(8) payload_len(2) path_len attempt
 HEADER_FORMAT = ">H B B B B B B 16s 8s 8s Q H B B"
 assert struct.calcsize(HEADER_FORMAT) == HEADER_SIZE
 
@@ -89,6 +89,14 @@ class Packet:
     path: list = field(default_factory=list)
     payload: bytes = b""
     signature: Optional[bytes] = None
+    # Retransmission counter, carried in what section 7.1 left as the
+    # reserved byte (0 on the first send, +1 on every ACK-timeout retry or
+    # store-and-forward flush). Relays use it to tell "the same copy
+    # arriving twice" (drop it) from "the sender trying again" (forward it);
+    # without it, dedup would swallow every retry at the first relay that had
+    # already seen the original. Not part of ``identity_bytes``, so a
+    # retransmission keeps its signature.
+    attempt: int = 0
 
     # -- flag convenience accessors ------------------------------------
 
@@ -119,6 +127,8 @@ class Packet:
             raise PacketError(f"ttl out of range: {self.ttl}")
         if not (0 <= self.hop_count <= 0xFF):
             raise PacketError(f"hop_count out of range: {self.hop_count}")
+        if not (0 <= self.attempt <= 0xFF):
+            raise PacketError(f"attempt out of range: {self.attempt}")
         if len(self.path) > 0xFF:
             raise PacketError("path exceeds 255 entries (path_len is 1 byte)")
         if len(self.payload) > 0xFFFF:
@@ -142,7 +152,7 @@ class Packet:
             self.timestamp,
             len(self.payload),
             len(self.path),
-            0,  # reserved
+            self.attempt,
         )
 
     def pack(self) -> bytes:
@@ -236,7 +246,7 @@ class Packet:
             timestamp,
             payload_len,
             path_len,
-            _reserved,
+            attempt,
         ) = struct.unpack(HEADER_FORMAT, data[:HEADER_SIZE])
 
         if magic != MAGIC:
@@ -278,6 +288,7 @@ class Packet:
             path=path,
             payload=payload,
             signature=signature,
+            attempt=attempt,
         )
 
     @staticmethod
@@ -338,5 +349,5 @@ HEADER_FIELD_OFFSETS = {
     40: "timestamp (8 bytes)",
     48: "payload_len (2 bytes)",
     50: "path_len (1 byte)",
-    51: "reserved (1 byte)",
+    51: "attempt (1 byte)",
 }

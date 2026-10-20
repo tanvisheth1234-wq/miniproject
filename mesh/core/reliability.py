@@ -13,7 +13,7 @@ import itertools
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Optional
+from typing import Hashable, Optional
 
 from .packet import Packet
 
@@ -40,9 +40,11 @@ class DedupSet:
 
     def __init__(self, window_s: float = DEDUP_WINDOW) -> None:
         self._window_ms = int(window_s * 1000)
-        self._seen: dict[uuid.UUID, int] = {}
+        # keyed by a bare msg_id, or by any richer hashable the caller
+        # chooses (relay.py uses (type, msg_id[, attempt]) -- see there)
+        self._seen: dict[Hashable, int] = {}
 
-    def seen_before(self, msg_id: uuid.UUID, now_ms: Optional[int] = None) -> bool:
+    def seen_before(self, msg_id: Hashable, now_ms: Optional[int] = None) -> bool:
         """Record ``msg_id`` if this is the first time it's been seen
         (within the window), and report whether it was already known.
         Call this once per received packet, before acting on it."""
@@ -58,7 +60,7 @@ class DedupSet:
         for mid in expired:
             del self._seen[mid]
 
-    def __contains__(self, msg_id: uuid.UUID) -> bool:
+    def __contains__(self, msg_id: Hashable) -> bool:
         return msg_id in self._seen
 
     def __len__(self) -> int:

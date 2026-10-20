@@ -91,6 +91,22 @@ class MeshGraph:
     def has_node(self, node_id: str) -> bool:
         return node_id in self._adjacency
 
+    def reachable_from(self, root: str) -> set[str]:
+        """Every node a packet from ``root`` could get to over the edges
+        currently in the graph (``root`` included). A node that died keeps
+        its last-reported edges in far-away graphs until something replaces
+        them, but nothing points *to* it any more, so it drops out of this
+        set -- which is what a view of "who is on the mesh" should use."""
+        seen = {root}
+        frontier = [root]
+        while frontier:
+            current = frontier.pop()
+            for neighbour in self._adjacency.get(current, {}):
+                if neighbour not in seen:
+                    seen.add(neighbour)
+                    frontier.append(neighbour)
+        return seen
+
     def nodes(self) -> list[str]:
         return list(self._adjacency.keys())
 
@@ -378,7 +394,15 @@ class LinkStateGossip:
 
         self._seq[origin] = seq
 
+        # A report is origin's *complete* neighbour list, so it replaces what
+        # we held for origin rather than adding to it: a neighbour that has
+        # disappeared from the report is a link that no longer exists. Without
+        # this, every node beyond the dead node's radio range kept routing
+        # "through" it indefinitely (section 9: heartbeat must propagate).
         changed = False
+        for gone in set(self.graph.neighbours_of(origin)) - set(entries):
+            self.graph.remove_edge(origin, gone)
+            changed = True
         for neighbour_id, entry in entries.items():
             existing = self.graph.edge(origin, neighbour_id)
             if existing is None or existing.link_quality != entry.link_quality or existing.recent_failures != entry.recent_failures:
@@ -417,9 +441,19 @@ class Router:
     computes distances to everywhere and picks the cheapest such node.
     """
 
-    def __init__(self, node_id: str, graph: MeshGraph) -> None:
+    def __init__(
+        self,
+        node_id: str,
+        graph: MeshGraph,
+        cost_fn: Optional[Callable[[EdgeInfo], float]] = None,
+    ) -> None:
         self.node_id = node_id
         self.graph = graph
+        # ``None`` (the default) is the section 8.2 weighted cost. A caller
+        # can swap in e.g. ``lambda _edge: 1.0`` to get plain hop-count
+        # routing -- that is how the simulator runs section 16's
+        # "weighted vs hop-count" comparison against identical conditions.
+        self._cost_fn = cost_fn
         self._roles: dict[str, str] = {}
         self._cache: dict[str, Optional[list[str]]] = {}
 
@@ -431,6 +465,10 @@ class Router:
 
     def forget_role(self, node_id: str) -> None:
         self._roles.pop(node_id, None)
+
+    def role_of(self, node_id: str) -> str:
+        """``node_id``'s last-known advertised role (``NORMAL`` if never heard)."""
+        return self._roles.get(node_id, NodeRole.NORMAL)
 
     def invalidate(self) -> None:
         """Drop every cached route -- call after any topology change."""
@@ -490,7 +528,7 @@ class Router:
             for v, edge in self.graph.neighbours_of(u).items():
                 if v in visited:
                     continue
-                nd = d + edge.cost
+                nd = d + (self._cost_fn(edge) if self._cost_fn is not None else edge.cost)
                 if nd < dist.get(v, float("inf")):
                     dist[v] = nd
                     prev[v] = u

@@ -59,6 +59,10 @@ class RelayNode:
         self.on_deliver: Optional[Callable[[Packet], None]] = None
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
         self.on_drop: Optional[Callable[[Packet, str], None]] = None
+        # fired *in addition to* on_drop("duplicate") when the duplicate was
+        # addressed to this node -- the sender is retrying, which usually
+        # means our ACK was lost, so node.py answers it again.
+        self.on_duplicate: Optional[Callable[[Packet], None]] = None
 
     def set_next_hop(self, dst_id: str, peer_id: str) -> None:
         """Route messages for ``dst_id`` toward ``peer_id``."""
@@ -81,11 +85,25 @@ class RelayNode:
         if pkt.type not in (PacketType.DATA, PacketType.ACK):
             return  # HELLO/LINK_STATE belong to discovery.py, not the relay
 
-        if self._dedup is not None and self._dedup.seen_before(pkt.msg_id):
-            self._drop(pkt, "duplicate")
-            return
+        for_me = pkt.dst == self.node_id or (self._accepts_dst is not None and self._accepts_dst(pkt.dst))
 
-        if pkt.dst == self.node_id or (self._accepts_dst is not None and self._accepts_dst(pkt.dst)):
+        # What counts as "the same packet again" depends on the role:
+        # - the *type* is part of the key because an ACK carries the msg_id of
+        #   the DATA it acknowledges; without it the ACK would be dropped as a
+        #   duplicate at every relay the DATA had already crossed.
+        # - at a relay, ``attempt`` is part of the key so a sender's retry is
+        #   forwarded instead of being swallowed by the first relay that saw
+        #   the original. At the destination it is not, so an application
+        #   still sees each message exactly once however often it is retried.
+        if self._dedup is not None:
+            key = (pkt.type, pkt.msg_id) if for_me else (pkt.type, pkt.msg_id, pkt.attempt)
+            if self._dedup.seen_before(key):
+                self._drop(pkt, "duplicate")
+                if for_me and self.on_duplicate is not None:
+                    self.on_duplicate(pkt)
+                return
+
+        if for_me:
             if self.on_deliver is not None:
                 self.on_deliver(pkt)
             return

@@ -493,3 +493,52 @@ async def test_two_nodes_converge_on_each_others_graph_view():
     assert graph_a.edge("B", "A") is not None  # learned from B's report
     assert graph_b.edge("B", "A") is not None
     assert graph_b.edge("A", "B") is not None
+
+
+# --- a newer report replaces the old one; dead nodes fall out of reach -----------------
+
+def _report_packet(origin: str, seq: int, entries: dict, dst: str = "A") -> bytes:
+    payload = encode_dated_report(origin, seq, entries)
+    return Packet(type=PacketType.LINK_STATE, priority=1, src=origin, dst=dst, ttl=1, payload=payload).pack()
+
+
+@pytest.mark.asyncio
+async def test_a_newer_report_removes_links_the_origin_no_longer_has():
+    bus = _Bus()
+    graph = MeshGraph()
+    gossip = LinkStateGossip("A", _FakeTransport("A", bus), graph, neighbours_provider=lambda: ["B"])
+
+    gossip._on_receive("B", _report_packet("B", 1, {"C": ReportEntry(), "D": ReportEntry()}))
+    assert graph.edge("B", "C") is not None and graph.edge("B", "D") is not None
+
+    changes = []
+    gossip.on_topology_change = lambda: changes.append(1)
+    gossip._on_receive("B", _report_packet("B", 2, {"C": ReportEntry()}))  # D has gone
+
+    assert graph.edge("B", "C") is not None
+    assert graph.edge("B", "D") is None
+    assert changes, "losing a link is a topology change"
+
+
+@pytest.mark.asyncio
+async def test_a_dead_node_stops_being_reachable_once_its_neighbours_stop_reporting_it():
+    bus = _Bus()
+    graph = MeshGraph()
+    gossip = LinkStateGossip("A", _FakeTransport("A", bus), graph, neighbours_provider=lambda: ["B"])
+    graph.set_edge("A", "B")
+
+    gossip._on_receive("B", _report_packet("B", 1, {"X": ReportEntry(), "A": ReportEntry()}))
+    gossip._on_receive("B", _report_packet("X", 1, {"B": ReportEntry()}))
+    assert "X" in graph.reachable_from("A")
+
+    gossip._on_receive("B", _report_packet("B", 2, {"A": ReportEntry()}))  # X died; B no longer hears it
+    assert "X" not in graph.reachable_from("A")
+
+
+def test_reachable_from_follows_edge_direction():
+    graph = MeshGraph()
+    graph.set_edge("A", "B")
+    graph.set_edge("B", "C")
+    graph.set_edge("D", "A")  # D can reach A, but A cannot reach D
+    assert graph.reachable_from("A") == {"A", "B", "C"}
+    assert graph.reachable_from("D") == {"D", "A", "B", "C"}

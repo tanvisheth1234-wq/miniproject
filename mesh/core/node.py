@@ -84,6 +84,7 @@ class Node:
         db_path: str = ":memory:",
         session_key: Optional[bytes] = None,
         keypair: Optional[crypto.KeyPair] = None,
+        hop_count_routing: bool = False,
     ) -> None:
         self.node_id = node_id
         self.transport = transport
@@ -111,7 +112,14 @@ class Node:
         )
 
         self.graph = MeshGraph()
-        self.router = Router(node_id, self.graph)
+        # hop_count_routing=True swaps the section 8.2 weighted cost for a
+        # flat cost of 1 per link -- the baseline for the "weighted vs
+        # hop-count" comparison (section 16), not something to run in anger.
+        self.hop_count_routing = hop_count_routing
+        self.router = Router(
+            node_id, self.graph,
+            cost_fn=(lambda _edge: 1.0) if hop_count_routing else None,
+        )
         self.gossip = LinkStateGossip(
             node_id, transport, self.graph,
             neighbours_provider=self.discovery.neighbours.ids,
@@ -133,6 +141,8 @@ class Node:
 
         self.discovery.on_peer_up = self._on_peer_up
         self.discovery.on_peer_down = self._on_peer_down
+        # HELLO reception ratio -> the cost function's link_quality term
+        self.discovery.on_link_quality = self.gossip.record_link_quality
         self.router.set_role(node_id, role)
 
         self.ack_tracker = AckTracker(timeout_s=ack_timeout, max_retries=max_retries)
@@ -148,6 +158,7 @@ class Node:
         self.on_forward: Optional[Callable[[Packet, str], None]] = None
         self.on_drop: Optional[Callable[[Packet, str], None]] = None
         self.relay.on_deliver = self._on_relay_deliver
+        self.relay.on_duplicate = self._on_relay_duplicate
         self.relay.on_forward = self._on_relay_forward
         self.relay.on_drop = self._on_relay_drop
 
@@ -353,6 +364,10 @@ class Node:
             self.ack_tracker.acknowledge(pkt.msg_id)
             self.store.record_event("ack", msg_id=str(pkt.msg_id))
             self.store.update_message_status(str(pkt.msg_id), "delivered")
+            # the ACK walked the return path, so the relays it collected
+            # (reversed) are how the original travelled -- this is how the
+            # *sender* learns "relayed via N nodes"
+            self.store.update_message_route(str(pkt.msg_id), pkt.hop_count, list(reversed(pkt.path)))
             return
 
         if pkt.encrypted:
@@ -379,6 +394,17 @@ class Node:
             self._send_ack_for(pkt)
         self._call(self.on_deliver, pkt)
 
+    def _on_relay_duplicate(self, pkt: Packet) -> None:
+        """A retry of something addressed to us that we already took. The
+        sender only retries when it never saw our ACK, so send it again --
+        but only for a message we really accepted (a forged or undecryptable
+        one was never recorded, and gets no ACK)."""
+        if pkt.type != PacketType.DATA or not pkt.needs_ack:
+            return
+        row = self.store.get_message(str(pkt.msg_id))
+        if row is not None and row["direction"] == "received":
+            self._send_ack_for(pkt)
+
     def _on_relay_forward(self, pkt: Packet, next_hop: str) -> None:
         self.store.record_message(
             str(pkt.msg_id), src=pkt.src, dst=pkt.dst, priority=pkt.priority,
@@ -401,6 +427,7 @@ class Node:
             dst=original.src,
             msg_id=original.msg_id,  # same id: how the sender's AckTracker correlates it
             ttl=DEFAULT_TTL,
+            attempt=original.attempt,  # so a re-ACK to a retry isn't mistaken for a duplicate by relays
         )
         ack = self._sign(ack)
         asyncio.create_task(self._dispatch(ack))
@@ -422,6 +449,7 @@ class Node:
                     next_hop = self.router.next_hop(entry.pkt.dst)
                     if next_hop is not None:
                         self.store.record_event("retry", msg_id=str(entry.pkt.msg_id), peer=next_hop)
+                        entry.pkt = self._next_attempt(entry.pkt)
                         asyncio.create_task(self._resend(next_hop, entry.pkt))
                     # else: no route right now -- leave it tracked, it'll
                     # either get a route by the next poll or exhaust its
@@ -429,6 +457,11 @@ class Node:
                 for entry in failed:
                     self.gossip.record_failure(entry.next_hop)
                     self._queue_for_store_forward(entry.pkt)
+
+    @staticmethod
+    def _next_attempt(pkt: Packet) -> Packet:
+        """The same message, marked as a retransmission."""
+        return replace(pkt, attempt=min(0xFF, pkt.attempt + 1))
 
     async def _resend(self, next_hop: str, pkt: Packet) -> None:
         with contextlib.suppress(TransportError):
@@ -452,6 +485,7 @@ class Node:
                     asyncio.create_task(self._flush_one(next_hop, pkt))
 
     async def _flush_one(self, next_hop: str, pkt: Packet) -> None:
+        pkt = self._next_attempt(pkt)
         try:
             await self.transport.send(next_hop, pkt.pack())
         except TransportError:

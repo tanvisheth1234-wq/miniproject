@@ -335,3 +335,66 @@ async def test_no_dedup_configured_allows_reprocessing():
     await _settle()
 
     assert len(delivered) == 2
+
+
+# --- dedup: ACKs, retries and the destination ----------------------------------------
+
+@pytest.mark.asyncio
+async def test_an_ack_is_not_a_duplicate_of_the_data_it_acknowledges():
+    """An ACK carries the msg_id of the DATA it answers, and travels back
+    over relays that already forwarded that DATA."""
+    transport = _FakeTransport()
+    relay = RelayNode("B", transport, dedup=DedupSet())
+    relay.set_next_hop("A", "A")
+    relay.set_next_hop("C", "C")
+    relay.register()
+    drops = []
+    relay.on_drop = lambda pkt, reason: drops.append(reason)
+
+    data = make_data_packet(src="A", dst="C", path=["A"])
+    ack = Packet(type=PacketType.ACK, priority=Priority.STATUS, src="C", dst="A", msg_id=data.msg_id, path=["C"])
+    transport.callback("A", data.pack())
+    transport.callback("C", ack.pack())
+    await _settle()
+
+    assert drops == []
+    assert [peer for peer, _ in transport.sent] == ["C", "A"]
+
+
+@pytest.mark.asyncio
+async def test_a_retransmission_is_forwarded_by_a_relay_that_saw_the_original():
+    transport = _FakeTransport()
+    relay = RelayNode("B", transport, dedup=DedupSet())
+    relay.set_next_hop("C", "C")
+    relay.register()
+    drops = []
+    relay.on_drop = lambda pkt, reason: drops.append(reason)
+
+    original = make_data_packet(src="A", dst="C", path=["A"])
+    retry = Packet(**{**original.__dict__, "attempt": 1})
+    transport.callback("A", original.pack())
+    transport.callback("A", retry.pack())
+    transport.callback("A", retry.pack())  # but the same retry twice is still a duplicate
+    await _settle()
+
+    assert len(transport.sent) == 2
+    assert drops == ["duplicate"]
+
+
+@pytest.mark.asyncio
+async def test_the_destination_sees_a_retried_message_once_but_is_told_about_it():
+    transport = _FakeTransport()
+    relay = RelayNode("C", transport, dedup=DedupSet())
+    relay.register()
+    delivered, duplicates = [], []
+    relay.on_deliver = delivered.append
+    relay.on_duplicate = duplicates.append
+
+    original = make_data_packet(src="A", dst="C")
+    retry = Packet(**{**original.__dict__, "attempt": 2})
+    transport.callback("A", original.pack())
+    transport.callback("A", retry.pack())
+    await _settle()
+
+    assert len(delivered) == 1
+    assert [p.attempt for p in duplicates] == [2]

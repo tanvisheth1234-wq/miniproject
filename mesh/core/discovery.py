@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
+from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Iterable, Optional
 
@@ -23,6 +24,13 @@ NEIGHBOUR_TIMEOUT = 10.0    # seconds
 PRUNE_INTERVAL = 1.0        # how often the prune loop checks for dead neighbours
 
 PUBLIC_KEY_SIZE = 32  # raw Ed25519 public key, appended to a HELLO's payload
+
+# Section 8.2: link_quality is "the fraction of the last 20 expected HELLOs
+# that actually arrived". LINK_QUALITY_REPORT_DELTA keeps the estimate from
+# firing a topology change on every tiny wobble -- only a real shift is
+# worth recomputing routes for.
+LINK_QUALITY_WINDOW = 20
+LINK_QUALITY_REPORT_DELTA = 0.1
 
 
 class NodeRole:
@@ -138,6 +146,13 @@ class Discovery:
         # left unset until something is wired up.
         self.on_peer_up: Optional[Callable[[str, str], None]] = None
         self.on_peer_down: Optional[Callable[[str], None]] = None
+        # fired with (neighbour_id, link_quality) when the HELLO reception
+        # ratio for a link has moved meaningfully since last reported
+        self.on_link_quality: Optional[Callable[[str, float], None]] = None
+
+        self._hello_times: dict[str, deque[float]] = {}
+        self._first_heard: dict[str, float] = {}
+        self._reported_quality: dict[str, float] = {}
 
         self._hello_task: Optional[asyncio.Task] = None
         self._prune_task: Optional[asyncio.Task] = None
@@ -185,6 +200,7 @@ class Discovery:
                 for node_id in self.neighbours.prune(self._neighbour_timeout):
                     if self.on_peer_down is not None:
                         self.on_peer_down(node_id)
+                self._expire_link_history()
 
     def _on_receive(self, sender_id: str, data: bytes) -> None:
         try:
@@ -214,3 +230,63 @@ class Discovery:
         is_new = self.neighbours.update(pkt.src, role, public_key=public_key)
         if is_new and self.on_peer_up is not None:
             self.on_peer_up(pkt.src, role)
+        # after on_peer_up: that hook resets the link to a default perfect
+        # score, which a returning-but-lossy neighbour must then correct
+        self._note_hello(pkt.src, fresh_link=is_new)
+
+    # -- link quality (section 8.2) ---------------------------------------------
+
+    def link_quality(self, neighbour_id: str, now: Optional[float] = None) -> Optional[float]:
+        """Fraction of the last ``LINK_QUALITY_WINDOW`` expected HELLOs from
+        ``neighbour_id`` that actually arrived, in [0, 1]; ``None`` if we
+        have never heard from it. While a neighbour is still new, fewer than
+        20 HELLOs have been *expected*, so the denominator is however many
+        have been due so far -- otherwise every fresh link would look lossy."""
+        first = self._first_heard.get(neighbour_id)
+        if first is None:
+            return None
+        now = time.monotonic() if now is None else now
+        window_s = LINK_QUALITY_WINDOW * self._hello_interval
+        expected = min(LINK_QUALITY_WINDOW, int((now - first) / self._hello_interval) + 1)
+        received = sum(1 for t in self._hello_times[neighbour_id] if now - t <= window_s)
+        return min(1.0, received / max(1, expected))
+
+    def _note_hello(self, neighbour_id: str, fresh_link: bool = False) -> None:
+        now = time.monotonic()
+        window_s = LINK_QUALITY_WINDOW * self._hello_interval
+        times = self._hello_times.get(neighbour_id)
+        if times is not None and now - times[-1] > window_s:
+            # silent for longer than the whole window: the old history says
+            # nothing about this link any more, so start counting afresh
+            del self._hello_times[neighbour_id]
+            del self._first_heard[neighbour_id]
+            times = None
+        if times is None:
+            times = self._hello_times[neighbour_id] = deque(maxlen=LINK_QUALITY_WINDOW * 2)
+        self._first_heard.setdefault(neighbour_id, now)
+        times.append(now)
+        if self.on_link_quality is None:
+            return
+        quality = self.link_quality(neighbour_id, now)
+        if quality is None:
+            return
+        # a link that has just (re)appeared starts from the default 1.0 the
+        # routing graph was reset to; otherwise compare against what we last said
+        baseline = 1.0 if fresh_link else self._reported_quality.get(neighbour_id, 1.0)
+        if abs(quality - baseline) >= LINK_QUALITY_REPORT_DELTA:
+            self._reported_quality[neighbour_id] = quality
+            self.on_link_quality(neighbour_id, quality)
+        elif fresh_link:
+            self._reported_quality[neighbour_id] = 1.0
+
+    def _expire_link_history(self) -> None:
+        """Bound memory: forget neighbours we haven't heard from in two windows."""
+        horizon = 2 * LINK_QUALITY_WINDOW * self._hello_interval
+        now = time.monotonic()
+        for neighbour_id in [n for n, t in self._hello_times.items() if t and now - t[-1] > horizon]:
+            self._forget_link_quality(neighbour_id)
+
+    def _forget_link_quality(self, neighbour_id: str) -> None:
+        self._hello_times.pop(neighbour_id, None)
+        self._first_heard.pop(neighbour_id, None)
+        self._reported_quality.pop(neighbour_id, None)

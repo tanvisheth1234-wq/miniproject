@@ -172,3 +172,36 @@ def test_context_manager_closes_connection():
         s.record_message(msg_id="m1", src="A", dst="B", priority=1, direction="sent", status="pending")
     with pytest.raises(Exception):
         s.get_message("m1")  # connection is closed
+
+
+def test_list_and_count_messages_filter_by_direction_and_status():
+    with Store() as store:
+        store.record_message("m1", "A", "B", 1, "sent", "delivered", created_ms=100)
+        store.record_message("m2", "A", "B", 0, "sent", "pending", created_ms=200)
+        store.record_message("m3", "C", "A", 1, "received", "delivered", created_ms=300)
+
+        assert [m["msg_id"] for m in store.list_messages()] == ["m3", "m2", "m1"]  # newest first
+        assert [m["msg_id"] for m in store.list_messages(direction="sent")] == ["m2", "m1"]
+        assert [m["msg_id"] for m in store.list_messages(status="delivered", limit=1)] == ["m3"]
+        assert store.count_messages() == 3
+        assert store.count_messages(direction="sent", status="pending") == 1
+
+
+def test_update_message_route_records_hops_and_path():
+    with Store() as store:
+        store.record_message("m1", "A", "D", 1, "sent", "pending")
+        assert store.update_message_route("m1", 2, ["B", "C"]) is True
+        row = store.get_message("m1")
+        assert row["hop_count"] == 2
+        assert row["path"] == "B,C"
+        assert store.update_message_route("unknown", 1, []) is False
+
+
+def test_events_since_returns_only_newer_events_in_order():
+    with Store() as store:
+        first = store.record_event("sent", msg_id="m1")
+        store.record_event("ack", msg_id="m1")
+        store.record_event("recv", msg_id="m2")
+        assert [e["kind"] for e in store.events_since(first)] == ["ack", "recv"]
+        assert store.events_since(0, limit=2)[0]["id"] == first
+        assert len(store.events_since(0, limit=2)) == 2

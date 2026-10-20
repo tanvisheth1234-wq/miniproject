@@ -133,6 +133,53 @@ class Store:
         rows = self._conn.execute("SELECT * FROM messages WHERE status = ?", (status,)).fetchall()
         return [dict(row) for row in rows]
 
+    def list_messages(
+        self,
+        direction: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> list[dict]:
+        """Newest first. Both filters are optional -- this is what the
+        message-history view and the aggregate stats read from."""
+        clauses, params = [], []
+        if direction is not None:
+            clauses.append("direction = ?")
+            params.append(direction)
+        if status is not None:
+            clauses.append("status = ?")
+            params.append(status)
+        sql = "SELECT * FROM messages"
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
+        sql += " ORDER BY created_ms DESC"
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
+        return [dict(row) for row in self._conn.execute(sql, params).fetchall()]
+
+    def count_messages(self, direction: Optional[str] = None, status: Optional[str] = None) -> int:
+        clauses, params = [], []
+        if direction is not None:
+            clauses.append("direction = ?")
+            params.append(direction)
+        if status is not None:
+            clauses.append("status = ?")
+            params.append(status)
+        sql = "SELECT COUNT(*) AS n FROM messages"
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
+        return self._conn.execute(sql, params).fetchone()["n"]
+
+    def update_message_route(self, msg_id: str, hop_count: int, path: list[str]) -> bool:
+        """Record how a message actually travelled once the sender learns
+        it (from the ACK that came back). False if ``msg_id`` is unknown."""
+        cur = self._conn.execute(
+            "UPDATE messages SET hop_count = ?, path = ? WHERE msg_id = ?",
+            (hop_count, ",".join(path), msg_id),
+        )
+        self._conn.commit()
+        return cur.rowcount > 0
+
     # -- events --------------------------------------------------------------------
 
     def record_event(
@@ -160,6 +207,14 @@ class Store:
     def events_by_kind(self, kind: str) -> list[dict]:
         rows = self._conn.execute(
             "SELECT * FROM events WHERE kind = ? ORDER BY ts_ms ASC", (kind,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def events_since(self, after_id: int = 0, limit: int = 500) -> list[dict]:
+        """Events with ``id > after_id``, oldest first -- lets a live view
+        (the API's WebSocket feed) catch up without re-reading everything."""
+        rows = self._conn.execute(
+            "SELECT * FROM events WHERE id > ? ORDER BY id ASC LIMIT ?", (after_id, limit)
         ).fetchall()
         return [dict(row) for row in rows]
 

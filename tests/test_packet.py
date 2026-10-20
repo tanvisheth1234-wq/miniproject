@@ -373,3 +373,24 @@ def test_identity_bytes_reflects_flags_as_currently_set():
     unsigned = make_packet(flags=0)
     flagged = make_packet(flags=FLAG_SIGNED)
     assert unsigned.identity_bytes() != flagged.identity_bytes()
+
+
+# --- attempt (retransmission counter, in the formerly reserved byte) --------------------
+
+def test_attempt_round_trips_through_the_reserved_byte():
+    pkt = make_packet(attempt=3)
+    data = pkt.pack()
+    assert data[51] == 3
+    assert Packet.unpack(data).attempt == 3
+
+
+def test_attempt_defaults_to_zero_and_is_range_checked():
+    assert make_packet().attempt == 0
+    with pytest.raises(PacketError):
+        make_packet(attempt=256).pack()
+
+
+def test_a_retransmission_keeps_its_signable_identity():
+    first, retry = make_packet(), None
+    retry = Packet(**{**first.__dict__, "attempt": 1})
+    assert first.identity_bytes() == retry.identity_bytes()
