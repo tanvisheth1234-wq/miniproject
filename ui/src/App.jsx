@@ -47,7 +47,7 @@ function EngineMenu() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const active = ENGINE.some((e) => pathname.startsWith(e.to))
-  useEffect(() => setOpen(false), [pathname])
+  useEffect(() => { setOpen(false) }, [pathname])
   return (
     <div className="relative" onMouseLeave={() => setOpen(false)}>
       <button
@@ -82,7 +82,7 @@ function EngineMenu() {
 function Header() {
   const [mobile, setMobile] = useState(false)
   const { pathname } = useLocation()
-  useEffect(() => setMobile(false), [pathname])
+  useEffect(() => { setMobile(false) }, [pathname])
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-6 px-5 sm:px-8">
@@ -125,7 +125,7 @@ function Footer() {
 
 function ScrollToTop() {
   const { pathname } = useLocation()
-  useEffect(() => window.scrollTo(0, 0), [pathname])
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
 
