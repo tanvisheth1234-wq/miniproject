@@ -1,0 +1,11 @@
+{
+  "_help": "One entry per device. For a real multi-laptop run replace each host with that laptop's Wi-Fi IP. 'links' says who can hear whom (range emulation).",
+  "nodes": {
+    "L1": {"label": "Trapped person", "role": "NORMAL",  "x": 0.08, "y": 0.50, "host": "127.0.0.1", "port": 9101, "web": 8101},
+    "L2": {"label": "Phone 2",        "role": "NORMAL",  "x": 0.38, "y": 0.20, "host": "127.0.0.1", "port": 9102, "web": 8102},
+    "L3": {"label": "Phone 3",        "role": "NORMAL",  "x": 0.38, "y": 0.80, "host": "127.0.0.1", "port": 9103, "web": 8103},
+    "L4": {"label": "Gateway",        "role": "GATEWAY", "x": 0.68, "y": 0.50, "host": "127.0.0.1", "port": 9104, "web": 8104},
+    "L5": {"label": "Rescue team",    "role": "RESCUE",  "x": 0.94, "y": 0.50, "host": "127.0.0.1", "port": 9105, "web": 8105}
+  },
+  "links": [["L1", "L2"], ["L1", "L3"], ["L2", "L4"], ["L3", "L4"], ["L4", "L5"]]
+}
