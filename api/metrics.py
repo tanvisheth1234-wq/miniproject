@@ -33,6 +33,15 @@ def _mean(values: list[float]) -> Optional[float]:
     return statistics.fmean(values) if values else None
 
 
+def _p95(values: list[float]) -> Optional[float]:
+    """95th percentile (inclusive method), for the tail-latency requirement."""
+    if not values:
+        return None
+    if len(values) == 1:
+        return values[0]
+    return statistics.quantiles(values, n=20, method="inclusive")[18]
+
+
 def receive_times(stores: Mapping[str, Store]) -> dict[str, int]:
     """msg_id -> the moment (ms) a destination handed it to the application."""
     out: dict[str, int] = {}
@@ -74,6 +83,7 @@ def compute_metrics(stores: Mapping[str, Store]) -> dict:
             "delivered": len(got_p),
             "median_latency_ms": _median(latency_by_priority[name]),
             "mean_latency_ms": _mean(latency_by_priority[name]),
+            "p95_latency_ms": _p95(latency_by_priority[name]),
         }
 
     sos_median = per_priority["SOS"]["median_latency_ms"]
@@ -101,6 +111,10 @@ def compute_metrics(stores: Mapping[str, Store]) -> dict:
         "by_priority": per_priority,
         "sos_latency_advantage": advantage,
         "retries": event_totals["retry"],
+        # data-plane overhead: every hop-by-hop transmission of a DATA packet
+        # (origin sends, relay forwards, retries and store-and-forward flushes);
+        # HELLO and link-state control traffic is not logged per packet
+        "transmissions": event_totals["sent"] + event_totals["forward"] + event_totals["retry"] + event_totals["sf_flush"],
         "store_forward_queued": event_totals["sf_queue"],
         "store_forward_flushed": event_totals["sf_flush"],
         "drops": {k.removeprefix("drop_"): event_totals[k] for k in _DROP_KINDS if event_totals[k]},

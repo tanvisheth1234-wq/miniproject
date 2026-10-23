@@ -13,3 +13,6 @@ build/
 .claude/
 node_modules/
 ui/dist/
+
+# report build output
+docs/report/latex/build/

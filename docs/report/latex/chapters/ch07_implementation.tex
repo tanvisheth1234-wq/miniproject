@@ -1,0 +1,56 @@
+\section{Implementation and Module-Wise Coding}
+\label{ch:impl}
+
+\subsection{Development Environment}
+The system is written in Python~3.10 with \texttt{asyncio}, the \texttt{cryptography} library and SQLite; the API uses FastAPI, uvicorn and pydantic; the web application uses React~18, Vite and Tailwind; testing uses pytest and pytest-asyncio; version control is Git on GitHub. Development and testing used Windows~11 laptops. The source is about 6\,500 lines of Python (\texttt{mesh/}, \texttt{api/}, \texttt{sim/}, \texttt{story/}), 4\,500 lines of tests and 3\,100 lines of React.
+
+\subsection{Overall Implementation Strategy}
+The build order followed what blocks what. \textbf{Phase~1:} the 52-byte packet and the \texttt{Transport} interface, so every track could work against a stable boundary. \textbf{Phase~2:} discovery, single-hop relay and the simulated transport, so that routing and reliability could be tested in one process. \textbf{Phase~3:} routing, reliability, security and storage, wired into \texttt{Node}. \textbf{Phase~4:} the API and React application, the scenario runner and metrics, engine fixes found by integration, and the multi-device deployment. Building the simulator first meant bugs were found deterministically in-process, not through live sockets.
+
+\subsection{Module-Wise Implementation}
+\label{sec:modules}
+Table~\ref{tab:impl} gives, for each module, its code reference (file and size), its purpose, input and output, processing logic, dependencies and test evidence.
+\begin{table}[!htbp]
+\caption{Modules: code reference, logic, dependencies and tests}
+\label{tab:impl}
+\scriptsize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}@{}}
+\toprule
+\textbf{Module (lines)} & \textbf{Purpose, input $\rightarrow$ output, processing, details} & \textbf{Depends on} & \textbf{Tests}\\ \midrule
+\texttt{mesh/core/packet.py} (362) & wire format, \texttt{Packet} $\leftrightarrow$ bytes. \texttt{struct} format asserted to be 52 bytes; every field range-checked; \texttt{unpack} rejects bad magic and truncation of each region; \texttt{remaining\_length} frames stream reads; \texttt{identity\_bytes} is the signed content & -- & 47 + 4\,000 fuzz\\
+transports (461) & bytes between neighbours: simulated (seeded loss, latency), multicast/TCP, and the multi-device \texttt{LanTransport} (Section~\ref{sec:lan}) & \texttt{packet} & 15 + 6\\
+\texttt{discovery.py} (292) & HELLOs $\rightarrow$ neighbour table, peer events, link quality over a 20-slot window reported only when it moves by 0.1; \texttt{visible\_neighbours} range emulation & \texttt{transport} & 15 + 12\\
+\texttt{relay.py} (153) & received packets $\rightarrow$ deliver, forward or drop (algorithm A4); one drain task over a priority queue & \texttt{reliability} & 18 + 3\\
+\texttt{routing.py} (546) & reports $\rightarrow$ graph, next hop. \texttt{MeshGraph}, \texttt{edge\_cost}, sequence-numbered gossip with quality, failures, role and key, cached Dijkstra, \texttt{RESCUE\_\_} terminals, hop-count switch for the comparison & \texttt{discovery} & 14 + 14 + 33\\
+\texttt{reliability.py} (240) & \texttt{DedupSet} (300\,s), \texttt{MessagePriorityQueue}, \texttt{AckTracker} (3 attempts), \texttt{StoreForwardQueue} (500 messages, 1800\,s) & \texttt{packet} & 18 + 20\\
+\texttt{crypto.py} (131) & AES-256-GCM with nonce prefix and associated data; Ed25519 sign and non-raising verify; one exception type & \texttt{cryptography} & 19\\
+\texttt{store.py} (258) & tables, WAL, upserts, event queries, \texttt{events\_since}, listing and counting for metrics & \texttt{sqlite3} & 23\\
+\texttt{node.py} (513) & composition root: \texttt{send()} encrypts, signs, logs, dispatches; receive verifies, decrypts, logs, ACKs; ACK loop records the failure, recomputes, resends; flush loop expires and retries & all above & 27\\
+\texttt{sim/}, \texttt{api/lab.py}, \texttt{api/metrics.py} (3\,000) & simulator with a virtual clock and seven scenarios; metrics read from node logs & \texttt{node} & 5 + 12\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Front-End Implementation}
+Two front ends use the same engine. The \textbf{engine web application} (\texttt{ui/}, a React PWA) has an overview, a six-beat live demo that drives the real API, a node view with a long-press SOS control, the rescue dashboard (d3-force graph, SOS queue, statistics), and pages for routing, reliability, protocol, security and the simulator; a manifest and service worker make it installable. The \textbf{device screens} (\texttt{story/node.html}) are one page that becomes a \emph{survivor phone}, a \emph{gateway} view or a \emph{rescue console} by role. The survivor screen is built to be read under stress: a plain status line, need chips and a location field, an SOS button that must be held about 1.2\,s (preventing accidental sends), a progress tracker with plain-language states, an explanation when a message is held, and nearby phones with signal strength. The rescue console shows SOS cards (sender, text, route, age, a NEW badge), counters, a network map highlighting the last message's path, a device list and an optional alert sound. Screens are shown in Section~\ref{sec:shots}.
+
+\subsection{Back-End Implementation}
+The back end is FastAPI with a WebSocket. The engine server (\texttt{api/server.py}) exposes the simulation lab (snapshot, reset, kill and revive, link edits, bursts), a node's view, graph and route (weighted and hop-count), \texttt{send} and \texttt{sos}, the rescue view, statistics, one message's full story, the event log, a protocol inspector, a security playground and attack drill, background scenario jobs, and \texttt{/ws}, which streams every logged event. Each device server (\texttt{story/node.py}) exposes \texttt{/api/me} (everything its screen needs), \texttt{/api/sos} and \texttt{/api/power}. Request bodies are validated with pydantic (text length, numeric ranges), and engine errors map to clear HTTP errors. The API reads the same objects and database as the engine.
+
+\subsection{Database Implementation}
+The three tables of Section~\ref{sec:db} are created with \texttt{CREATE TABLE IF NOT EXISTS}, WAL mode is set at connection time, and the two indexes are created with the schema. Queries used include retained messages by status (\texttt{SELECT * FROM messages WHERE status = ?}), a message's timeline (\texttt{SELECT * FROM events WHERE msg\_id = ? ORDER BY ts\_ms}), event counters (\texttt{SELECT COUNT(*) FROM events WHERE kind = ?}), and the upsert \texttt{INSERT \ldots ON CONFLICT(msg\_id) DO UPDATE}. Every write commits immediately.
+
+\subsection{Communication and Concurrency Implementation}
+\label{sec:lan}
+The original \texttt{UdpTcpTransport} could not carry a complete \texttt{Node}: it never learned a HELLO sender's address, and it reported the packet's \emph{original} source instead of the previous hop, which breaks link-state flooding. \texttt{lan\_transport.py} fixes both. A JSON \textbf{topology file} lists every device (role, host, port) and the links (who can hear whom); a device talks only to its configured neighbours, which is the range emulation of the honest statement and satisfies DIS-7, so no multicast is needed. Each connection starts with the previous hop's identity followed by the unmodified packet. Connect, drain and close are bounded by 1.5\,s so a dead laptop fails fast. A \textbf{power switch} makes a device neither send nor hear, like a dead radio. \texttt{python -m story.node --id L1} starts one device (engine plus a small web server); five of them, started together on one machine or one per laptop, form the mesh, each with its own SQLite log, port and screen. In the two-laptop demonstration L1--L3 ran on one laptop and L4--L5 on the other, joined through a phone hotspot (Figure~\ref{fig:deploy}). All of a node's activities share one thread, and \texttt{asyncio.wait\_for} was replaced by a cancellation-safe helper (Section~\ref{sec:defects}). Recovery is layered: TCP per hop; ACK, retry and re-route end to end; store-and-forward when retries run out.
+
+\subsection{Git Repository Setup}
+\label{sec:git}
+\textbf{Repository:} \url{\RepoURL}. \textbf{Structure:} \texttt{mesh/core/} (engine), \texttt{api/}, \texttt{sim/}, \texttt{story/}, \texttt{ui/}, \texttt{tests/}, \texttt{docs/}, \texttt{config/}, with README, CONTRIBUTING and requirements from the first phase. \textbf{Branching strategy:} one branch per phase, each inheriting the previous and never merged back (\texttt{develop}, \texttt{develop\_2}, \texttt{develop\_3}, \texttt{develop\_4}). \textbf{Commit conventions:} Conventional Commits (\texttt{feat(routing): \ldots}, \texttt{fix(reliability): \ldots}). \textbf{Contribution of members:} Tanvi Sheth built the packet format, transports, the API, the React application and the scenario runner, and the Phase~4 engine fixes found by integration; Miti Shah built discovery, the relay, the node skeleton and the simulated transport; Twissha Shah built routing, reliability, crypto and storage with their wiring into the node, the multi-device program and device screens, the robustness and socket tests, and the evidence scripts. \textbf{Evidence of development history:}
+\input{generated/git_stats.tex}
+
+\subsection{Integration of Modules}
+\texttt{Node} registers one dispatcher on the transport that feeds each packet to discovery (HELLO), gossip (LINK\_STATE) and relay (DATA, ACK); each ignores types it does not own. Callbacks connect the pieces: peer-up sets a one-hop route and a graph edge and logs the event; a topology change invalidates cached routes; relay hooks write the message and event log; the ACK loop reports failures to gossip so the cost reacts at once. The API reads the same objects and database, so nothing on screen is computed separately from the engine.
+
+\subsection{Implementation Challenges and Resolutions}
+The significant difficulties were: a single receive callback that let only one of discovery and relay hear packets; topology known only two hops out, with dead nodes still routable (fixed by sequence-numbered re-flooding and replacing a newer report's edges); signatures that failed after the first relay (fixed by signing identity fields only); ACKs and retries lost at relays (dedup now keyed on type, id and attempt); a hostile packet raising \texttt{UnicodeDecodeError}; a hang in \texttt{Node.stop()} on Windows; and a transport that could not run a full node (fixed by \texttt{LanTransport}). Each was found by an integration, fuzz or repeated-run test and is listed with its cause and retest in Table~\ref{tab:defects}.

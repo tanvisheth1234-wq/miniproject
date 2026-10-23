@@ -1,0 +1,36 @@
+\section{Software Requirements Specification}
+\label{ch:srs}
+
+\subsection{Purpose and Scope of the SRS}
+This chapter condenses the IEEE 830 Software Requirements Specification delivered in Phase~II (\texttt{docs/SRS\_EcoMesh\_Group20.pdf}). It states \emph{what} EcoMesh must do, not how. The scope is a single deployment of cooperating nodes with ten system features (peer discovery, message composition, multi-hop forwarding, adaptive routing, priority handling, reliability, store-and-forward, message security, logging, rescue dashboard); no server exists in any operating mode.
+
+\subsection{Intended Users and Stakeholders}
+The \emph{trapped user} originates an SOS or a message and needs one prominent control and no configuration. The \emph{relay user} passively carries other people's traffic and must not be able to read it. The \emph{gateway operator} holds the residual outside link. The \emph{rescue coordinator} monitors the SOS queue, the topology and delivery statistics. The \emph{administrator} assigns node identifiers and constrains who hears whom. The project guide and evaluators review scope, rigour and evidence.
+
+\subsection{Overall Product Description}
+Every node runs the same program. HELLO beacons build a neighbour table; link-state reports build a graph; Dijkstra selects next hops; a per-hop priority queue orders transmissions; ACK, retry, deduplication and store-and-forward give reliability; AES-256-GCM and Ed25519 give confidentiality and authenticity; and an embedded web server exposes the node to a browser. The operating environment is an IP network segment on which infrastructure services have failed; where multicast is blocked a configured peer list is used (DIS-7). Dependencies are the Python runtime and the \texttt{cryptography} library.
+
+\subsection{Functional Requirements}
+\label{sec:fr}
+The 68 functional requirements are listed in Table~\ref{tab:fr}. Each has a unique identifier, its text, and an acceptance criterion: the tests that must pass (and, for screens, a manual check). Each feature's input, processing and output are given in the feature's heading row.
+\input{generated/fr_table.tex}
+
+\subsection{Non-Functional Requirements}
+\label{sec:nfr}
+\begin{itemize}
+\item \textbf{Performance:} at least 90\,\% delivery on a forty-node network with 20\,\% packet loss; convergence of the topology view within 15\,s; delivery resumed within 10\,s of a node failure; an SOS measurably faster than routine traffic under load.
+\item \textbf{Scalability:} at least fifty nodes without degradation beyond these targets and without configuration changes to existing nodes.
+\item \textbf{Availability and reliability:} no single point of failure; correct operation under packet loss, node failure and partition; no message discarded while retention capacity remains.
+\item \textbf{Security and privacy:} payloads encrypted; relays cannot read them; tampering detected; a forged SOS rejected; every packet field validated; private keys never transmitted; plaintext stored only on the originator and destination.
+\item \textbf{Usability and accessibility:} the emergency action is one prominent control requiring a sustained press; no end-user configuration; plain-language status text and a state change visible within 2\,s.
+\item \textbf{Maintainability, portability and resources:} independent modules for each concern; the engine is independent of the link technology, so another transport replaces the current one unchanged; one process on one event-loop thread with an embedded database and bounded queues (measured in Chapter~\ref{ch:perf}).
+\end{itemize}
+
+\subsection{Hardware and Software Requirements}
+\textbf{Hardware:} laptops (Windows~11 used for development and testing) on a Wi-Fi network or phone hotspot; no server. \textbf{Software:} Python~3.10 with \texttt{asyncio}; \texttt{cryptography}~42 (AES-256-GCM, Ed25519); SQLite in WAL mode; FastAPI, uvicorn, pydantic and \texttt{websockets} for the API; React~18, Vite~6, Tailwind~4 and d3-force for the web application (with a manifest and service worker so it installs as a PWA); pytest, pytest-asyncio and httpx for testing; Git and GitHub for version control.
+
+\subsection{Constraints and Assumptions}
+\textbf{Constraints:} one semester (phases from 17~August to 2~November 2026); three members; no radio hardware, so the radio link is emulated by a neighbour-restricted LAN; scale about 50 nodes; no machine learning and no native mobile application. \textbf{Assumptions:} the software is installed before an incident; every device is within range of another, directly or through intermediaries; batteries last the incident; at least one gateway or an arriving rescue node exists for messages to leave the mesh; node identifiers are unique and assigned in advance.
+
+\subsection{Use Cases and User Stories}
+\textbf{UC1:} as a trapped user I hold the SOS control so that rescuers learn I need help; the system sends the highest-priority message and shows its live status. \textbf{UC2:} as a trapped user with no route I want my message kept; it is retained, flushed when a path appears, and the screen says it is held. \textbf{UC3:} as a relay user I want to help without reading others' messages; the node forwards automatically and the payload is opaque to it. \textbf{UC4:} as a gateway operator I want to be an exit point; the node advertises the gateway role. \textbf{UC5:} as a rescue coordinator I want the SOS queue ordered by priority then age, with route and age, and the live topology. \textbf{UC6:} as an administrator I want to restrict who hears whom through a topology file. The use case diagram is Figure~\ref{fig:usecase}.

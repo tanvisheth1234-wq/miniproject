@@ -1,0 +1,13 @@
+\begin{table}[H]
+\caption{Live devices: end-to-end SOS latency over mesh.json (5 processes, real TCP, real timers; polling error $\le$ 20\,ms)}
+\label{tab:livelat}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.388\textwidth}>{\raggedleft\arraybackslash}p{0.136\textwidth}>{\raggedleft\arraybackslash}p{0.136\textwidth}>{\raggedleft\arraybackslash}p{0.116\textwidth}>{\raggedleft\arraybackslash}p{0.136\textwidth}@{}}
+\toprule
+\textbf{Measurement} & \textbf{Median (ms)} & \textbf{95th pct (ms)} & \textbf{Max (ms)} & \textbf{Completed} \\ \midrule
+SOS arrives at the rescue device & 47 & 102 & 281 & 30/30 \\
+ACK back at the sender & 63 & 149 & 297 & 30/30 \\
+\bottomrule
+\end{tabular}
+\end{table}

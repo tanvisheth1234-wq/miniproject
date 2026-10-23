@@ -1,0 +1,56 @@
+\section{Introduction and Problem Definition}
+\label{ch:intro}
+
+\subsection{Project Background}
+After an earthquake, fire or building collapse, cellular towers and internet links are unavailable or overwhelmed, yet connectivity is rarely zero: it survives in pockets (one person near a window with a bar of signal, a UPS-powered access point, a rescue team's own equipment) and normally helps only the person holding it. \textbf{EcoMesh} makes every participating device an endpoint \emph{and} a relay, so a message hops from device to device until it reaches its destination, a \emph{gateway} with an outside link, or a \emph{rescue} device, with no internet and no server. The project comprises a complete engine (discovery, routing, reliability, security, storage), a simulator that measures it, a web interface for survivors and rescue coordinators, and a deployment in which every device is a separate process exchanging bytes only over TCP.
+
+\subsection{Problem Statement}
+WhatsApp, Signal, Telegram and SMS all need a message to reach a server or tower elsewhere; a Wi-Fi router with a cut uplink breaks every one of them although the devices on it can still reach each other. People trapped in a building therefore cannot signal their condition, share the one weak signal, coordinate, or be located efficiently. Existing offline systems flood or use hop-count routing, offer no message priority, publish little measurement, and in one widely used case lacked effective confidentiality and authenticity~\cite{albrecht2021bridgefy} (Chapter~\ref{ch:lit}).
+
+\subsection{Motivation}
+Rescue is time-critical: survival depends on how fast rescuers learn that someone is there, where and in what condition. A system that makes one person's connectivity serve everyone and lets an SOS overtake routine traffic at every hop shortens that time. Beneficiaries are trapped occupants, rescue teams, and institutions (hospitals, campuses, hostels, factories, stadiums) that could pre-deploy it. The problem also exercises graph algorithms, concurrency, networking, cryptography and databases together and can be evaluated under controlled failure.
+
+\subsection{Objectives}
+O1 \emph{Self-organising mesh}: neighbours found automatically, every node learns the whole graph (convergence $\le$ 15\,s). O2 \emph{Weighted routing} that beats hop count on identical scenarios. O3 \emph{Priority}: SOS overtakes routine traffic at every hop ($\ge$ 3$\times$ lower median latency under load). O4 \emph{Reliability}: $\ge$ 90\,\% delivery on 40 nodes at 20\,\% loss and recovery within 10\,s of a relay failure. O5 \emph{Store-and-forward}: no route means retained, never dropped (100\,\% flushed). O6 \emph{Security}: confidential, tamper-evident payloads; forged SOS rejected. O7 \emph{Evidence}: every metric is a query over per-node logs. O8 \emph{Integration}: web front end, REST/WebSocket back end and engine running on several devices.
+
+\subsection{Scope of the Project}
+\textbf{Included:} discovery with a neighbour table; a binary wire protocol; link-state gossip; Dijkstra over a link-quality cost; per-hop priority queue; TTL, dedup, ACK/retry with re-route, heartbeat; roles NORMAL, GATEWAY, RESCUE; bounded store-and-forward; AES-256-GCM and Ed25519; per-node SQLite log; \texttt{asyncio} concurrency; simulator and metrics; survivor and rescue interfaces. \textbf{Excluded:} real Bluetooth LE / Wi-Fi Direct transport, NAT traversal, voice/video/files, scale beyond about 50 nodes, machine learning, a native mobile app. \textbf{Users:} trapped user, relay user, gateway operator, rescue coordinator. \textbf{Environment and scale:} laptops running Python~3.10 on a shared network; 5 live devices and up to 65 simulated nodes. The following statement is repeated verbatim because it is a design decision, not an omission:
+\begin{quote}\itshape
+The mesh currently runs over LAN sockets, which stand in for Bluetooth Low Energy or Wi-Fi Direct. On LAN we restrict each node's visible neighbour set to emulate limited radio range. This lets us develop and measure the routing, prioritisation and reliability logic without radio hardware. Discovery, routing, reliability and encryption are all transport-agnostic --- replacing LAN sockets with a radio transport does not change any layer above it.
+\end{quote}
+
+\subsection{Proposed Solution}
+Each device runs one node (a Python process whose \texttt{asyncio} loop runs discovery, link-state gossip, receive, send, store-and-forward and an API server). A message leaves through one of three exits: a \textbf{gateway} with an outside link (reaching any gateway counts as arrival); a \textbf{rescue} device that comes into range (every pending SOS flows in); or \textbf{store-and-forward}, where a node with no route keeps the message until one appears, so a person walking out of the building physically carries others' messages. Paths are chosen by Dijkstra over a graph whose edge weights penalise weak and failing links (Chapter~\ref{ch:alg}).
+
+\subsection{Novelty and Originality}
+A \textbf{priority-aware, link-quality-weighted mesh with a delay-tolerant fallback, evaluated empirically}: SOS priority re-applied at every hop; cost derived from measured HELLO reception and from ACK failures, applied immediately; one transport interface so the same engine runs on a simulator, on loopback and on separate laptops; and every number is a query over per-node logs, with weighted and hop-count routing compared on identical seeds.
+
+\subsection{Feasibility Analysis}
+\textbf{Technical:} mature open-source components; the main risk (debugging routing over live sockets) was removed by building the simulator first. \textbf{Economic:} existing laptops, open-source software, no server, so there is no recurring cost. \textbf{Operational:} one command starts a node; the survivor screen has one prominent control. \textbf{Time/resources:} three members, one semester, about 336 person-hours, delivered in four tagged phases.
+
+\subsection{Social Relevance and Practical Applications}
+The realistic adoption path is \emph{institutional pre-deployment}, not consumer download: hospitals, campuses, hostels, factories and stadiums install it on staff and resident devices as safety compliance; rescue and civil-defence teams carry it as standard kit so the rescue exit works even if no civilian has it; and it can ship as a module inside an app people already have. The benefit is faster location of survivors and coordination inside a stricken building at no infrastructure cost.
+
+\subsection{Success Criteria and Key Performance Indicators}
+\label{sec:kpi}
+The targets of Table~\ref{tab:kpi} are the quantified requirements of the SRS, fixed before testing; Section~\ref{sec:kpival} validates them against measured data.
+\begin{table}[!htbp]
+\caption{Key performance indicators}
+\label{tab:kpi}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+\textbf{KPI} & \textbf{Definition} & \textbf{Target} & \textbf{Measured by}\\ \midrule
+K1 Delivery & Delivered $\div$ sent, 40 nodes, 20\,\% loss & $\ge$ 90\,\% & seeded simulator runs\\
+K2 Convergence & Every node's graph holds every node & $\le$ 15\,s & simulator, live\\
+K3 Recovery & Relay death until a route avoiding it & $\le$ 10\,s & 50 trials, live\\
+K4 SOS advantage & Median routine $\div$ median SOS latency under load & $\ge$ 3$\times$ & burst scenario\\
+K5 Store-and-forward & Retained messages flushed on return & 100\,\% & simulator, live\\
+K6 Weighted vs hop count & Delivery on identical seeds & weighted better & paired runs\\
+K7 Scale & Nodes within the targets & $\ge$ 50 & sweep 10--65 nodes\\
+K8 UI freshness & Event to screen & $\le$ 2\,s & API time, poll interval\\
+K9 Correctness & Tests passed & 100\,\% & repeated runs\\
+K10 Security & No relay decryption; forged SOS and tampering rejected & all hold & automated tests\\
+\bottomrule
+\end{tabularx}
+\end{table}

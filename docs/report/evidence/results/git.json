@@ -1,0 +1,32 @@
+{
+  "commits": 45,
+  "per_member": {
+    "Twissha Shah": 24,
+    "Tanvi Sheth": 19,
+    "Miti Shah": 2
+  },
+  "per_identity": {
+    "twissha0206 <twisshashah@gmail.com>": 24,
+    "tanvi-sheth2006 <tanvisheth1964@gmail.com>": 18,
+    "Delta Student <miti2109@gmail.com>": 2,
+    "tanvisheth1234-wq <tanvisheth1234@gmail.com>": 1
+  },
+  "conventional": 40,
+  "non_conventional": [
+    "phase 2 final",
+    "phase-2",
+    "Update UDP transport",
+    "xyz",
+    "Add project title to README"
+  ],
+  "branches": [
+    "main",
+    "develop",
+    "develop_2",
+    "develop_3",
+    "develop_4"
+  ],
+  "tags": [
+    "v0.3-phase3"
+  ]
+}

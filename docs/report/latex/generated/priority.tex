@@ -1,0 +1,14 @@
+\begin{table}[H]
+\caption{Latency by priority under load (16 nodes, one packet per 80\,ms radio, 90 messages of which 15\,\% are SOS, all to the same destination; mean over 20 runs of the per-run statistic)}
+\label{tab:priority}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.232\textwidth}>{\raggedleft\arraybackslash}p{0.232\textwidth}>{\raggedleft\arraybackslash}p{0.232\textwidth}>{\raggedleft\arraybackslash}p{0.232\textwidth}@{}}
+\toprule
+\textbf{Priority} & \textbf{Median latency (ms)} & \textbf{95th percentile (ms)} & \textbf{Delivered per run} \\ \midrule
+SOS & 547 & 1034 & 9.5 \\
+NORMAL & 2198 & 6145 & 49.2 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize Median SOS advantage (median NORMAL $/$ median SOS): 4.4$\times$. Only this scenario sends both priorities on the same trip, so only here is the comparison fair.
+\end{table}

@@ -1,0 +1,15 @@
+\begin{table}[H]
+\caption{Engine throughput: simultaneous sends over a 3-node line (A$\rightarrow$B$\rightarrow$C, ACK requested, in-memory transport, real clock)}
+\label{tab:throughput}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedleft\arraybackslash}p{0.132\textwidth}>{\raggedleft\arraybackslash}p{0.132\textwidth}>{\raggedleft\arraybackslash}p{0.132\textwidth}>{\raggedleft\arraybackslash}p{0.132\textwidth}>{\raggedleft\arraybackslash}p{0.184\textwidth}>{\raggedleft\arraybackslash}p{0.184\textwidth}@{}}
+\toprule
+\textbf{Messages} & \textbf{Delivered} & \textbf{ACKed} & \textbf{Delivery (s)} & \textbf{Until all ACKed (s)} & \textbf{Delivered per second} \\ \midrule
+100 & 100 & 100 & 0.04 & 0.07 & 2544 \\
+500 & 500 & 500 & 0.21 & 0.35 & 2421 \\
+1000 & 1000 & 1000 & 0.41 & 0.85 & 2441 \\
+2000 & 2000 & 2000 & 1.28 & 2.74 & 1561 \\
+\bottomrule
+\end{tabular}
+\end{table}

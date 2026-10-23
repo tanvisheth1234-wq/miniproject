@@ -1,0 +1,14 @@
+\begin{table}[H]
+\caption{Sample rows of \texttt{messages} for one SOS from A to C in a real run: each node holds its own view of the same message id}
+\label{tab:samples}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llllllllll@{}}
+\toprule
+\textbf{DB} & \textbf{msg\_id} & \textbf{src} & \textbf{dst} & \textbf{prio} & \textbf{direction} & \textbf{status} & \textbf{body} & \textbf{hops} & \textbf{path} \\ \midrule
+A & 8e859198... & A & C & 0 & sent & delivered & trapped on floor 3 & 1 & B \\
+B & 8e859198... & A & C & 0 & forwarded & delivered & NULL & 1 & B \\
+C & 8e859198... & A & C & 0 & received & delivered & trapped on floor 3 & 1 & B \\
+\bottomrule
+\end{tabular}
+\end{table}

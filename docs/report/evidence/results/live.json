@@ -1,0 +1,186 @@
+{
+  "devices": 5,
+  "config": "mesh.json",
+  "started_locally": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5"
+  ],
+  "startup_to_full_convergence_s": 3.81,
+  "route_sender_to_rescue": [
+    "L1",
+    "L2",
+    "L4",
+    "L5"
+  ],
+  "idle": {
+    "seconds": 20.3,
+    "per_process": {
+      "L1": {
+        "working_set_mb": 53.2,
+        "cpu_percent_of_one_core": 0.92
+      },
+      "L2": {
+        "working_set_mb": 53.3,
+        "cpu_percent_of_one_core": 0.85
+      },
+      "L3": {
+        "working_set_mb": 53.3,
+        "cpu_percent_of_one_core": 1.38
+      },
+      "L4": {
+        "working_set_mb": 53.5,
+        "cpu_percent_of_one_core": 1.85
+      },
+      "L5": {
+        "working_set_mb": 53.7,
+        "cpu_percent_of_one_core": 0.38
+      }
+    }
+  },
+  "sos_latency_ms": {
+    "arrive_at_rescue": {
+      "n": 30,
+      "median": 46.999999998661224,
+      "p95": 101.79999999854768,
+      "max": 281.00000000267755,
+      "mean": 59.866666666493984
+    },
+    "ack_back_at_sender": {
+      "n": 30,
+      "median": 62.999999998282874,
+      "p95": 149.34999999932182,
+      "max": 296.9999999986612,
+      "mean": 77.60000000004463
+    },
+    "sent": 30,
+    "delivered": 30,
+    "acked": 30
+  },
+  "under_load": {
+    "seconds": 2.3,
+    "per_process": {
+      "L1": {
+        "working_set_mb": 54.2,
+        "cpu_percent_of_one_core": 14.09
+      },
+      "L2": {
+        "working_set_mb": 53.3,
+        "cpu_percent_of_one_core": 10.74
+      },
+      "L3": {
+        "working_set_mb": 53.3,
+        "cpu_percent_of_one_core": 1.34
+      },
+      "L4": {
+        "working_set_mb": 53.5,
+        "cpu_percent_of_one_core": 14.09
+      },
+      "L5": {
+        "working_set_mb": 54.8,
+        "cpu_percent_of_one_core": 18.79
+      }
+    }
+  },
+  "api_me_response_ms": {
+    "n": 200,
+    "median": 15.999999995983671,
+    "p95": 31.000000002677552,
+    "max": 31.9999999992433,
+    "mean": 15.0
+  },
+  "failover": {
+    "trials": [
+      {
+        "victim": "L2",
+        "reroute_s": 3.9690000000045984,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L3",
+        "reroute_s": 3.9530000000013388,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L2",
+        "reroute_s": 3.8280000000013388,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L2",
+        "reroute_s": 4.453000000001339,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L3",
+        "reroute_s": 3.9689999999973224,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L3",
+        "reroute_s": 4.25,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L2",
+        "reroute_s": 3.7969999999986612,
+        "delivered_after_failure": true
+      },
+      {
+        "victim": "L2",
+        "reroute_s": 4.3439999999973224,
+        "delivered_after_failure": true
+      }
+    ],
+    "reroute_s": {
+      "n": 8,
+      "median": 3.9690000000009604,
+      "p95": 4.414849999999933,
+      "max": 4.453000000001339,
+      "mean": 4.07037500000024
+    },
+    "all_delivered": true
+  },
+  "store_and_forward": {
+    "trials": [
+      {
+        "held_before_restore": 5,
+        "all_five_delivered": true,
+        "seconds_to_flush": 1.6869999999980791
+      },
+      {
+        "held_before_restore": 5,
+        "all_five_delivered": true,
+        "seconds_to_flush": 6.140999999995984
+      },
+      {
+        "held_before_restore": 5,
+        "all_five_delivered": true,
+        "seconds_to_flush": 4.75
+      },
+      {
+        "held_before_restore": 5,
+        "all_five_delivered": true,
+        "seconds_to_flush": 4.203000000001339
+      }
+    ],
+    "seconds_to_flush": {
+      "n": 4,
+      "median": 4.476500000000669,
+      "p95": 5.932349999996585,
+      "max": 6.140999999995984,
+      "mean": 4.19524999999885
+    },
+    "flush_rate": 1.0
+  },
+  "timing": {
+    "hello_interval_s": 1.0,
+    "neighbour_timeout_s": 4.0,
+    "link_state_interval_s": 2.0,
+    "ack_timeout_s": 3.0,
+    "max_retries": 3,
+    "sf_retry_interval_s": 3.0
+  }
+}

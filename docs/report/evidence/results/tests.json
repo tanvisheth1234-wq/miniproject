@@ -1,0 +1,3460 @@
+{
+  "repeats": 3,
+  "runs": [
+    {
+      "run": 1,
+      "wall_s": 22.4,
+      "exit_code": 0,
+      "summary": "312 passed, 1 warning in 21.66s"
+    },
+    {
+      "run": 2,
+      "wall_s": 22.8,
+      "exit_code": 0,
+      "summary": "312 passed, 1 warning in 22.01s"
+    },
+    {
+      "run": 3,
+      "wall_s": 22.2,
+      "exit_code": 1,
+      "summary": "1 failed, 311 passed, 1 warning in 21.55s"
+    }
+  ],
+  "cases": [
+    {
+      "file": "test_ack_multihop",
+      "name": "test_ack_returns_over_the_path_the_data_took",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.733
+    },
+    {
+      "file": "test_ack_multihop",
+      "name": "test_a_lost_ack_is_re_sent_when_the_sender_retries",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.021
+    },
+    {
+      "file": "test_ack_multihop",
+      "name": "test_a_retry_crosses_relays_that_already_forwarded_the_original",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.01
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_acknowledge_before_timeout_clears_pending",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_acknowledge_unknown_msg_id_returns_false",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_no_timeout_before_deadline",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_timeout_triggers_retry_and_resets_timer",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_exhausting_max_retries_reports_failed_and_stops_tracking",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_multiple_pending_sends_tracked_independently",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_enqueue_and_all",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_remove_clears_entry",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_remove_unknown_id_is_a_no_op",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_enqueue_same_msg_id_twice_does_not_duplicate",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_multiple_queued_messages_independent",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_enqueue_under_the_bound_evicts_nothing",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_enqueue_over_the_bound_evicts_lowest_priority",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_eviction_never_displaces_sos_for_routine_traffic",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_eviction_ties_broken_by_oldest_first",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_default_max_count_matches_design_of_algorithms_c_max",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_expire_removes_messages_older_than_max_age",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_expire_returns_empty_when_nothing_is_stale",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_expire_applies_regardless_of_priority",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_ack_retry",
+      "name": "test_default_max_age_matches_design_of_algorithms_t_hold",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_api",
+      "name": "test_snapshot_describes_a_converged_mesh",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.453
+    },
+    {
+      "file": "test_api",
+      "name": "test_presets_and_scenarios_are_listed",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.011
+    },
+    {
+      "file": "test_api",
+      "name": "test_sos_reaches_the_rescue_queue_and_the_sender_sees_it_delivered",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.428
+    },
+    {
+      "file": "test_api",
+      "name": "test_node_view_reports_peers_with_hop_distance",
+      "status": "flaky",
+      "results": [
+        "passed",
+        "passed",
+        "failed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_api",
+      "name": "test_route_compare_returns_both_routers",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.004
+    },
+    {
+      "file": "test_api",
+      "name": "test_bad_requests_get_clear_errors",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.01
+    },
+    {
+      "file": "test_api",
+      "name": "test_killing_a_node_reroutes_and_reviving_restores_it",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.41
+    },
+    {
+      "file": "test_api",
+      "name": "test_websocket_streams_a_hello_snapshot_then_events",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.099
+    },
+    {
+      "file": "test_api",
+      "name": "test_protocol_inspector_builds_and_parses_real_packets",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.019
+    },
+    {
+      "file": "test_api",
+      "name": "test_security_playground_round_trips_and_detects_tampering",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.009
+    },
+    {
+      "file": "test_api",
+      "name": "test_attack_drill_defends_every_attack",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.83
+    },
+    {
+      "file": "test_api",
+      "name": "test_reset_swaps_the_preset_and_security_options",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.601
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_generate_session_key_is_32_bytes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_encrypt_decrypt_round_trip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_ciphertext_is_nonce_prefixed_per_section_7_2",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_ciphertext_does_not_contain_plaintext",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_two_encryptions_of_same_plaintext_differ",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_decrypt_with_wrong_key_fails",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_tampered_ciphertext_fails_gcm_tag_check",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_decrypt_rejects_input_shorter_than_nonce",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_encrypt_rejects_wrong_key_size",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_associated_data_must_match_on_decrypt",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_associated_data_matching_succeeds",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_generate_keypair_public_bytes_is_32",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_sign_verify_round_trip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_verify_fails_for_tampered_message",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_verify_fails_for_wrong_public_key_forged_sos",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_verify_never_raises_on_garbage_signature",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_verify_rejects_wrong_length_signature",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_load_public_key_round_trip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_crypto",
+      "name": "test_load_public_key_rejects_wrong_size",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_shortest_path_direct_neighbour",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_shortest_path_multi_hop_chain",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_unreachable_destination_returns_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_path_to_self_has_no_next_hop",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_weighted_routing_avoids_lossy_shortcut",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_recent_failures_also_penalise_a_link",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_equal_quality_prefers_fewer_hops",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_rescue_dst_resolves_to_nearest_gateway",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_rescue_dst_picks_cheapest_of_multiple_gateways",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_rescue_dst_none_when_no_gateway_reachable",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_normal_node_role_not_treated_as_terminal",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_self_as_gateway_resolves_trivially",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_route_is_cached_until_invalidated",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_dijkstra",
+      "name": "test_set_role_invalidates_cache",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_update_reports_new_neighbour_once",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_prune_removes_only_stale_neighbours",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_get_and_snapshot",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_hello_is_broadcast_on_start",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.13
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_neighbour_added_on_hello_received",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.133
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_own_hello_not_added_as_neighbour",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.122
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_non_hello_packet_ignored",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.016
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_on_peer_up_fires_once_for_new_neighbour",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.191
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_neighbour_marked_dead_after_timeout",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.226
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_visible_neighbours_filters_unlisted_senders",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_hello_includes_public_key_when_configured",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.064
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_hello_omits_public_key_when_not_configured",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.067
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_neighbour_table_learns_public_key_from_hello",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.069
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_neighbour_public_key_is_none_when_peer_has_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.018
+    },
+    {
+      "file": "test_discovery",
+      "name": "test_stop_cancels_background_tasks",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.065
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_receiver_sees_the_previous_hop_not_the_packet_source",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.133
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_sending_to_a_non_neighbour_is_refused",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.027
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_switched_off_device_neither_sends_nor_hears",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.224
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_unknown_previous_hop_and_garbage_are_ignored_and_listener_survives",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.219
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_sending_to_a_dead_peer_fails_fast_with_transport_error",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.519
+    },
+    {
+      "file": "test_lan_transport",
+      "name": "test_full_node_mesh_over_real_tcp_discovers_routes_and_delivers_with_ack",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.867
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_unknown_neighbour_has_no_link_quality",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_a_new_link_is_not_penalised_for_hellos_not_yet_due",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_perfect_reception_scores_one",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_losing_every_other_hello_scores_about_half",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_quality_change_is_reported_only_when_it_moves_enough",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_forgetting_a_neighbour_resets_its_history",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_weighted_routing_avoids_the_flaky_short_path",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_hop_count_routing_takes_the_flaky_short_path",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_node_exposes_the_hop_count_switch",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_a_flapping_link_keeps_its_history_instead_of_resetting_to_perfect",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_a_long_silence_starts_the_estimate_afresh",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_quality",
+      "name": "test_a_returning_lossy_neighbour_is_reported_even_if_it_was_already_reported_before",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_encode_decode_round_trip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_decode_empty_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_decode_rejects_truncated_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_role_round_trips_for_all_roles",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_encode_caps_failures_at_255",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_public_key_round_trips",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_no_public_key_decodes_as_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_send_report_reaches_each_neighbour",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.022
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_send_report_syncs_own_direct_edges_into_graph",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_send_report_uses_recorded_quality_and_failures",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.024
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_record_failure_updates_graph_immediately_not_just_on_next_report",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_record_link_quality_updates_graph_immediately",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_record_failure_invalidates_cached_routes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_stale_own_edge_removed_when_neighbour_drops_out",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_receiving_report_merges_reported_edges_into_graph",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_receiving_report_teaches_learned_role",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_receiving_report_teaches_learned_public_key",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_unknown_public_key_does_not_fire_on_public_key_learned",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_send_report_includes_public_key_from_provider",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_send_report_includes_role_from_role_provider",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_on_topology_change_fires_when_graph_actually_changes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_dated_report_round_trip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_decode_dated_report_rejects_too_short_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_report_is_reflooded_to_other_neighbours",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_report_reflooded_reaches_a_node_two_hops_away",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.004
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_stale_report_is_not_reflooded_or_remerged",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.024
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_own_report_looped_back_is_ignored",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_non_link_state_packet_ignored",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_forget_neighbour_removes_from_graph_and_own_report",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_two_nodes_converge_on_each_others_graph_view",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.023
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_a_newer_report_removes_links_the_origin_no_longer_has",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.027
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_a_dead_node_stops_being_reachable_once_its_neighbours_stop_reporting_it",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_link_state",
+      "name": "test_reachable_from_follows_edge_direction",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_node",
+      "name": "test_discovery_and_relay_both_work_on_the_same_node",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.101
+    },
+    {
+      "file": "test_node",
+      "name": "test_message_to_discovered_neighbour_delivers_without_manual_next_hop",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.112
+    },
+    {
+      "file": "test_node",
+      "name": "test_middle_node_auto_relays_across_a_chain",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.104
+    },
+    {
+      "file": "test_node",
+      "name": "test_route_forgotten_when_neighbour_dies",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.233
+    },
+    {
+      "file": "test_node",
+      "name": "test_neighbours_property_matches_discovery_table",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.08
+    },
+    {
+      "file": "test_node",
+      "name": "test_router_forwards_beyond_direct_neighbours_via_gossip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.277
+    },
+    {
+      "file": "test_node",
+      "name": "test_node_originates_a_message_three_hops_away_via_reflooded_gossip",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.366
+    },
+    {
+      "file": "test_node",
+      "name": "test_rescue_dst_routes_to_gateway_across_multiple_hops",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.257
+    },
+    {
+      "file": "test_node",
+      "name": "test_send_without_route_queues_to_store_forward",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.004
+    },
+    {
+      "file": "test_node",
+      "name": "test_send_with_ack_delivers_and_gets_acknowledged",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.172
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_logs_sent_message_and_delivery_lifecycle",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.178
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_logs_forward_on_middle_node",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.234
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_logs_peer_up_and_down",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.214
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_logs_drop_reason",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.047
+    },
+    {
+      "file": "test_node",
+      "name": "test_encrypted_payload_decrypts_correctly_at_destination",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.166
+    },
+    {
+      "file": "test_node",
+      "name": "test_relay_never_sees_plaintext_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.231
+    },
+    {
+      "file": "test_node",
+      "name": "test_wrong_session_key_is_rejected_not_delivered",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.151
+    },
+    {
+      "file": "test_node",
+      "name": "test_no_key_configured_drops_encrypted_message",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.167
+    },
+    {
+      "file": "test_node",
+      "name": "test_ack_never_arriving_exhausts_retries_and_queues_for_store_forward",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.148
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_forward_flushes_once_a_route_appears",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.169
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_forward_evicts_lowest_priority_when_queue_is_full",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.018
+    },
+    {
+      "file": "test_node",
+      "name": "test_store_forward_expires_messages_past_max_age",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.161
+    },
+    {
+      "file": "test_node",
+      "name": "test_signed_message_verifies_and_delivers_one_hop",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.18
+    },
+    {
+      "file": "test_node",
+      "name": "test_signature_survives_multi_hop_relay_and_verifies_at_destination",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.358
+    },
+    {
+      "file": "test_node",
+      "name": "test_forged_signature_is_rejected_not_delivered",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.143
+    },
+    {
+      "file": "test_node",
+      "name": "test_unknown_signer_is_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.034
+    },
+    {
+      "file": "test_node",
+      "name": "test_unsigned_messages_still_work_when_no_keypair_configured",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.175
+    },
+    {
+      "file": "test_packet",
+      "name": "test_header_is_52_bytes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_round_trip_no_path_no_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_round_trip_with_path_and_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_round_trip_all_message_types_and_priorities",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_round_trip_with_signature",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_magic_bytes_are_M_E",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_version_field",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_msg_id_defaults_to_uuid4_and_round_trips",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_msg_id_is_16_bytes_on_wire",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_src_dst_null_padded_to_8_bytes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_src_dst_full_8_char_ids",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_node_id_longer_than_8_bytes_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_timestamp_is_uint64_milliseconds",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_packet",
+      "name": "test_payload_len_field_matches_payload",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_path_len_field_matches_path",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_reserved_byte_is_zero",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_flag_bits_independent",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signature_present_implies_signed_flag_even_if_not_set_explicitly",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signed_flag_without_signature_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_wrong_signature_length_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_bad_magic_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_truncated_header_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_truncated_path_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_truncated_payload_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_truncated_signature_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_payload_too_large_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_path_too_long_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_ttl_out_of_range_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_remaining_length_matches_actual_body_size",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_remaining_length_includes_signature",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_remaining_length_rejects_wrong_size_input",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_remaining_length_rejects_bad_magic",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_default_ttl_is_10",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_hop_count_defaults_to_zero",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signable_bytes_excludes_payload_and_signature",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signable_bytes_matches_pack_header_and_path_region",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signable_bytes_reflects_flags_as_currently_set",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signable_bytes_changes_if_path_changes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_signable_bytes_validates_like_pack",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_identity_bytes_survives_a_relay_hop_unchanged",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_identity_bytes_changes_if_payload_changes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_identity_bytes_changes_if_src_or_dst_changes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_identity_bytes_changes_if_msg_id_changes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_identity_bytes_reflects_flags_as_currently_set",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_attempt_round_trips_through_the_reserved_byte",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_packet",
+      "name": "test_attempt_defaults_to_zero_and_is_range_checked",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_packet",
+      "name": "test_a_retransmission_keeps_its_signable_identity",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_relay",
+      "name": "test_delivers_packet_addressed_to_self",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.02
+    },
+    {
+      "file": "test_relay",
+      "name": "test_forwards_to_configured_next_hop",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.016
+    },
+    {
+      "file": "test_relay",
+      "name": "test_on_forward_hook_called_with_next_hop",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_drops_when_no_route_configured",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.025
+    },
+    {
+      "file": "test_relay",
+      "name": "test_drops_when_ttl_expired",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_drops_on_loop_detected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_drops_on_send_failure",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.023
+    },
+    {
+      "file": "test_relay",
+      "name": "test_ignores_hello_packets",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_relay",
+      "name": "test_two_hop_relay_a_to_b_to_c",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.017
+    },
+    {
+      "file": "test_relay",
+      "name": "test_duplicate_delivery_is_dropped",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_duplicate_forward_is_dropped_not_resent",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.017
+    },
+    {
+      "file": "test_relay",
+      "name": "test_different_messages_not_treated_as_duplicates",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_relay",
+      "name": "test_sos_forwarded_before_already_queued_normal",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.014
+    },
+    {
+      "file": "test_relay",
+      "name": "test_single_forward_still_sent_immediately",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_no_dedup_configured_allows_reprocessing",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_relay",
+      "name": "test_an_ack_is_not_a_duplicate_of_the_data_it_acknowledges",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.024
+    },
+    {
+      "file": "test_relay",
+      "name": "test_a_retransmission_is_forwarded_by_a_relay_that_saw_the_original",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.006
+    },
+    {
+      "file": "test_relay",
+      "name": "test_the_destination_sees_a_retried_message_once_but_is_told_about_it",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.006
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_first_sighting_is_not_a_duplicate",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_second_sighting_is_a_duplicate",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_different_messages_are_independent",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_entry_expires_after_window",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_entry_still_duplicate_just_inside_window",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_len_reflects_current_entries_after_prune",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_contains",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_sos_pops_before_normal_regardless_of_insertion_order",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_all_three_priorities_ordered_correctly",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_ties_broken_by_oldest_timestamp_first",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.004
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_same_priority_and_timestamp_does_not_crash_on_packet_comparison",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_peek_does_not_remove",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_peek_empty_queue_returns_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_len_and_bool",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_push_with_item_returns_item_not_packet",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_push_without_item_defaults_to_packet_itself",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_ordering_uses_packet_priority_even_with_custom_item",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_reliability",
+      "name": "test_sos_reapplied_mid_route_overtakes_already_queued_normal",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_random_bytes_never_crash_the_parser",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.184
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_bit_flipped_valid_packets_never_crash_the_parser",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.009
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_payload_over_the_length_field_is_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_node_id_longer_than_eight_bytes_is_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_header_only_input_and_empty_input_are_rejected",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_node_survives_garbage_arriving_on_the_wire",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.214
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_empty_payload_is_a_valid_message",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.209
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_send_to_an_unknown_destination_is_held_not_raised",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.102
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_replayed_packet_is_delivered_only_once",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.217
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_two_hundred_simultaneous_sends_across_two_hops_all_arrive_exactly_once",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.819
+    },
+    {
+      "file": "test_robustness",
+      "name": "test_sos_burst_and_routine_burst_from_two_senders_do_not_corrupt_each_other",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 1.223
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_perfect_link_is_cheapest",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_penalises_weak_link",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_penalises_recent_failures",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_matches_section_8_2_formula",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_rejects_out_of_range_quality",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_edge_cost_rejects_negative_failures",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_add_node_creates_empty_entry",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_routing",
+      "name": "test_set_edge_creates_both_endpoints",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_routing",
+      "name": "test_set_edge_is_directed_not_automatically_reversed",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_set_edge_overwrites_existing",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_remove_edge",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_remove_node_drops_incoming_and_outgoing_edges",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_nodes_lists_every_known_node",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_routing",
+      "name": "test_len_counts_nodes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_sim_runner",
+      "name": "test_build_chain_topology_links_only_adjacent_nodes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_sim_runner",
+      "name": "test_build_full_mesh_topology_links_every_pair",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_sim_runner",
+      "name": "test_chain_topology_discovers_only_direct_neighbours",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.088
+    },
+    {
+      "file": "test_sim_runner",
+      "name": "test_full_mesh_topology_discovers_all_other_nodes",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.096
+    },
+    {
+      "file": "test_sim_runner",
+      "name": "test_visible_neighbours_map_restricts_discovery_within_a_linked_topology",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.098
+    },
+    {
+      "file": "test_store",
+      "name": "test_record_and_get_message",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_store",
+      "name": "test_get_unknown_message_returns_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_store",
+      "name": "test_record_message_stores_path_as_comma_separated",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_record_message_upserts_on_same_id",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_update_message_status",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_update_status_of_unknown_message_returns_false",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_messages_by_status",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_record_event_and_query_by_message",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_events_for_message_ordered_by_time",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_events_by_kind",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_count_events",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_record_event_returns_row_id",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_upsert_and_get_peer",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_upsert_peer_updates_role_and_last_seen",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_upsert_peer_preserves_link_quality_when_not_given",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_get_unknown_peer_returns_none",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_store",
+      "name": "test_remove_peer",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_all_peers",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_public_key_round_trips_as_blob",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_context_manager_closes_connection",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_list_and_count_messages_filter_by_direction_and_status",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_update_message_route_records_hops_and_path",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_store",
+      "name": "test_events_since_returns_only_newer_events_in_order",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_link_config_rejects_loss_out_of_range",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_link_config_rejects_invalid_latency_range",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_set_link_is_bidirectional_by_default",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_set_link_can_be_unidirectional",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_remove_link",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_neighbours_of_reflects_link_matrix",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.0
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_send_without_link_raises_transport_error",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.013
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_send_delivers_with_zero_latency",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_send_respects_latency_delay",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.065
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_loss_probability_one_always_drops",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_loss_probability_zero_never_drops",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_seeded_network_reproduces_same_loss_pattern",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.003
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_broadcast_delivers_only_to_linked_neighbours",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.004
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_broadcast_with_no_links_does_nothing",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    },
+    {
+      "file": "test_transport_sim",
+      "name": "test_stop_unregisters_from_network",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.002
+    }
+  ],
+  "flaky": [
+    "test_api::test_node_view_reports_peers_with_hop_distance"
+  ]
+}

@@ -1,0 +1,44 @@
+\section{Subject-Wise Engineering Concepts and APNI Leap Alignment}
+\label{ch:subjects}
+
+This chapter maps the Semester I--IV subjects that the project genuinely uses to the implementation; a subject the problem does not call for is marked not applicable, with the reason.
+
+\subsection{Software Engineering}
+\emph{Modularity:} seven layers (discovery, transport, routing, reliability, crypto, storage, API) are separate modules joined only at \texttt{node.py}. \emph{State management:} the node's mutable state is a small named set of structures, each owned by one component, and the message lifecycle is an explicit state machine (Figure~\ref{fig:state}) whose states are the stored \texttt{status} values. \emph{Requirement traceability:} every requirement has an identifier and acceptance tests (Table~\ref{tab:fr}). \emph{Exception handling:} a bad input is dropped and logged and never raised into the event loop; cryptographic failures collapse to one exception type. \emph{Version control:} Git with phase branches and Conventional Commits (Section~\ref{sec:git}).
+
+\subsection{Computer Networks}
+The communication architecture is peer-to-peer: each node is both host and router. The protocol is a custom binary format with a magic value, a version and a self-describing length, so a stream reader frames packets without a separate prefix (Table~\ref{tab:header}). HELLO is a one-hop broadcast, link-state reports are unicast to neighbours, and DATA and ACK use TCP per hop. \texttt{LanTransport} opens a connection per packet and prefixes it with the previous hop's identity, so flooding never echoes a report back to its sender; connect and drain are bounded by 1.5\,s so a dead laptop fails fast. Errors are recovered by TCP per hop, by ACK, retry and route recomputation end to end, and by store-and-forward; failure detection uses missed HELLOs. \emph{TCP between many clients and a central server is not applicable:} the project's requirement is the absence of a central server in every mode; the equivalent is many peers, each a server for its neighbours and a client of them, which the live deployment exercises.
+
+\subsection{Database Management Systems}
+Schema, primary keys, the deliberately denormalised \texttt{path} column, the two secondary indexes, upserts, logical foreign keys and WAL concurrency are in Section~\ref{sec:db}. \emph{Transaction management:} every write is committed immediately, so each event is durable once logged (subject to SQLite's default synchronisation setting, which we did not tighten), and WAL lets the API read while the engine writes. \emph{Query-driven metrics:} delivery ratio, hop histogram, per-priority latency (median and 95th percentile), retries, retained and flushed counts and the duplicate-drop ratio are queries over \texttt{messages} and \texttt{events}. \emph{Distributed databases:} each node owns its file and there is no shared or replicated database; cross-node queries are assembled by the simulator or API reading each node's log.
+
+\subsection{Operating Systems}
+One node is one process; five processes ran live and communicated only over TCP and HTTP (inter-process communication). A single thread runs a cooperative \texttt{asyncio} event loop, so shared structures are touched only on that thread and there are no locks and no races by construction. Scheduling is \emph{priority scheduling} (SOS, NORMAL, STATUS; ties oldest first) re-applied at every hop; Round-Robin was rejected because an emergency must not share a link fairly with routine traffic, and the scheduling metric is the SOS latency advantage measured in Chapter~\ref{ch:perf}. I/O is non-blocking with timeouts, and memory is bounded (500 retained messages, 1800\,s). On Windows with Python~3.10, \texttt{asyncio.wait\_for} can swallow a task cancellation that arrives as the inner operation completes, which made \texttt{Node.stop()} hang intermittently; a cancellation-safe helper fixed it (Section~\ref{sec:defects}).
+
+\subsection{Data Structures}
+Adjacency dictionaries, binary heaps, hash maps and sets, fixed-capacity deques and id-keyed dictionaries give efficient insertion, search, deletion and request handling (Table~\ref{tab:ds}); the heap serves both Dijkstra's frontier and the priority queue.
+
+\subsection{Design and Analysis of Algorithms}
+Dijkstra's algorithm is correct here because every edge weight is at least 1, and it runs in $O((V+E)\log V)$ (Table~\ref{tab:complexity}). The cost function is a design contribution with derived coefficients (Section~\ref{sec:cost}); link-state flooding terminates because sequence numbers admit each report once per link; and the weighted-versus-hop-count experiment (Chapter~\ref{ch:perf}) is the empirical test of the design.
+
+\subsection{Cloud Computing}
+Not applicable by design: the system has no server, so there is no cloud deployment, hosted database or autoscaling, and no recurring infrastructure cost.
+
+\subsection{Mapping of Subjects to Project Implementation}
+\begin{table}[!htbp]
+\caption{Subjects, concepts applied, modules and evidence}
+\label{tab:subjmap}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+\textbf{Subject} & \textbf{Concept applied} & \textbf{Project module} & \textbf{Evidence}\\ \midrule
+Software Engineering & modularity, explicit state machine, error policy, traceability, version control & all; \texttt{node.py} & Table~\ref{tab:fr}; Section~\ref{sec:git}\\
+Computer Networks & binary protocol, framing, per-hop TCP, previous-hop identity, timeouts, failure detection & \texttt{packet.py}, \texttt{lan\_transport.py}, \texttt{discovery.py} & \texttt{test\_packet}, \texttt{test\_lan\_transport}; live test\\
+DBMS & schema, keys, indexes, upserts, WAL, query-driven metrics & \texttt{store.py}, \texttt{api/metrics.py} & \texttt{test\_store}; Section~\ref{sec:db}\\
+Operating Systems & process per node, single-threaded event loop, priority scheduling, bounded memory & \texttt{node.py}, \texttt{reliability.py} & concurrency tests; priority scenario\\
+Data Structures & heap, hash map and set, adjacency dictionary, deque & \texttt{routing.py}, \texttt{reliability.py} & \texttt{test\_reliability}, \texttt{test\_dijkstra}\\
+Algorithms and Graph Theory & Dijkstra, cost derivation, link-state flooding, complexity & \texttt{routing.py} & weighted vs hop-count experiment\\
+Cloud Computing & not applicable (no server by design) & -- & --\\
+\bottomrule
+\end{tabularx}
+\end{table}

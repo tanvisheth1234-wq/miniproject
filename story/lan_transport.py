@@ -29,6 +29,27 @@ from mesh.core.transport import TransportError
 CONNECT_TIMEOUT = 1.5  # seconds -- a dead laptop must fail fast, not hang
 
 
+async def _within(awaitable, timeout: float):
+    """``asyncio.wait_for`` without its cancellation race.
+
+    On Python < 3.12, ``wait_for`` can swallow a ``CancelledError`` that
+    arrives at the instant the inner operation completes. A background loop
+    (HELLO, link-state gossip) cancelled by ``Node.stop()`` then carries on
+    forever and ``stop()`` never returns. ``asyncio.wait`` has no such
+    window: cancellation always propagates.
+    """
+    task = asyncio.ensure_future(awaitable)
+    try:
+        done, _pending = await asyncio.wait({task}, timeout=timeout)
+        if not done:
+            raise asyncio.TimeoutError
+        return task.result()
+    finally:
+        if not task.done():
+            task.cancel()
+            task.add_done_callback(lambda t: t.cancelled() or t.exception())
+
+
 class LanTransport:
     def __init__(
         self,
@@ -59,7 +80,10 @@ class LanTransport:
     async def stop(self) -> None:
         if self._server is not None:
             self._server.close()
-            await self._server.wait_closed()
+            # Server.wait_closed() can block forever on Windows (Proactor loop,
+            # Python < 3.12) while a client connection is still winding down
+            with contextlib.suppress(asyncio.TimeoutError):
+                await _within(self._server.wait_closed(), CONNECT_TIMEOUT)
             self._server = None
 
     async def send(self, node_id: str, data: bytes) -> None:
@@ -71,16 +95,16 @@ class LanTransport:
         me = self.node_id.encode("ascii")
         writer = None
         try:
-            _reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), CONNECT_TIMEOUT)
+            _reader, writer = await _within(asyncio.open_connection(host, port), CONNECT_TIMEOUT)
             writer.write(bytes([len(me)]) + me + data)
-            await asyncio.wait_for(writer.drain(), CONNECT_TIMEOUT)
+            await _within(writer.drain(), CONNECT_TIMEOUT)
         except (OSError, asyncio.TimeoutError) as exc:
             raise TransportError(f"could not reach {node_id!r}: {exc}") from exc
         finally:
             if writer is not None:
                 writer.close()
                 with contextlib.suppress(OSError, asyncio.TimeoutError):
-                    await asyncio.wait_for(writer.wait_closed(), CONNECT_TIMEOUT)
+                    await _within(writer.wait_closed(), CONNECT_TIMEOUT)
 
     async def broadcast(self, data: bytes) -> None:
         if not self.enabled:
@@ -106,5 +130,5 @@ class LanTransport:
             pass
         finally:
             writer.close()
-            with contextlib.suppress(OSError):
-                await writer.wait_closed()
+            with contextlib.suppress(OSError, asyncio.TimeoutError):
+                await _within(writer.wait_closed(), CONNECT_TIMEOUT)

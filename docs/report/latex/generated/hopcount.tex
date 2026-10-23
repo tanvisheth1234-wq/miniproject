@@ -1,0 +1,14 @@
+\begin{table}[H]
+\caption{Weighted versus hop-count routing on identical seeds (5 nodes; the 2-hop shortcut crosses a link with 45\,\% loss; best-effort messages)}
+\label{tab:hopcount}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.316\textwidth}>{\raggedleft\arraybackslash}p{0.090\textwidth}>{\raggedleft\arraybackslash}p{0.163\textwidth}>{\raggedleft\arraybackslash}p{0.090\textwidth}>{\raggedleft\arraybackslash}p{0.090\textwidth}>{\raggedleft\arraybackslash}p{0.145\textwidth}@{}}
+\toprule
+\textbf{Routing} & \textbf{Runs} & \textbf{Delivery (mean)} & \textbf{Min} & \textbf{Max} & \textbf{Median hops} \\ \midrule
+Weighted (link-quality cost) & 20 & 99.2\,\% & 90\% & 100\% & 2 \\
+Hop count & 20 & 57.4\,\% & 42\% & 72\% & 1 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize On the same 20 seeds, weighted routing delivered a higher ratio in 20 runs, equal in 0, lower in 0.
+\end{table}

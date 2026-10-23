@@ -1,0 +1,142 @@
+\section{System Architecture and Design}
+\label{ch:design}
+
+\subsection{Overall System Architecture}
+A node is one operating-system process. Inside it \texttt{asyncio} runs discovery (HELLO every 3\,s, timeout 10\,s), link-state gossip (every 5\,s), the receive path, the sender (priority queue), the store-and-forward flush (every 10\,s) and the API server on one event-loop thread. Every activity reaches the network only through the \texttt{Transport} interface (Figure~\ref{fig:arch}). Shared mutable state is the neighbour table, the mesh graph and the pending-ACK map (plus the dedup set and the retention queue, each owned by one component); on one thread there are no locks and no data races by construction.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.58\textwidth]{figures/fig_architecture.pdf}
+\caption{Block diagram: one EcoMesh node and its three interchangeable transports}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Component and Module Description}
+Table~\ref{tab:modules} gives each module's purpose, input and output, and dependencies.
+\begin{table}[!htbp]
+\caption{Modules, purpose (input $\rightarrow$ output) and dependencies}
+\label{tab:modules}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+\textbf{Module} & \textbf{Purpose: input $\rightarrow$ output} & \textbf{Depends on}\\ \midrule
+\texttt{packet.py} & pack, parse and validate the 52-byte header, path, payload and signature: bytes $\leftrightarrow$ \texttt{Packet} & --\\
+\texttt{transport*.py}, \texttt{lan\_transport.py} & the transport boundary and its simulated, multicast/TCP and multi-device implementations: bytes between neighbours & \texttt{packet}\\
+\texttt{discovery.py} & HELLOs $\rightarrow$ neighbour table, peer-up and peer-down events, link quality & \texttt{transport}\\
+\texttt{relay.py} & received packets $\rightarrow$ deliver, forward in priority order, or drop with a reason & \texttt{reliability}\\
+\texttt{routing.py} & link-state reports $\rightarrow$ mesh graph, least-cost next hop, \texttt{RESCUE\_\_} terminal & \texttt{discovery}\\
+\texttt{reliability.py} & packets $\rightarrow$ dedup decision, priority order, ACK timers, retained messages & \texttt{packet}\\
+\texttt{crypto.py} & payload and identity bytes $\rightarrow$ ciphertext, signature, verification result & \texttt{cryptography}\\
+\texttt{store.py} & messages, events and peers $\rightarrow$ SQLite rows and query results & \texttt{sqlite3}\\
+\texttt{node.py} & wires every layer; \texttt{send()}, ACK/retry loop, flush loop & all above\\
+\texttt{sim/}, \texttt{api/} & scenario scripts $\rightarrow$ metrics; REST/WebSocket server & \texttt{node}\\
+\texttt{ui/}, \texttt{story/} & React application; one-device program with survivor and rescue screens & \texttt{api}, \texttt{node}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\textbf{Wire protocol.} A fixed big-endian header (Table~\ref{tab:header}) is followed by the traversed path, the payload and an optional 64-byte signature. The path is carried on the wire for loop detection and so that the interface can show ``relayed via $n$ nodes''. HELLO is a one-hop shout, LINK\_STATE is unicast to neighbours, and DATA and ACK use TCP per hop, so each hop is ordered and reliable though the end-to-end path is not.
+\begin{table}[!htbp]
+\caption{The 52-byte packet header}
+\label{tab:header}
+\scriptsize
+\begin{tabular}{@{}rrll@{\hspace{8pt}}rrll@{}}
+\toprule
+\textbf{Off.} & \textbf{Size} & \textbf{Field} & \textbf{Meaning} & \textbf{Off.} & \textbf{Size} & \textbf{Field} & \textbf{Meaning}\\ \midrule
+0 & 2 & magic & \texttt{0x4D45} ``ME'' & 24 & 8 & src & node id, ASCII\\
+2 & 1 & version & 1 & 32 & 8 & dst & node id / \texttt{RESCUE\_\_}\\
+3 & 1 & type & HELLO, LINK\_STATE, DATA, ACK & 40 & 8 & timestamp & Unix ms\\
+4 & 1 & priority & 0 SOS, 1 NORMAL, 2 STATUS & 48 & 2 & payload\_len & bytes\\
+5 & 1 & ttl & per-hop decrement (10) & 50 & 1 & path\_len & ids in path\\
+6 & 1 & flags & enc., needs\_ack, s-f, signed & 51 & 1 & attempt & retry counter\\
+7 & 1 & hop\_count & per-hop increment & 8 & 16 & msg\_id & UUIDv4\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture Selection and Justification}
+\textbf{Layered and transport-agnostic.} One boundary separates ``how bytes move'' from everything else. It gives a deterministic simulator, socket-free unit tests and an honest answer to the radio objection (a BLE transport is a fourth implementation, not a rewrite). \textbf{Single-threaded \texttt{asyncio} rather than threads.} Four activities share three structures; on one loop there are no locks or races, so correctness does not rest on lock discipline. \textbf{Peer-to-peer rather than client--server.} A server is a single point of failure and the very infrastructure being argued against. \textbf{Link state rather than flooding or on-demand discovery.} Flooding collapses under load and on-demand discovery delays the first emergency packet. \textbf{Per-node SQLite (WAL).} File-based, no server, and the API can read while the engine writes.
+
+\subsection{Data Flow Diagram (DFD)}
+Figure~\ref{fig:dfd0} is the context-level DFD: the system boundary contains one node and no server. Figure~\ref{fig:dfd1} is the level-1 decomposition into six processes (discover, build graph, receive, forward, originate/retry/retain, log and serve) and five data stores.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/fig_dfd0.pdf}
+\caption{Level-0 (context) data flow diagram}
+\label{fig:dfd0}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.64\textwidth]{figures/fig_dfd1.pdf}
+\caption{Level-1 data flow diagram of one node}
+\label{fig:dfd1}
+\end{figure}
+
+\subsection{UML Diagrams}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/uml_usecase.pdf}
+\caption{Use case diagram}
+\label{fig:usecase}
+\end{figure}
+\textbf{Use case diagram.} The actors are the trapped user, the passive relay user, the gateway node, the rescue coordinator and the administrator. Raising an SOS includes sending a message; holding and flushing undelivered messages extends sending when no route exists.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[height=0.42\textheight,keepaspectratio]{figures/uml_class.pdf}
+\caption{Class diagram: \texttt{Node} as the composition root}
+\label{fig:class}
+\end{figure}
+\textbf{Class diagram.} \texttt{Node} owns the discovery, gossip, routing, relay, ACK-tracking, retention and storage components (filled diamonds); the router and gossip share one \texttt{MeshGraph}; the relay owns its priority queue and uses a dedup set; three classes implement the \texttt{Transport} interface.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/uml_sequence.pdf}
+\caption{Sequence diagram: an SOS relayed hop by hop with the ACK returning along the reverse path}
+\label{fig:sequence}
+\end{figure}
+\textbf{Sequence diagram.} An SOS is created, encrypted and signed at L1, forwarded through L2 and the gateway (each relay applies dedup, decrements the hop allowance and appends its own id) and delivered at L5, whose ACK returns along the reverse path.
+\begin{figure}[!htbp]
+\centering
+\includegraphics[height=0.4\textheight,keepaspectratio]{figures/uml_activity.pdf}
+\caption{Activity diagram: the packet receive path}
+\label{fig:activity}
+\end{figure}
+\textbf{Activity diagram.} A packet is validated and checked for duplicates; if it is for this node its signature is verified, its payload decrypted, and it is logged, acknowledged and delivered; otherwise the hop allowance, loop and route checks decide between dropping it and re-queuing it by priority.
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[b]{0.52\textwidth}\centering\includegraphics[width=\textwidth]{figures/uml_state.pdf}\end{minipage}\hfill
+\begin{minipage}[b]{0.40\textwidth}\centering\includegraphics[width=\textwidth]{figures/uml_deploy.pdf}\end{minipage}
+\caption{State machine of the message lifecycle (left) and deployment diagram of the live configuration (right)}
+\label{fig:state}\label{fig:deploy}
+\end{figure}
+\textbf{State machine.} A message is created, then pending (sent, awaiting ACK) or held (no route), and ends delivered or failed; the states are the \texttt{status} values stored in the database. \textbf{Deployment diagram.} Five node processes on two laptops, each with its own engine, web screen and SQLite file, joined only by TCP links where the topology file lists them; there is no server (Section~\ref{sec:lan}).
+
+\subsection{Database Design}
+\label{sec:db}
+Each node keeps its own SQLite database (WAL mode, plain \texttt{sqlite3} and raw SQL: three tables, so an ORM would add indirection for nothing). Every metric is a query over it (SRS 6.1).
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig_er.pdf}
+\caption{Entity--relationship diagram of the per-node database (PK primary key, IDX secondary index, FK logical foreign key)}
+\label{fig:er}
+\end{figure}
+\textbf{Relational schema.} \texttt{messages}(\texttt{msg\_id} PK, \texttt{src}, \texttt{dst}, \texttt{priority}, \texttt{direction} in sent/received/forwarded, \texttt{status} in pending/delivered/failed/queued\_sf, \texttt{body}, \texttt{created\_ms}, \texttt{resolved\_ms}, \texttt{hop\_count}, \texttt{path}); \texttt{events}(\texttt{id} PK, \texttt{ts\_ms}, \texttt{kind}, \texttt{msg\_id}, \texttt{peer}, \texttt{detail}); \texttt{peers}(\texttt{node\_id} PK, \texttt{role}, \texttt{last\_seen\_ms}, \texttt{link\_quality}, \texttt{public\_key}). \textbf{Keys and integrity constraints.} \texttt{msg\_id} is a UUID and is the join key between a node's messages and events; \texttt{messages.body} holds plaintext only if the node is the source or destination; writes to \texttt{messages} are upserts, so a message moves pending $\rightarrow$ queued\_sf $\rightarrow$ delivered without duplicate rows; \texttt{events.msg\_id} and \texttt{events.peer} are logical, not declared, foreign keys because a relay logs events for messages it never stores and for peers that may have expired. \textbf{Normalisation.} Third normal form except \texttt{messages.path}, a comma-separated list kept denormalised because it is always read and written whole. \textbf{Indexing.} \texttt{idx\_events\_ts} serves ``events since $t$'' for the live feed; \texttt{idx\_msg\_status} serves the retained-message counter. \textbf{Sample records} from a real run are in Table~\ref{tab:samples}; the relay's row carries no body.
+\input{generated/sample_rows.tex}
+
+\subsection{Security and Error Handling Design}
+\label{sec:secdesign}
+\textbf{Authentication.} Nodes have no user accounts; a node's identity is its Ed25519 key pair, distributed in HELLO and link-state reports, and every signed packet is verified against the sender's known key. An unknown signer is rejected. \textbf{Authorization.} Authority follows the node role: only GATEWAY and RESCUE nodes are valid terminals for \texttt{RESCUE\_\_}; any node may relay. The relay path never decrypts or stores content it does not own, and a relay that does not hold the session key sees only ciphertext; because one pre-shared key serves the whole mesh, a node that \emph{does} hold it could read what it forwards, which per-pair key agreement would remove (Section~\ref{sec:limits}). \textbf{Input validation.} Every packet field is range-checked before use; a violation raises \texttt{PacketError} and the packet is dropped, never forwarded. \textbf{Exception handling.} A bad packet is dropped and logged and never raised into the event loop; crypto failures collapse into one exception type and \texttt{verify} returns \texttt{False} instead of raising. \textbf{Logging.} Each drop has a named event kind (\texttt{drop\_ttl}, \texttt{drop\_dup}, \texttt{drop\_loop}, \texttt{drop\_signature\_invalid}, \texttt{drop\_decrypt\_failed}, \ldots) in the node's database. \textbf{Protection of sensitive data.} Payloads are AES-256-GCM ciphertext with a random 12-byte nonce; plaintext is stored only on the originator and destination; private keys stay in local memory and are never transmitted. The signature covers the identity fields (version, type, priority, flags, src, dst, msg\_id, timestamp, payload) and not the whole header, because TTL, hop count and path change at every relay and a signature over them could never verify beyond the first hop; the retransmission counter is excluded so a retry keeps its identity. Table~\ref{tab:threat} maps threats to mechanisms.
+\begin{table}[!htbp]
+\caption{Threat model and countermeasures}
+\label{tab:threat}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+\textbf{Threat} & \textbf{Mechanism} & \textbf{Requirement}\\ \midrule
+Relay reads a message & AES-256-GCM payload; a relay without the session key reads only \texttt{dst} and \texttt{ttl} & SEC-1, 2, FWD-7\\
+Relay modifies a message & the GCM tag fails at the destination; packet dropped and logged & SEC-5\\
+Relay forges an SOS & Ed25519 signature over the identity fields; public keys in HELLO and gossip & SEC-3, 4, 6\\
+Replay of a captured packet & dedup set keyed on message id (300\,s) & REL-3\\
+Malformed or hostile bytes & strict validation; \texttt{PacketError}; drop & FWD-6\\
+Endless circulation & TTL per hop; own id in the path is a loop & FWD-3, 5\\
+Hand-rolled cryptography & only \texttt{cryptography}-library primitives & SEC-7\\
+\bottomrule
+\end{tabularx}
+\end{table}

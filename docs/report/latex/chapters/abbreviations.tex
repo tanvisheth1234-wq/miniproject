@@ -1,0 +1,43 @@
+\section*{List of Abbreviations and Symbols}
+\addcontentsline{toc}{section}{List of Abbreviations and Symbols}
+\small
+\begin{longtable}{L{3.2cm}L{12.4cm}}
+\toprule
+\textbf{Term} & \textbf{Meaning}\\ \midrule \endhead
+ACK & Acknowledgement packet returned by the destination along the reverse path\\
+AES-256-GCM & Advanced Encryption Standard, 256-bit key, Galois/Counter Mode (authenticated encryption)\\
+AODV & Ad hoc On-Demand Distance Vector routing (RFC 3561)\\
+API & Application Programming Interface\\
+ASGI & Asynchronous Server Gateway Interface (used by FastAPI/uvicorn)\\
+BLE & Bluetooth Low Energy\\
+DAA & Design and Analysis of Algorithms\\
+DBMS & Database Management System\\
+DFD & Data Flow Diagram\\
+DTN & Delay-Tolerant Networking (RFC 4838)\\
+Ed25519 & Edwards-curve Digital Signature Algorithm over Curve25519\\
+ER & Entity--Relationship (diagram)\\
+ESE & End Semester Evaluation\\
+FR / NFR & Functional / Non-Functional Requirement\\
+GATEWAY & Node role: has a link to the outside world; valid terminal for \texttt{RESCUE\_\_}\\
+HELLO & Periodic one-hop beacon used for neighbour discovery\\
+KPI & Key Performance Indicator\\
+LAN & Local Area Network\\
+MANET & Mobile Ad hoc Network\\
+OLSR & Optimized Link State Routing (RFC 3626)\\
+OS & Operating System\\
+PWA & Progressive Web App\\
+RESCUE & Node role: rescue-team device; valid terminal for \texttt{RESCUE\_\_}\\
+\texttt{RESCUE\_\_} & Symbolic destination meaning ``the nearest GATEWAY or RESCUE node''\\
+SF / S\&F & Store-and-Forward\\
+SOS & Highest message priority (value 0)\\
+SRS & Software Requirements Specification\\
+TCP / UDP & Transmission Control Protocol / User Datagram Protocol\\
+TTL & Time To Live (remaining hop allowance of a packet)\\
+UML & Unified Modeling Language\\
+WAL & Write-Ahead Logging (SQLite journal mode)\\
+$V$, $E$ & Number of vertices (nodes) and edges (links) of the mesh graph\\
+$q$ & Link quality in $[0,1]$: fraction of the last 20 expected HELLOs received\\
+$f$ & Recent failures: ACK timeouts attributed to a link in the last 60\,s\\
+$C_{max}$, $T_{hold}$ & Store-and-forward bounds: maximum count (500) and maximum age (1800\,s)\\
+\bottomrule
+\end{longtable}

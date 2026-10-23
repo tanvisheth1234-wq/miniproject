@@ -2,203 +2,383 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EcoMesh Device</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111315">
+<title>EcoMesh</title>
 <style>
   :root {
-    --bg: #f6f4ef; --card: #ffffff; --ink: #1d2433; --muted: #5d6677; --line: #d9d5ca;
-    --ok: #1f8a4c; --okbg: #e3f4ea; --warn: #a15c00; --warnbg: #fdf0d8;
-    --bad: #b3261e; --badbg: #fbe4e2; --info: #2557a7; --infobg: #e3ecfa; --sos: #d62828; --route: #2557a7;
+    --bg: #111315; --surface: #1a1d21; --raised: #22262b; --line: #30353c;
+    --ink: #f1f3f5; --muted: #a0a8b1;
+    --danger: #d93f45; --danger-dim: #3b1f21;
+    --ok: #3aa776; --warn: #d9a032; --info: #5f9fe0;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14171f; --card: #1d222d; --ink: #eceff5; --muted: #9aa3b5; --line: #343b4b;
-      --ok: #5fd08a; --okbg: #17321f; --warn: #f2b45a; --warnbg: #3a2d12;
-      --bad: #ff8a80; --badbg: #3d1a18; --info: #8db4f5; --infobg: #1a2842; --route: #8db4f5;
-    }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 18px 16px 40px; }
-  h1 { font-size: 1.45rem; margin: 0; }
-  .who { color: var(--muted); margin: 2px 0 14px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; }
-  .banner { border-radius: 12px; padding: 14px 16px; font-size: 1.1rem; font-weight: 600; min-height: 56px; display: flex; align-items: center; }
-  .banner.info { background: var(--infobg); color: var(--info); }
-  .banner.ok   { background: var(--okbg);   color: var(--ok); }
-  .banner.warn { background: var(--warnbg); color: var(--warn); }
-  .banner.bad  { background: var(--badbg);  color: var(--bad); }
-  svg { width: 100%; height: auto; display: block; }
-  .link { stroke: var(--line); stroke-width: 3; stroke-dasharray: 5 7; opacity: .55; }
-  .link.known { stroke-dasharray: none; opacity: 1; }
-  .routeline { fill: none; stroke: var(--route); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: .35; }
-  .sosline { fill: none; stroke: var(--sos); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
-  .node circle.body { fill: var(--card); stroke: var(--ink); stroke-width: 3; }
-  .node.gw circle.body { stroke: var(--warn); }
-  .node.rescue circle.body { stroke: var(--ok); }
-  .node.me circle.ring { fill: none; stroke: var(--info); stroke-width: 4; }
-  .node.unknown { opacity: .4; }
-  .node text.name { fill: var(--ink); font-size: 21px; font-weight: 600; text-anchor: middle; }
-  .node text.sub2 { fill: var(--muted); font-size: 16px; text-anchor: middle; }
-  .node text.icon { font-size: 34px; text-anchor: middle; dominant-baseline: central; }
-  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  button { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 14px 20px; cursor: pointer; background: var(--ink); color: var(--bg); }
-  button:disabled { opacity: .45; cursor: not-allowed; }
-  button.sos { background: var(--sos); color: #fff; font-size: 1.25rem; padding: 16px 28px; }
-  button.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
-  .hint { color: var(--muted); font-size: .92rem; margin: 10px 0 0; }
-  h2 { font-size: 1.05rem; margin: 0 0 8px; }
-  ul.list { list-style: none; margin: 0; padding: 0; }
-  ul.list li { padding: 9px 0; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-  ul.list li:first-child { border-top: 0; }
-  .chip { font-size: .8rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
-  .chip.ok { background: var(--okbg); color: var(--ok); } .chip.warn { background: var(--warnbg); color: var(--warn); }
-  .chip.info { background: var(--infobg); color: var(--info); } .chip.bad { background: var(--badbg); color: var(--bad); }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  [hidden] { display: none !important; }
+  h1 { font-size: 1.5rem; line-height: 1.2; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-size: .95rem; margin: 0 0 8px; font-weight: 700; color: var(--muted); }
+  p { margin: 0; }
   .muted { color: var(--muted); }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .88rem; color: var(--muted); margin-top: 6px; }
+  .small { font-size: .9rem; }
+  button { font: inherit; cursor: pointer; color: inherit; }
+  :focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 10px 0; border-top: 1px solid var(--line); }
+  li:first-child { border-top: 0; }
+
+  .block { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .ghost { background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-weight: 600; }
+  .rc { display: inline-block; background: var(--raised); border-radius: 6px; padding: 1px 8px; font-weight: 600; font-size: .92rem; }
+  .arr { color: var(--muted); margin: 0 4px; }
+  .sig { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; vertical-align: middle; }
+  .sig i { width: 4px; background: var(--line); border-radius: 1px; }
+  .sig i:nth-child(1) { height: 5px; } .sig i:nth-child(2) { height: 9px; } .sig i:nth-child(3) { height: 14px; }
+  .sig.s1 i:nth-child(1), .sig.s2 i:nth-child(-n+2), .sig.s3 i { background: var(--ink); }
+  summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+
+  /* ---------- survivor phone ---------- */
+  .phone { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
+  .bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  .bar strong { font-size: 1.05rem; letter-spacing: .02em; }
+  .bar span { color: var(--muted); font-size: .9rem; }
+  .status { border-left: 5px solid var(--info); background: var(--surface); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 20px; }
+  .status b { display: block; font-size: 1.08rem; }
+  .status span { color: var(--muted); font-size: .95rem; }
+  .status.ok { border-left-color: var(--ok); } .status.warn { border-left-color: var(--warn); } .status.bad { border-left-color: var(--danger); }
+  .lead { color: var(--muted); margin-bottom: 16px; }
+  .field-label { display: block; font-size: .95rem; font-weight: 600; margin: 0 0 8px; }
+  .needs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .need { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 13px 12px; text-align: left; font-weight: 600; min-height: 52px; }
+  .need.on { border-color: var(--ink); background: var(--raised); box-shadow: inset 0 0 0 1px var(--ink); }
+  input.where { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); padding: 14px; font: inherit; margin-bottom: 20px; }
+  input.where::placeholder { color: var(--muted); }
+  #sosBtn { position: relative; overflow: hidden; width: 100%; min-height: 104px; border: 0; border-radius: 12px; background: var(--danger); color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #sosBtn .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(0,0,0,.3); }
+  #sosBtn .t1, #sosBtn .t2 { position: relative; }
+  #sosBtn .t1 { font-size: 2rem; font-weight: 800; letter-spacing: .06em; line-height: 1.1; }
+  #sosBtn .t2 { font-size: .95rem; font-weight: 600; opacity: .92; }
+  #sosBtn:disabled { background: var(--raised); color: var(--muted); cursor: not-allowed; }
+  .holdhint { color: var(--muted); font-size: .92rem; margin: 10px 0 22px; text-align: center; }
+  .headline { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+  .steps li { display: flex; gap: 12px; align-items: flex-start; border: 0; padding: 7px 0; }
+  .steps .mk { width: 22px; height: 22px; border-radius: 50%; flex: none; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 800; border: 2px solid var(--muted); color: var(--muted); }
+  .steps .mk.done { background: var(--ok); border-color: var(--ok); color: #06251a; }
+  .steps .mk.warn { background: var(--warn); border-color: var(--warn); color: #2d2000; }
+  .steps .t b { display: block; font-weight: 600; } .steps .t span { color: var(--muted); font-size: .9rem; }
+  .near li { display: flex; justify-content: space-between; align-items: center; }
+  .msg b { display: block; font-weight: 600; } .msg span { color: var(--muted); font-size: .9rem; }
+
+  /* ---------- rescue console ---------- */
+  .console { max-width: 1280px; margin: 0 auto; padding: 0 20px 30px; }
+  .chead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 0; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  .chead h1 { font-size: 1.25rem; margin: 0; }
+  .state { color: var(--muted); font-size: .95rem; }
+  .state i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); margin-right: 7px; }
+  .state i.off { background: var(--danger); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin-bottom: 16px; }
+  .kpi { padding: 12px 16px; border-left: 1px solid var(--line); }
+  .kpi:first-child { border-left: 0; }
+  .kpi .n { font-size: 1.7rem; font-weight: 700; line-height: 1.15; } .kpi .l { color: var(--muted); font-size: .88rem; }
+  @media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } .kpi:nth-child(3) { border-left: 0; } .kpi:nth-child(n+3) { border-top: 1px solid var(--line); } }
+  .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+  .req { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--danger); border-radius: 0 10px 10px 0; padding: 12px 16px; margin-bottom: 10px; }
+  .req.other { border-left-color: var(--info); }
+  .req.fresh { background: #2a1d1e; }
+  .req .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .req .who { font-weight: 700; }
+  .req .body { font-size: 1.2rem; font-weight: 600; margin: 4px 0 8px; }
+  .tag { font-size: .78rem; font-weight: 700; letter-spacing: .05em; padding: 2px 8px; border-radius: 4px; background: var(--danger); color: #fff; }
+  .tag.other { background: var(--info); color: #08213b; }
+  .tag.new { background: var(--ink); color: #111; margin-right: 4px; }
+  .empty { padding: 30px 10px; text-align: center; color: var(--muted); }
+  svg.map { width: 100%; height: auto; display: block; }
+  .m-link { stroke: #4a525d; stroke-width: 3; } .m-link.off { stroke-dasharray: 5 7; opacity: .5; }
+  .m-flash { fill: none; stroke: var(--danger); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+  .m-node .b { fill: var(--raised); stroke: var(--muted); stroke-width: 3; }
+  .m-node.ok .b { stroke: var(--ok); } .m-node.lost { opacity: .5; } .m-node.lost .b { stroke: var(--danger); stroke-dasharray: 4 5; }
+  .m-node text.n { fill: var(--ink); font-size: 21px; font-weight: 600; text-anchor: middle; }
+  .m-node text.s { fill: var(--muted); font-size: 16px; text-anchor: middle; }
+  .legend { color: var(--muted); font-size: .85rem; margin-top: 6px; }
+  .devs li { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: inline-block; margin-right: 6px; }
+  .dot.bad { background: var(--danger); }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--raised); color: var(--ink); border: 1px solid var(--muted); padding: 12px 18px; border-radius: 8px; font-weight: 600; z-index: 9; max-width: 90vw; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1 id="title">EcoMesh device</h1>
-  <p class="who" id="who">connecting&hellip;</p>
 
-  <div class="card"><div id="banner" class="banner info">Connecting to this device&hellip;</div></div>
+<!-- ================= survivor / relay / gateway phone ================= -->
+<main id="phone" class="phone" hidden>
+  <div class="bar"><strong>EcoMesh</strong><span id="nearPill">&hellip;</span></div>
 
-  <div class="card">
-    <svg id="map" viewBox="0 0 1000 440" role="img" aria-label="The network as this device sees it"></svg>
-    <div class="legend">
-      <span>This is the network <b>as this device knows it</b>, learned only from messages from other devices.</span>
-      <span>Faded = this device cannot reach it right now.</span>
-      <span>Blue line = path to the rescue team.</span>
+  <div id="pStatus" class="status"><b>Starting&hellip;</b><span>Connecting to nearby phones.</span></div>
+
+  <section id="pTracker" class="block" hidden></section>
+
+  <section id="pHelp">
+    <h1>Request help</h1>
+    <p class="lead">No internet is needed. Your request is passed from phone to phone until it reaches the rescue team.</p>
+    <span class="field-label">What is happening?</span>
+    <div class="needs" id="needs">
+      <button class="need on" data-need="Need help" aria-pressed="true">Need help</button>
+      <button class="need" data-need="Trapped" aria-pressed="false">Trapped</button>
+      <button class="need" data-need="Injured" aria-pressed="false">Injured</button>
+      <button class="need" data-need="Fire or smoke" aria-pressed="false">Fire or smoke</button>
+      <button class="need" data-need="Need water or food" aria-pressed="false">Water or food</button>
+    </div>
+    <label class="field-label" for="where">Where are you?</label>
+    <input id="where" class="where" maxlength="120" placeholder="Floor, room or landmark">
+    <button id="sosBtn" aria-label="Hold to send SOS"><span class="fill" id="sosFill"></span><span class="t1">SOS</span><span class="t2">Hold for one second to send</span></button>
+    <p class="holdhint">Holding the button prevents sending by accident.</p>
+  </section>
+
+  <section class="block"><h2>Path to the rescue team</h2><div id="pRoute"></div></section>
+  <section class="block"><h2>Phones near you</h2><ul id="pNear" class="near"></ul></section>
+  <section class="block" id="pHelping"><h2>Passing messages for others</h2><p id="pHelpingText" class="small" style="margin:0 0 6px"></p><ul id="pFwd"></ul></section>
+  <section class="block"><h2>Messages</h2><ul id="pMsgs"></ul></section>
+  <details class="block"><summary>Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power or its radio failing.</p><button class="ghost powerBtn"></button></details>
+</main>
+
+<!-- ================= rescue command console ================= -->
+<main id="console" class="console" hidden>
+  <div class="chead">
+    <div><h1>Rescue console</h1><div class="muted small" id="cSub"></div></div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <span class="state" id="cNet"></span>
+      <button class="ghost" id="soundBtn">Alert sound: off</button>
     </div>
   </div>
-
-  <div class="card">
-    <div class="row">
-      <button id="sosBtn" class="sos">&#127384; Send SOS</button>
-      <button id="powerBtn" class="ghost">Switch this device off</button>
-    </div>
-    <p class="hint" id="hint"></p>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <section>
+      <h2>Incoming requests</h2>
+      <div id="sosList"></div>
+    </section>
+    <section>
+      <div class="block"><h2>Network map</h2><svg id="cMap" class="map" viewBox="0 0 1000 440"></svg>
+        <div class="legend">Circle: phone &nbsp; Square: gateway &nbsp; Diamond: rescue team. Dashed outline: no contact.</div></div>
+      <div class="block"><h2>Devices</h2><ul id="cDevs" class="devs"></ul></div>
+      <details class="block"><summary>Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power.</p><button class="ghost powerBtn"></button></details>
+    </section>
   </div>
+</main>
 
-  <div class="cols">
-    <div class="card"><h2>Messages received here</h2><ul id="inbox" class="list"><li class="muted">Nothing yet.</li></ul></div>
-    <div class="card"><h2>Messages sent from here</h2><ul id="sent" class="list"><li class="muted">Nothing yet.</li></ul></div>
-  </div>
-  <div class="card"><h2>What this device is doing</h2><ul id="log" class="list"><li class="muted">&hellip;</li></ul></div>
-</div>
+<div id="toast" class="toast" hidden role="status"></div>
 
 <script>
-const ICONS = { NORMAL: '\u{1F4F1}', GATEWAY: '\u{1F4E1}', RESCUE: '\u{1F691}' };
-const NS = 'http://www.w3.org/2000/svg';
 const $ = (id) => document.getElementById(id);
-const px = (n) => 60 + n.x * 880, py = (n) => 50 + n.y * 300;
-let data = null, lastTop = null, flash = null, seenInbox = new Set(), firstLoad = true;
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const NS = 'http://www.w3.org/2000/svg';
+const ROLE = { NORMAL: 'phone', GATEWAY: 'gateway', RESCUE: 'rescue team' };
+let data = null, flash = null, seen = new Set(), first = true, soundOn = false, need = 'Need help';
+
+const lbl = (id) => ((data.nodes.find((n) => n.id === id)) || {}).label || id;
+const ago = (ms) => {
+  const s = Math.max(0, Math.round((data.now_ms - ms) / 1000));
+  if (s < 5) return 'just now'; if (s < 60) return s + 's ago';
+  const m = Math.round(s / 60); return m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago';
+};
+const sig = (q) => { const n = (q == null || q >= 0.8) ? 3 : q >= 0.5 ? 2 : 1; return `<span class="sig s${n}" title="link quality"><i></i><i></i><i></i></span>`; };
+const chips = (ids) => ids.map((i) => `<span class="rc">${esc(lbl(i))}</span>`).join('<span class="arr">&rarr;</span>');
+const fullRoute = (m) => [m.src, ...m.relays, data.id];
 
 async function api(method, path, body) {
   const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
   if (!res.ok) { let d = ''; try { d = (await res.json()).detail; } catch (e) {} throw new Error(d || res.statusText); }
   return res.json();
 }
-function banner(kind, text) { const b = $('banner'); b.className = 'banner ' + kind; b.textContent = text; }
-function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
-const lbl = (id) => { const n = data && data.nodes.find((x) => x.id === id); return n ? n.label : id; };
-const ago = (ms) => { const s = Math.max(0, Math.round((Date.now() - ms) / 1000)); return s < 60 ? `${s}s ago` : `${Math.round(s / 60)} min ago`; };
+function toast(text, ms) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, ms || 3500); }
 
-function drawMap() {
-  const svg = $('map'); svg.innerHTML = '';
+function beep() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)(); const t0 = ac.currentTime;
+    [880, 660, 880].forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = f; o.type = 'sine';
+      g.gain.setValueAtTime(0.0001, t0 + i * 0.22); g.gain.exponentialRampToValueAtTime(0.25, t0 + i * 0.22 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.22 + 0.2);
+      o.connect(g); g.connect(ac.destination); o.start(t0 + i * 0.22); o.stop(t0 + i * 0.22 + 0.21);
+    });
+  } catch (e) {}
+}
+
+function wantConsole() {
+  const q = new URLSearchParams(location.search).get('view');
+  if (q === 'console') return true; if (q === 'phone') return false;
+  return data.role === 'RESCUE';
+}
+
+/* ------------------------------- survivor phone ------------------------------- */
+function renderPhone() {
+  const d = data, isGw = d.role === 'GATEWAY';
+  $('pHelp').hidden = isGw;
+  const near = d.neighbours;
+  const minQ = near.length ? Math.min(...near.map((n) => (n.link_quality == null ? 1 : n.link_quality))) : null;
+  $('nearPill').innerHTML = `${sig(minQ)} ${near.length} ${near.length === 1 ? 'phone' : 'phones'} nearby`;
+
+  let st;
+  const hops = d.route.length - 2;
+  if (!d.online) st = ['bad', 'This phone is switched off', 'It cannot send or receive anything.'];
+  else if (isGw) st = ['ok', 'Gateway online', 'This device links the mesh to the rescue team and passes requests on.'];
+  else if (d.route.length > 1) st = ['ok', 'Connected to the rescue team', hops > 0 ? `Through ${hops} ${hops === 1 ? 'phone' : 'phones'} in between.` : 'Directly.'];
+  else if (near.length) st = ['warn', 'Searching for a path', 'Phones found nearby, but none leads to the rescue team yet.'];
+  else st = ['warn', 'Looking for nearby phones', 'Stay where you are and keep this screen open.'];
+  $('pStatus').className = 'status ' + st[0];
+  $('pStatus').innerHTML = `<b>${esc(st[1])}</b><span>${esc(st[2])}</span>`;
+  $('sosBtn').disabled = !d.online;
+
+  // tracker for the latest SOS sent from this phone
+  const sent = d.thread.filter((m) => m.direction === 'sent');
+  const m = sent[sent.length - 1];
+  const tr = $('pTracker'); tr.hidden = !m;
+  if (m) {
+    const done = m.status === 'delivered', held = m.status === 'queued_sf', failed = m.status === 'failed';
+    const head = done ? ['var(--ok)', 'The rescue team has your request', 'Stay where you are and keep your phone on. Help has been alerted.']
+      : held ? ['var(--warn)', 'Saved, waiting for a path', 'There is no route to the rescue team right now. Your phone keeps the message safe and sends it automatically as soon as a path appears.']
+      : failed ? ['var(--danger)', 'Could not be delivered', 'Please send it again.']
+      : ['var(--info)', 'Sending your request', 'Nearby phones are passing it along.'];
+    const s1 = ['done', 'Created on your phone', ago(m.created_ms)];
+    const s2 = m.first_hop ? ['done', `Handed to ${lbl(m.first_hop)}`, 'It is on its way'] : [held ? 'warn' : 'wait', 'Looking for a phone to pass it to', ''];
+    const s3 = done ? ['done', 'Rescue team confirmed receipt', ''] : [held ? 'warn' : 'wait', 'Waiting for the rescue team to confirm', held ? 'Will retry automatically' : ''];
+    const row = (s) => `<li><span class="mk ${s[0]}">${s[0] === 'done' ? '&#10003;' : s[0] === 'warn' ? '!' : ''}</span><div class="t"><b>${esc(s[1])}</b>${s[2] ? `<span>${esc(s[2])}</span>` : ''}</div></li>`;
+    tr.innerHTML = `<p class="headline" style="color:${head[0]}">${esc(head[1])}</p><p class="muted" style="margin:0 0 8px">${esc(head[2])}</p>
+      <div class="muted small" style="margin-bottom:6px">&ldquo;${esc(m.body)}&rdquo;</div>
+      <ul class="steps">${row(s1)}${row(s2)}${row(s3)}</ul>
+      ${m.retries > 0 ? `<p class="muted small" style="margin:6px 0 0">A link failed ${m.retries} time${m.retries > 1 ? 's' : ''}; your phone re-routed automatically.</p>` : ''}`;
+  }
+
+  $('pRoute').innerHTML = d.route.length > 1 ? chips(d.route) : '<span class="muted">No path right now.</span>';
+  $('pNear').innerHTML = near.length
+    ? near.map((n) => `<li><span>${esc(lbl(n.id))} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span>${sig(n.link_quality)}</li>`).join('')
+    : '<li class="muted">Nobody yet.</li>';
+
+  const nf = d.counters.forward;
+  $('pHelping').hidden = !(isGw || nf > 0);
+  $('pHelpingText').textContent = nf > 0 ? `This phone has passed on ${nf} message${nf === 1 ? '' : 's'} for other people. Every phone is part of the network.` : 'No messages passed through yet.';
+  $('pFwd').innerHTML = d.forwarded.map((f) => `<li class="msg"><b>${esc(f.priority_name === 'SOS' ? 'SOS' : 'Message')} from ${esc(lbl(f.src))} to ${esc(lbl(f.dst))}</b><span>${ago(f.created_ms)}</span></li>`).join('');
+
+  const rows = d.thread.slice().reverse().slice(0, 6).map((x) => x.direction === 'sent'
+    ? `<li class="msg"><b>You: ${esc(x.body)}</b><span>${x.status === 'delivered' ? 'Delivered' : x.status === 'queued_sf' ? 'Saved, waiting for a path' : x.status === 'failed' ? 'Failed' : 'Sending'} &middot; ${ago(x.created_ms)}</span></li>`
+    : `<li class="msg"><b>${esc(lbl(x.src))}: ${esc(x.body)}</b><span>Received ${ago(x.created_ms)}</span></li>`);
+  $('pMsgs').innerHTML = rows.length ? rows.join('') : '<li class="muted">No messages yet.</li>';
+}
+
+/* ------------------------------- rescue console ------------------------------- */
+function mapSvg(svg) {
+  svg.innerHTML = '';
+  const px = (n) => 60 + n.x * 880, py = (n) => 50 + n.y * 300;
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
   const pos = {}; data.nodes.forEach((n) => { pos[n.id] = n; });
-  const gl = el('g', {}, svg);
-  data.links.forEach((l) => el('line', { class: 'link' + (l.known ? ' known' : ''), x1: px(pos[l.a]), y1: py(pos[l.a]), x2: px(pos[l.b]), y2: py(pos[l.b]) }, gl));
+  data.links.forEach((l) => el('line', { class: 'm-link' + (l.known ? '' : ' off'), x1: px(pos[l.a]), y1: py(pos[l.a]), x2: px(pos[l.b]), y2: py(pos[l.b]) }));
   const pts = (ids) => ids.filter((i) => pos[i]).map((i) => `${px(pos[i])},${py(pos[i])}`).join(' ');
-  if (data.route.length > 1) el('polyline', { class: 'routeline', points: pts(data.route) }, svg);
-  if (flash && flash.until > Date.now()) el('polyline', { class: 'sosline', points: pts(flash.path) }, svg);
+  if (flash && flash.until > Date.now()) el('polyline', { class: 'm-flash', points: pts(flash.path) });
   data.nodes.forEach((n) => {
-    const cls = ['node', n.role === 'GATEWAY' ? 'gw' : n.role === 'RESCUE' ? 'rescue' : '', n.me ? 'me' : '', n.known ? '' : 'unknown'].join(' ');
-    const g = el('g', { class: cls, transform: `translate(${px(n)},${py(n)})` }, svg);
-    if (n.me) el('circle', { class: 'ring', r: 50 }, g);
-    el('circle', { class: 'body', r: 40 }, g);
-    el('text', { class: 'icon' }, g).textContent = ICONS[n.role] || ICONS.NORMAL;
-    el('text', { class: 'name', y: 74 }, g).textContent = n.label + (n.me ? ' (this device)' : '');
-    el('text', { class: 'sub2', y: 96 }, g).textContent = n.me ? (data.online ? '' : 'SWITCHED OFF') : (n.known ? '' : 'not reachable');
+    const g = el('g', { class: 'm-node ' + (n.known ? 'ok' : 'lost'), transform: `translate(${px(n)},${py(n)})` });
+    if (n.role === 'GATEWAY') el('rect', { class: 'b', x: -32, y: -32, width: 64, height: 64, rx: 6 }, g);
+    else if (n.role === 'RESCUE') el('rect', { class: 'b', x: -28, y: -28, width: 56, height: 56, rx: 4, transform: 'rotate(45)' }, g);
+    else el('circle', { class: 'b', r: 32 }, g);
+    el('text', { class: 'n', y: 66 }, g).textContent = n.label;
+    el('text', { class: 's', y: 88 }, g).textContent = n.me ? 'this screen' : (n.known ? '' : 'no contact');
   });
 }
 
-function chip(kind, text) { const c = document.createElement('span'); c.className = 'chip ' + kind; c.textContent = text; return c; }
-function fill(ul, rows, empty) {
-  ul.innerHTML = '';
-  if (!rows.length) { ul.innerHTML = `<li class="muted">${empty}</li>`; return; }
-  rows.forEach((r) => ul.appendChild(r));
+function renderConsole() {
+  const d = data;
+  const recv = d.thread.filter((m) => m.direction === 'received').reverse();
+  recv.sort((a, b) => a.priority - b.priority);        // stable: SOS first, then newest first
+  const sosCount = recv.filter((m) => m.priority === 0).length;
+  const online = d.nodes.filter((n) => n.known).length, total = d.nodes.length;
+  const avg = recv.length ? (recv.reduce((s, m) => s + m.relays.length + 1, 0) / recv.length) : null;
+
+  $('cSub').textContent = `${d.label} · listening on the mesh network, no internet needed`;
+  $('cNet').innerHTML = `<i class="${d.online ? '' : 'off'}"></i>${d.online ? `${online} of ${total} devices reachable` : 'Console switched off'}`;
+  $('kpis').innerHTML = `
+    <div class="kpi"><div class="n">${sosCount}</div><div class="l">SOS received</div></div>
+    <div class="kpi"><div class="n">${recv.length}</div><div class="l">Messages received</div></div>
+    <div class="kpi"><div class="n">${online}/${total}</div><div class="l">Devices reachable</div></div>
+    <div class="kpi"><div class="n">${avg == null ? '&ndash;' : avg.toFixed(1)}</div><div class="l">Average hops</div></div>`;
+
+  $('sosList').innerHTML = recv.length ? recv.map((m) => {
+    const age = Math.max(0, Math.round((d.now_ms - m.created_ms) / 1000));
+    const isNew = age < 20, sos = m.priority === 0;
+    return `<div class="req ${sos ? '' : 'other'} ${isNew && sos ? 'fresh' : ''}">
+      <div class="top"><span class="who">${esc(lbl(m.src))}</span><span>${isNew ? '<span class="tag new">NEW</span>' : ''}<span class="tag ${sos ? '' : 'other'}">${esc(m.priority_name)}</span> <span class="muted small">${ago(m.created_ms)}</span></span></div>
+      <div class="body">${esc(m.body)}</div>
+      <div><span class="muted small">Route:</span> ${chips(fullRoute(m))}</div></div>`;
+  }).join('') : `<div class="block empty"><b>No messages yet</b><br>Listening for requests from the network.</div>`;
+
+  mapSvg($('cMap'));
+  $('cDevs').innerHTML = d.nodes.filter((n) => !n.me).map((n) =>
+    `<li><span>${esc(n.label)} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span><span><span class="dot ${n.known ? '' : 'bad'}"></span><span class="muted small">${n.known ? 'reachable' : 'no contact'}</span></span></li>`).join('');
 }
 
+/* --------------------------------- plumbing ---------------------------------- */
 function render() {
-  $('title').textContent = data.label;
-  $('who').textContent = `Device ${data.id} · ${data.role === 'RESCUE' ? 'rescue team' : data.role === 'GATEWAY' ? 'gateway' : 'ordinary phone'} · can hear: ${data.hearing.length ? data.hearing.map(lbl).join(', ') : 'nobody right now'}`;
-  $('sosBtn').disabled = !data.online;
-  $('powerBtn').textContent = data.online ? 'Switch this device off' : 'Switch this device back on';
-  $('hint').textContent = data.role === 'RESCUE'
-    ? 'This is the rescue screen. SOS messages from the network appear in the left box below.'
-    : 'Press Send SOS to alert the rescue team. To test the network, switch other devices off (or close their laptop lids).';
-  drawMap();
+  const con = wantConsole();
+  $('console').hidden = !con; $('phone').hidden = con;
+  document.querySelectorAll('.powerBtn').forEach((b) => { b.textContent = data.online ? 'Switch this device off' : 'Switch this device back on'; });
+  con ? renderConsole() : renderPhone();
 
-  const inbox = data.thread.filter((m) => m.direction === 'received').reverse().map((m) => {
-    const li = document.createElement('li');
-    li.append(chip(m.priority === 0 ? 'bad' : 'info', m.priority_name));
-    const b = document.createElement('b'); b.textContent = m.body; li.append(b);
-    const s = document.createElement('span'); s.className = 'muted';
-    s.textContent = `from ${lbl(m.src)} via ${[m.src, ...m.relays].filter((x) => x !== data.id).map(lbl).join(' → ')} · ${ago(m.created_ms)}`; li.append(s);
-    return li;
-  });
-  fill($('inbox'), inbox, 'Nothing yet.');
-
-  const sentMap = { delivered: ['ok', 'Delivered'], pending: ['info', 'Sending'], queued_sf: ['warn', 'Held, waiting for a route'], failed: ['bad', 'Failed'] };
-  const sent = data.thread.filter((m) => m.direction === 'sent').reverse().map((m) => {
-    const li = document.createElement('li'); const [k, t] = sentMap[m.status] || ['info', m.status];
-    li.append(chip(k, t)); const b = document.createElement('b'); b.textContent = m.body; li.append(b);
-    const s = document.createElement('span'); s.className = 'muted'; s.textContent = ago(m.created_ms); li.append(s); return li;
-  });
-  fill($('sent'), sent, 'Nothing yet.');
-
-  fill($('log'), data.log.map((e) => { const li = document.createElement('li'); li.textContent = e.text; const s = document.createElement('span'); s.className = 'muted'; s.textContent = ago(e.t); li.append(s); return li; }), 'Quiet so far.');
-
-  // banner + new-SOS flash
-  const rcv = data.thread.filter((m) => m.direction === 'received');
-  rcv.forEach((m) => {
-    if (!seenInbox.has(m.msg_id)) {
-      seenInbox.add(m.msg_id);
-      if (!firstLoad) {
-        flash = { path: [m.src, ...m.relays, data.id], until: Date.now() + 6000 };
-        banner('ok', `\u{1F6A8} Message received from ${lbl(m.src)} via ${[m.src, ...m.relays].map(lbl).join(' → ')}: “${m.body}”`);
-        lastTop = 'rcv';
-      }
+  // new inbound message: highlight its path, beep, update the tab title
+  data.thread.filter((m) => m.direction === 'received').forEach((m) => {
+    if (seen.has(m.msg_id)) return;
+    seen.add(m.msg_id);
+    if (first) return;
+    flash = { path: fullRoute(m), until: Date.now() + 8000 };
+    if (m.priority === 0) {
+      if (soundOn && con) beep();
+      if (!con) toast(`Message from ${lbl(m.src)}: ${m.body}`);
+      document.title = 'New SOS - EcoMesh'; clearTimeout(render.t); render.t = setTimeout(() => { document.title = 'EcoMesh'; }, 8000);
     }
   });
-  firstLoad = false;
-  if (!data.online) banner('bad', 'This device is switched off. It cannot send or hear anything, like a dead battery.');
-  else if (data.held > 0) banner('warn', `No route to the rescue team right now. ${data.held} message${data.held > 1 ? 's are' : ' is'} being held safely and will be sent as soon as a route appears.`);
-  else if (lastTop !== 'rcv') {
-    if (data.route.length > 1) banner('info', `Ready. Path to the rescue team: ${data.route.map(lbl).join(' → ')}.`);
-    else if (data.role === 'RESCUE') banner('info', 'Waiting for SOS messages…');
-    else banner('warn', 'Looking for other devices… no path to the rescue team yet.');
-  }
-  if (lastTop === 'rcv' && flash && flash.until < Date.now()) lastTop = null;
+  first = false;
 }
 
 async function poll() {
-  try { data = await api('GET', '/api/me'); render(); }
-  catch (e) { banner('bad', 'Cannot reach this device’s program: ' + e.message); }
+  try { data = await api('GET', '/api/me'); render(); } catch (e) { /* keep last screen; next poll retries */ }
 }
 
-let n = 0;
-$('sosBtn').addEventListener('click', async () => {
-  n += 1;
-  try { await api('POST', '/api/sos', { text: `SOS #${n} from ${data.label}: trapped, need help` }); lastTop = null; banner('info', 'SOS sent. The phones are passing it along…'); poll(); }
-  catch (e) { banner('bad', 'Could not send: ' + e.message); }
+document.addEventListener('click', async (e) => {
+  const pb = e.target.closest('.powerBtn');
+  if (pb && data) { await api('POST', '/api/power', { on: !data.online }); poll(); return; }
+  const nb = e.target.closest('.need');
+  if (nb) { document.querySelectorAll('.need').forEach((b) => { const on = b === nb; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); need = nb.dataset.need; }
 });
-$('powerBtn').addEventListener('click', async () => { await api('POST', '/api/power', { on: !data.online }); lastTop = null; poll(); });
+$('soundBtn').addEventListener('click', () => {
+  soundOn = !soundOn; $('soundBtn').textContent = soundOn ? 'Alert sound: on' : 'Alert sound: off'; if (soundOn) beep();
+});
+
+// press-and-hold SOS
+const HOLD_MS = 1200, fill = $('sosFill'), btn = $('sosBtn');
+let holding = false, raf = 0, t0 = 0;
+function holdStart(e) {
+  if (!data || !data.online || holding) return; e.preventDefault(); holding = true; t0 = performance.now();
+  const step = (t) => {
+    if (!holding) return; const k = Math.min(1, (t - t0) / HOLD_MS); fill.style.width = (k * 100) + '%';
+    if (k >= 1) { holdEnd(true); } else { raf = requestAnimationFrame(step); }
+  };
+  raf = requestAnimationFrame(step);
+}
+function holdEnd(done) {
+  if (!holding) return; holding = false; cancelAnimationFrame(raf); fill.style.width = '0';
+  if (done) sendSOS();
+}
+btn.addEventListener('pointerdown', holdStart);
+['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, () => holdEnd(false)));
+btn.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') holdStart(e); });
+btn.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') holdEnd(false); });
+btn.addEventListener('contextmenu', (e) => e.preventDefault());
+
+async function sendSOS() {
+  const where = $('where').value.trim();
+  const text = `${need}${where ? ' — ' + where : ''}`;
+  try {
+    await api('POST', '/api/sos', { text });
+    if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    toast('SOS sent. Nearby phones are passing it along.'); poll();
+  } catch (e) { toast('Could not send: ' + e.message); }
+}
 
 poll(); setInterval(poll, 700);
 </script>

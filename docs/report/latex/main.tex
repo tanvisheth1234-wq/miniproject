@@ -1,0 +1,97 @@
+%----------------------------------------------------------
+% EcoMesh -- Mini Project Report (SPIT, Computer Engineering, AY 2026-27)
+% Page set-up, cover, certificates and declaration follow the department's
+% Overleaf mini-project template (synopsis.tex); the chapter structure follows
+% the "Mini Project Report Preparation Guidelines" (Chapters 1-11).
+%
+% Build:  pdflatex main.tex  (run twice for the table of contents)
+% Overleaf: upload this whole folder, set main.tex as the main document.
+%----------------------------------------------------------
+\documentclass[12pt,singleside,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\geometry{left=20mm,right=20mm,top=20mm,bottom=30mm}
+\pagestyle{plain}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\setlength{\cftbeforesecskip}{1pt}\renewcommand{\cftsecfont}{\footnotesize\bfseries}\renewcommand{\cftsecpagefont}{\footnotesize\bfseries}\setlength{\cftbeforesubsecskip}{-1pt}\setlength{\cftbeforesubsecskip}{0pt}
+\renewcommand{\cftsubsecfont}{\footnotesize}\renewcommand{\cftsubsecpagefont}{\footnotesize}\setlength{\cftbeforesecskip}{2pt}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlist{itemsep=1pt,topsep=2pt,parsep=0pt}
+\renewcommand{\arraystretch}{1.08}
+
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible,
+        keepspaces=true,xleftmargin=2pt,xrightmargin=2pt,showstringspaces=false}
+
+% each chapter (\section) starts on a new page, as the template asks
+\let\oldsection\section
+\renewcommand{\section}{\clearpage\oldsection}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+\pagenumbering{arabic}
+\input{students.tex}
+\input{be_title.tex}
+\input{be_certificate1.tex}
+\input{be_certificate2.tex}
+
+\clearpage
+\section*{\centering{Declaration}}
+
+\vspace{2cm}
+We wish to state that the work embodied in this work titled ``\ProjectTitle'' forms our own contribution to the work carried out under the guidance of \GuideName\ at the Sardar Patel Institute of Technology. We declare that this written submission represents our ideas in our own words and where others' ideas or words have been included, we have adequately cited and referenced the original sources. We also declare that we have adhered to all principles of academic honesty and integrity and have not misrepresented or fabricated or falsified any idea/data/fact/source in our submission.
+\\
+\\
+\\
+\textbf{\StudentA} \hspace{2cm} \textbf{\StudentB} \hspace{2cm} \textbf{\StudentC}\\
+\vspace{3cm}
+\textbf{UID \UIDA} \hspace{2cm} \textbf{UID \UIDB} \hspace{2cm} \textbf{UID \UIDC}\\
+
+\clearpage
+\input{chapters/acknowledgement.tex}
+
+\clearpage
+\input{chapters/abstract.tex}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+\input{chapters/abbreviations.tex}
+
+\input{chapters/ch01_introduction.tex}
+\input{chapters/ch02_literature.tex}
+\input{chapters/ch03_srs.tex}
+\input{chapters/ch04_design.tex}
+\input{chapters/ch05_algorithms.tex}
+\input{chapters/ch06_subjects.tex}
+\input{chapters/ch07_implementation.tex}
+\input{chapters/ch08_performance.tex}
+\input{chapters/ch09_testing.tex}
+\input{chapters/ch10_results.tex}
+\input{chapters/ch11_conclusion.tex}
+
+\input{chapters/references.tex}
+
+\end{document}

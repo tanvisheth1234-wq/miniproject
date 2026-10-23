@@ -62,7 +62,10 @@ BROADCAST_DST = "BCAST___"
 
 
 def _encode_node_id(node_id: str) -> bytes:
-    raw = node_id.encode("ascii")
+    try:
+        raw = node_id.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise PacketError(f"node id {node_id!r} is not ASCII") from exc
     if len(raw) > NODE_ID_SIZE:
         raise PacketError(
             f"node id {node_id!r} exceeds {NODE_ID_SIZE} bytes when ASCII-encoded"
@@ -71,7 +74,13 @@ def _encode_node_id(node_id: str) -> bytes:
 
 
 def _decode_node_id(raw: bytes) -> str:
-    return raw.rstrip(b"\x00").decode("ascii")
+    # a corrupted or hostile packet can carry any byte here; callers only
+    # catch PacketError, so a bad id must surface as one (found by the
+    # fuzz tests in tests/test_robustness.py)
+    try:
+        return raw.rstrip(b"\x00").decode("ascii")
+    except UnicodeDecodeError as exc:
+        raise PacketError("node id field is not ASCII") from exc
 
 
 @dataclass

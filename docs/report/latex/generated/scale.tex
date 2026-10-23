@@ -1,0 +1,18 @@
+\begin{table}[H]
+\caption{Scalability: 5\,\% per-link loss (6 runs per size)}
+\label{tab:scale}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedleft\arraybackslash}p{0.088\textwidth}>{\raggedleft\arraybackslash}p{0.088\textwidth}>{\raggedleft\arraybackslash}p{0.105\textwidth}>{\raggedleft\arraybackslash}p{0.123\textwidth}>{\raggedleft\arraybackslash}p{0.123\textwidth}>{\raggedleft\arraybackslash}p{0.123\textwidth}>{\raggedleft\arraybackslash}p{0.088\textwidth}>{\raggedleft\arraybackslash}p{0.123\textwidth}@{}}
+\toprule
+\textbf{Nodes} & \textbf{Links} & \textbf{Delivery} & \textbf{Conv. mean (s)} & \textbf{Conv. max (s)} & \textbf{Tx per delivered} & \textbf{CPU (s)} & \textbf{Peak heap (MB)} \\ \midrule
+10 & 13 & 100.0\,\% & 5.2 & 5.2 & 5.2 & 3.0 & 1.1 \\
+21 & 32 & 100.0\,\% & 5.2 & 5.2 & 7.7 & 12.0 & 2.3 \\
+31 & 50 & 100.0\,\% & 5.2 & 5.2 & 10.2 & 28.8 & 4.0 \\
+43 & 72 & 100.0\,\% & 6.1 & 10.2 & 12.7 & 52.3 & 6.9 \\
+50 & 85 & 100.0\,\% & 5.2 & 5.2 & 14.4 & 69.4 & 8.5 \\
+65 & 113 & 98.9\,\% & 5.2 & 5.2 & 20.8 & 126.1 & 12.9 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize Nodes and links include the gateway and rescue post added to the grid. CPU is total process CPU time to simulate the whole run on a virtual clock (all nodes in one process); peak heap is the Python allocation peak (tracemalloc) for the whole simulated mesh. Neither is the cost of one real device.
+\end{table}

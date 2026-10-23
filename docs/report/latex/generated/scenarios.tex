@@ -1,0 +1,19 @@
+\begin{table}[H]
+\caption{Results of the seven simulator scenarios (weighted routing; delivery ratio shown as mean (min--max) over the runs)}
+\label{tab:scenarios}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.182\textwidth}>{\raggedleft\arraybackslash}p{0.061\textwidth}>{\raggedleft\arraybackslash}p{0.061\textwidth}>{\raggedleft\arraybackslash}p{0.061\textwidth}>{\raggedleft\arraybackslash}p{0.158\textwidth}>{\raggedleft\arraybackslash}p{0.055\textwidth}>{\raggedleft\arraybackslash}p{0.073\textwidth}>{\raggedleft\arraybackslash}p{0.073\textwidth}>{\raggedleft\arraybackslash}p{0.121\textwidth}@{}}
+\toprule
+\textbf{Scenario} & \textbf{Nodes} & \textbf{Loss} & \textbf{Runs} & \textbf{Delivery} & \textbf{Hops} & \textbf{Conv. (s)} & \textbf{Recov. (s)} & \textbf{S\&F flushed/queued} \\ \midrule
+baseline\_\allowbreak{}10 & 10 & 5\% & 20 & 100.0\,\% (100--100) & 1 & 5.5 & -- & 7/7 \\
+collapse\_\allowbreak{}40 & 40 & 20\% & 50 & 92.6\,\% (76--100) & 4 & 9.6 & 8.1 & 2959/3187 \\
+no\_\allowbreak{}gateway & 12 & 5\% & 20 & 100.0\,\% (100--100) & 2 & 5.2 & -- & 201/201 \\
+high\_\allowbreak{}loss & 20 & 35\% & 20 & 89.1\,\% (78--100) & 2 & 17.7 & -- & 1007/1048 \\
+chain\_\allowbreak{}10hop & 11 & 5\% & 20 & 100.0\,\% (100--100) & 9 & 14.4 & -- & 87/90 \\
+hopcount\_\allowbreak{}vs\_\allowbreak{}weighted & 5 & 45\% & 20 & 99.2\,\% (90--100) & 2 & 5.2 & -- & -- \\
+priority\_\allowbreak{}load & 16 & 0\% & 20 & 100.0\,\% (100--100) & 2 & 7.6 & -- & 1356/1356 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize Hops = median hop count of delivered messages. Conv. = mean seconds until every node's graph contains every node. Recov. = mean seconds from relay death until the sender has a route avoiding it. S\&F counts are event counts summed over all runs: a message re-queued after a failed retry is counted each time, and messages still held when a run ends are not flushed.
+\end{table}

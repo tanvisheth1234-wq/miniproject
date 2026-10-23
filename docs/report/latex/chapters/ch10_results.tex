@@ -1,0 +1,85 @@
+\section{Results, Demonstration and Discussion}
+\label{ch:results}
+
+\subsection{Implemented Features}
+\begin{table}[!htbp]
+\caption{Feature status}
+\label{tab:features}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{6.0cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Feature} & \textbf{Status} & \textbf{Evidence}\\ \midrule
+Discovery, link-state gossip, weighted Dijkstra, priority, TTL and dedup, ACK and retry, store-and-forward, AES-GCM, Ed25519, SQLite log & Implemented & \NTests\ tests; Chapters~\ref{ch:perf}, \ref{ch:test}\\
+Simulator, metrics, API, engine web application, survivor and rescue screens & Implemented & 7 scenarios to 65 nodes; 12 API tests; Section~\ref{sec:shots}\\
+Multi-device deployment over real sockets & Implemented & 5 processes measured; two-laptop demonstration\\
+Immediate flush on a new neighbour; history filter & Partial & SNF-3, LOG-5\\
+BLE or Wi-Fi Direct radio; per-pair key agreement; timed usability study & Not implemented & out of scope or future work\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Screenshots and Demonstration Evidence}
+\label{sec:shots}
+All screenshots are from the running system. Figures~\ref{fig:survivor} and~\ref{fig:console} come from the five-process live deployment in the demonstrated story: an SOS is delivered over a relay; the gateway fails and the next SOS is held; the gateway returns and the held message is delivered.
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[t]{0.25\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_delivered.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.25\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_held.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.25\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_flushed.png}\end{minipage}
+\caption{The survivor's screen. Left: SOS delivered over Phone 2 and the Gateway. Centre: the gateway has failed; the screen says ``Searching for a path'' and the message is ``Saved, waiting for a path''. Right: the gateway is back and the held message is delivered.}
+\label{fig:survivor}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[t]{0.38\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.38\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console_gwdown.png}\end{minipage}
+\caption{The rescue console. Left: SOS cards with sender, text, age and route, counters, network map and device list. Right: with the gateway down the rescue device hears nobody (``1 of 5 devices reachable''); earlier messages remain visible.}
+\label{fig:console}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[t]{0.3\textwidth}\centering\includegraphics[width=\textwidth]{figures/ui_rescue.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.3\textwidth}\centering\includegraphics[width=\textwidth]{figures/ui_routing.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.3\textwidth}\centering\includegraphics[width=\textwidth]{figures/ui_demo.png}\end{minipage}
+\caption{The engine web application. Left: rescue dashboard (delivery ratio, nodes online, live mesh, SOS queue). Centre: routing page (weighted versus hop-count route, cost function, a node's view of the graph). Right: the six-beat live demonstration page, which drives the real API.}
+\label{fig:uishots}
+\end{figure}
+The mesh was also run on two physical laptops joined by a phone hotspot (Figure~\ref{fig:deploy}): an SOS was delivered across both machines, the route changed when a relay was switched off, and a message held while the gateway was off was delivered when it returned. This run was a functional demonstration and was not timed.
+
+\subsection{Functional Results}
+Of the 68 requirements, \NAuto\ are verified by automated tests alone, \NAutoUI\ by automated tests plus a manual check of the screen, \NInspect\ by code inspection, \NManual\ by manual check only, and \NPartial\ are partial (Table~\ref{tab:fr}). The three stories that matter most were demonstrated on real devices: an SOS reaches the rescue device over several hops; the network re-routes around a failed relay; and a message with no route is held and later delivered.
+
+\subsection{Performance Results}
+Table~\ref{tab:kpival} collects the measured KPIs: \CollDel\,\% delivery on a 40-node mesh at 20\,\% loss with failures; an SOS median latency \SosAdv$\times$ lower under load; live SOS delivery in a median of 47\,ms on loopback; relay failover in about 4\,s; held messages flushed in about 4.5\,s.
+
+
+\subsection{Comparison with Existing Systems}
+We did not run other systems, so the comparison is limited to documented properties (Table~\ref{tab:compare1}) and to the one baseline that can be measured fairly, hop-count routing on identical seeds (\HopW\,\% against \HopH\,\% in the designed topology). We make no claim about the delivery of Bridgefy, Briar, Meshtastic or Serval, which publish no comparable measurements.
+
+
+\subsection{Achievement of Objectives}
+\begin{table}[!htbp]
+\caption{Objectives, supporting evidence and status}
+\label{tab:objectives}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.4cm}@{}}
+\toprule
+\textbf{Obj.} & \textbf{Evidence} & \textbf{Status}\\ \midrule
+O1 & live convergence 3.8\,s; simulator 5--15\,s in multiples of the gossip interval & Achieved (47 of 50 runs $\le$ 15\,s)\\
+O2 & \HopW\,\% vs \HopH\,\% on \HopRuns\ identical seeds (Figure~\ref{fig:results}b) & Achieved\\
+O3 & \SosAdv$\times$ lower median latency under load (Table~\ref{tab:priority}) & Achieved\\
+O4 & \CollDel\,\% at 40 nodes and 20\,\% loss; recovery mean \CollRecMean\,s, \CollRecOK\ of \CollRecN\ trials within 10\,s & Partly achieved\\
+O5 & 201 of 201 flushed in simulation; 4 of 4 live outages & Achieved\\
+O6 & security tests (Section~\ref{sec:nonfunc}) & Achieved with a pre-shared key\\
+O7 & every metric is a query over per-node logs & Achieved\\
+O8 & web application, device screens, API tests, five processes, two laptops & Achieved\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Discussion of Findings}
+Hop count is a poor proxy for delivery, and the cost is large when it is wrong: a weak shortcut loses almost half the traffic under hop count and almost none under the weighted cost, with no change to topology or traffic. Timer constants shape the results: recovery clusters at the heartbeat timeout and convergence at multiples of the gossip interval, so those targets are properties of constants rather than algorithms, which tells us exactly what to tune. Loss is paid for in tail latency: delivery stays high to 30\,\% loss, but each lost ACK costs a timeout, so medians move from milliseconds to seconds. Priority matters only under contention: on an idle network SOS and routine traffic are equally fast, and the advantage appears once a link queues, which is the disaster condition. Testing found real defects in code we believed finished (Section~\ref{sec:defects}).
+
+\subsection{Practical Applicability}
+A deployment needs devices running the node program, a topology (or multicast discovery), a gateway or rescue device and a shared network segment. It is usable today as a campus, hospital or building safety system on existing laptops, and as the reference implementation of a protocol whose transport can later be Bluetooth Low Energy or Wi-Fi Direct. Without a radio transport it is not yet a phone-to-phone application, which is the main gap to deployment.
+

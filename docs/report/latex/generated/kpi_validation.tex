@@ -1,0 +1,20 @@
+\begin{table}[H]
+\caption{Validation of the key performance indicators of Table~\ref{tab:kpi} against measured data}
+\label{tab:kpival}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.3cm}@{}}
+\toprule
+\textbf{KPI} & \textbf{Target} & \textbf{Measured} & \textbf{Verdict} \\ \midrule
+K1 Delivery & $\ge$ 90\,\% (40 nodes, 20\,\% loss, failures injected) & 92.6\,\% mean over 50 runs (worst run 76\,\%). Without failures, a 43-node grid at 20\,\% loss: 95.8\,\%. & Met \\
+K2 Convergence & $\le$ 15\,s & collapse\_40: mean 9.6\,s; 47 of 50 runs $\le$ 15\,s; worst 15.25\,s. Mean 17.7\,s in the 35\,\% loss scenario. Values come in multiples of the 5\,s gossip interval. Live devices (2\,s gossip): 3.8\,s from process start. & Met in 47/50 runs; not at 35\,\% loss \\
+K3 Recovery & $\le$ 10\,s & mean 8.1\,s, median 10.2\,s; 23 of 50 trials $\le$ 10\,s; the other 27 took 10.2--10.25\,s, i.e. the 10\,s heartbeat timeout plus the 0.25\,s sampling step. Live devices (4\,s timeout): median 4.0\,s, max 4.5\,s over 8 trials, every message delivered & Mean met; 27/50 trials miss by $\le$ 0.25\,s \\
+K4 SOS advantage & $\ge$ 3$\times$ & 4.4$\times$ (median routine $/$ median SOS) & Met \\
+K5 Store-and-forward & 100\,\% flushed & 201/201 in the no-gateway scenario; 100\,\% of live trials & Met \\
+K6 Weighted vs hop count & Weighted better & 99.2\,\% vs 57.4\,\% & Met \\
+K7 Scale & $\ge$ 50 nodes within the targets & 50 nodes at 5\,\% loss: 100.0\,\% delivery; 50 nodes at 20\,\% loss: 88.2\,\%; largest tested 65 nodes: 98.9\,\% (5\,\%) and 86.0\,\% (20\,\%) & Met at 5\,\% loss; not at 20\,\% \\
+K8 UI freshness & $\le$ 2\,s & API response median 16\,ms; screens poll every 0.7\,s & Met \\
+K9 Correctness & 100\,\% passed & 311/312 passed in all 3 runs; 1 timing-sensitive test failed once & Met except one flaky test \\
+K10 Security & All hold & relay cannot decrypt, forged signature rejected, tampered payload rejected: automated tests pass & Met \\
+\bottomrule
+\end{tabularx}
+\end{table}

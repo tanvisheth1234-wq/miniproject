@@ -160,13 +160,30 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         rescue_ids = [i for i, n in cfg["nodes"].items() if n["role"] == "RESCUE" and i != node_id]
         route = views.route_view(node.router, node.graph, rescue_ids[0] if rescue_ids else RESCUE_DST) if online else None
         view = views.node_view(node, labels.get(node_id))
+        thread = view["thread"]
+        for m in thread:
+            if m["direction"] != "sent":
+                continue
+            evs = node.store.events_for_message(m["msg_id"])
+            hops = [e["peer"] for e in evs if e["kind"] in ("sent", "retry", "sf_flush") and e.get("peer")]
+            m["first_hop"] = hops[-1] if hops else None
+            m["retries"] = sum(1 for e in evs if e["kind"] == "retry")
+        forwarded = [
+            {"src": r["src"], "dst": r["dst"], "priority_name": views.PRIORITY_NAMES.get(r["priority"], "?"),
+             "created_ms": r["created_ms"]}
+            for r in node.store.list_messages(direction="forwarded", limit=8)
+        ]
         return {
             "id": node_id, "label": labels.get(node_id, node_id), "role": spec["role"], "online": online,
             "nodes": nodes, "links": links,
             "route": route["path"] if route and route["path"][-1] != node_id else [],
             "hearing": [n["id"] for n in view["neighbours"]],
+            "neighbours": view["neighbours"],
+            "counters": view["counters"],
+            "forwarded": forwarded,
+            "now_ms": int(time.time() * 1000),
             "held": len(view["queues"]["store_forward"]),
-            "thread": view["thread"],
+            "thread": thread,
             "log": friendly_log(node, labels),
             "security": view["security"],
             "web_url": f"http://{lan_ip()}:{spec['web']}",
