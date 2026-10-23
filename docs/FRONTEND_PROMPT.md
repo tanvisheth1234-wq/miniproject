@@ -1,7 +1,7 @@
 # Frontend Build Prompt — Phase 4
 
 This is for Tanvi. Two parts: (1) how to connect design/MCP tools before starting, and
-(2) the actual prompt to paste into Claude (or whichever AI tool) to build the UI.
+(2) the actual prompt to paste into the AI assistant used to build the UI.
 
 ## 1. Connect MCP tools first
 
@@ -20,7 +20,7 @@ references and components instead of guessing:
 - **UI/UX Pro** — design-pattern/critique MCP, useful for a second opinion on the layout
   before committing to it.
 
-In Claude: `/mcp` → add each one → follow its own auth flow (most are "find it, click
+In the assistant's MCP settings: add each one → follow its own auth flow (most are "find it, click
 connect, approve in the browser tab that opens").
 
 **Giving the assistant the actual backend code as context:** since the Python backend

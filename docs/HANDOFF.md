@@ -1,6 +1,6 @@
 # EcoMesh: project hand-off
 
-Single status document for the team (Twissha, Tanvi, Miti) and for anyone, or any Claude session, picking this repo up cold. Branch: `develop_4` (Phase 4). Repo: https://github.com/tanvisheth1234-ug/miniproject
+Single status document for the team (Twissha, Tanvi, Miti) and for anyone picking this repo up cold. Branch: `develop_4` (Phase 4). Repo: https://github.com/tanvisheth1234-ug/miniproject
 
 ## 1. What the project is
 
@@ -64,7 +64,7 @@ Rules we agreed: one branch per phase; never merge between phase branches; each 
 |---|---|---|
 | Poster and/or research paper for the end-semester evaluation | all | the college email asks for a poster at ESE; reports and posters come from `docs/report` content |
 | Plagiarism report | all | upload the report PDF/LaTeX to the college-approved checker; add the result as asked |
-| Phase IV presentation deck | all | not built yet; Claude can generate it from the report |
+| Phase IV presentation deck | all | not built yet; can be generated from the report |
 | Photo or screen capture of the two-laptop run | Twissha + Tanvi | add to Chapter 10 (Figure on deployment) |
 | Contribution log confirmation | each member | report Section 7.8 lists commits: Twissha 24, Tanvi 19, Miti 2 (Miti's commits are under the name "Delta Student"); each member must confirm their real contribution and fix Git identity going forward |
 | Date and place on the declaration; guide's review | all | |
