@@ -47,10 +47,10 @@ python -m pytest -q
 
 Each phase lives on its own branch, inheriting everything before it rather than merging
 back: `develop` (Phase 1) → `develop_2` (+ Phase 2) → `develop_3` (+ Phase 3) →
-`develop_4` (+ Phase 4, in progress). See `CONTRIBUTING.md` for commit conventions.
+`develop_4` (+ Phase 4) → `develop_5` (+ Phase 5, in progress). See `CONTRIBUTING.md` for commit conventions.
 
 ## Team
 
-- **Miti Shah** — Phase 1–2 code (discovery, relay, simulator)
-- **Twissha Shah** — Phase 3 code (routing, reliability, security, storage)
+- **Miti Shah** — Phase 1–2 code (discovery, relay, simulator) and Phase 3 components (Dijkstra routing, dedup and priority queue, ACK/retry and store-and-forward, encryption and signing, SQLite log)
+- **Twissha Shah** — Phase 3 cost function, link-state gossip and node wiring; Phase 4 integration, multi-device demo and report
 - **Tanvi Sheth** — Phase 4 (API, UI, integration)

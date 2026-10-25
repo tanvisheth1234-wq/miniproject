@@ -1,17 +1,17 @@
 {
-  "commits": 45,
+  "commits": 49,
   "per_member": {
-    "Twissha Shah": 24,
-    "Tanvi Sheth": 19,
-    "Miti Shah": 2
+    "Miti Shah": 12,
+    "Twissha Shah": 18,
+    "Tanvi Sheth": 19
   },
   "per_identity": {
-    "twissha0206 <twisshashah@gmail.com>": 24,
+    "mitishah2109 <mitishah2109@gmail.com>": 12,
+    "twissha0206 <twisshashah@gmail.com>": 18,
     "tanvi-sheth2006 <tanvisheth1964@gmail.com>": 18,
-    "Delta Student <miti2109@gmail.com>": 2,
     "tanvisheth1234-wq <tanvisheth1234@gmail.com>": 1
   },
-  "conventional": 40,
+  "conventional": 44,
   "non_conventional": [
     "phase 2 final",
     "phase-2",
@@ -24,7 +24,8 @@
     "develop",
     "develop_2",
     "develop_3",
-    "develop_4"
+    "develop_4",
+    "develop_5"
   ],
   "tags": [
     "v0.3-phase3"

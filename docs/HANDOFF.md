@@ -1,6 +1,6 @@
 # EcoMesh: project hand-off
 
-Single status document for the team (Twissha, Tanvi, Miti) and for anyone picking this repo up cold. Branch: `develop_4` (Phase 4). Repo: https://github.com/tanvisheth1234-ug/miniproject
+Single status document for the team (Twissha, Tanvi, Miti) and for anyone picking this repo up cold. Branch: `develop_5` (Phase 5; Phase 4 is finished on `develop_4`). Repo: https://github.com/tanvisheth1234-wq/miniproject
 
 ## 1. What the project is
 
@@ -23,7 +23,7 @@ Stack: Python 3.10 asyncio engine; FastAPI + WebSocket API; React PWA website; s
 |---|---|---|
 | 1 | `develop` | 52-byte binary packet, `Transport` interface |
 | 2 | `develop_2` | discovery, single-hop relay, simulated transport |
-| 3 | `develop_3` (Twissha) | routing, reliability, crypto, store-and-forward, SQLite, `Node` |
+| 3 | `develop_3` (Miti and Twissha) | routing, reliability, crypto, store-and-forward, SQLite, `Node` (see `docs/contribution-log.md`) |
 | 4 | `develop_4` (Tanvi: API/UI; Twissha: integration, fixes, devices, report) | FastAPI + WebSocket, React site, simulator scenarios and metrics, multi-device demo, tests, report |
 
 Rules we agreed: one branch per phase; never merge between phase branches; each person runs their own git commands.
@@ -66,7 +66,7 @@ Rules we agreed: one branch per phase; never merge between phase branches; each 
 | Plagiarism report | all | upload the report PDF/LaTeX to the college-approved checker; add the result as asked |
 | Phase IV presentation deck | all | not built yet; can be generated from the report |
 | Photo or screen capture of the two-laptop run | Twissha + Tanvi | add to Chapter 10 (Figure on deployment) |
-| Contribution log confirmation | each member | report Section 7.8 lists commits: Twissha 24, Tanvi 19, Miti 2 (Miti's commits are under the name "Delta Student"); each member must confirm their real contribution and fix Git identity going forward |
+| Contribution log confirmation | each member | counts on `develop_5`: Tanvi 19, Twissha 18, Miti 12; `docs/contribution-log.md` lists who built what and records the 24 Oct 2026 author correction; each member confirms their entry and sets their Git identity |
 | Date and place on the declaration; guide's review | all | |
 | Printed, spiral-bound copy for Phase IV | all | per the college email |
 | Optional: usability test with 5 people | any | report states none was performed; either do it or leave the statement |

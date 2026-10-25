@@ -19,13 +19,14 @@ ROOT = Path(__file__).resolve().parents[3]
 OUT_TEX = ROOT / "docs" / "report" / "latex" / "generated" / "git_stats.tex"
 OUT_JSON = Path(__file__).resolve().parent / "results" / "git.json"
 
-# git identity -> team member. Miti's commits carry the machine-default name
-# "Delta Student" (email miti2109@gmail.com); Tanvi pushed from two accounts.
+# git identity -> team member. Tanvi pushed from two accounts; Miti's older commits
+# used the address miti2109@gmail.com.
 MEMBER = {
     "twisshashah@gmail.com": "Twissha Shah",
     "tanvisheth1964@gmail.com": "Tanvi Sheth",
     "tanvisheth1234@gmail.com": "Tanvi Sheth",
     "miti2109@gmail.com": "Miti Shah",
+    "mitishah2109@gmail.com": "Miti Shah",
 }
 CONVENTIONAL = re.compile(r"^(feat|fix|docs|test|chore|refactor|perf|style|build|ci)(\([^)]+\))?!?: .+")
 
@@ -36,7 +37,7 @@ def git(*args: str) -> str:
 
 
 def main() -> None:
-    log = [l.split("\x1f") for l in git("log", "--all", "--format=%H\x1f%an\x1f%ae\x1f%s").splitlines() if l]
+    log = [l.split("\x1f") for l in git("log", "--remotes=origin", "--format=%H\x1f%an\x1f%ae\x1f%s").splitlines() if l]
     per_member = Counter(MEMBER.get(email, name) for _, name, email, _ in log)
     per_identity = Counter(f"{name} <{email}>" for _, name, email, _ in log)
     conv = [s for _, _, _, s in log if CONVENTIONAL.match(s)]
@@ -60,7 +61,7 @@ def main() -> None:
     branch_str = ", ".join(TT + esc(b) + "}" for b in branches)
     tag_str = ", ".join(TT + esc(t) + "}" for t in tags) or "none"
     tex = f"""\\begin{{table}}[H]
-\\caption{{Commits per team member, read from \\texttt{{git log --all}} ({total} commits)}}
+\\caption{{Commits per team member, read from \\texttt{{git log}} over all remote branches ({total} commits)}}
 \\label{{tab:commits}}
 \\small
 \\begin{{tabular}}{{@{{}}lrr@{{}}}}
