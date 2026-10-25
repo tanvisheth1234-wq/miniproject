@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-25T16:46:21.935Z",
+  "base": "http://127.0.0.1:8000",
+  "checks": [
+    {
+      "id": "UT-01",
+      "name": "All 9 pages open from the top menu and render content",
+      "passed": true,
+      "detail": "text length per page: 4188, 1384, 1403, 1219, 6035, 2263, 2248, 3464, 1955"
+    },
+    {
+      "id": "UT-02",
+      "name": "Releasing the SOS button early (0.5 s) does not send an SOS",
+      "passed": true,
+      "detail": "SOS count 0 -> 0"
+    },
+    {
+      "id": "UT-03",
+      "name": "Holding the SOS button for 1.8 s sends an SOS that is delivered",
+      "passed": true,
+      "detail": "last SOS status: delivered"
+    },
+    {
+      "id": "UT-04",
+      "name": "Beat 1: self-organisation (all nodes know the whole mesh)",
+      "passed": true,
+      "detail": "All 5 nodes know all 5 nodes — no configuration was entered."
+    },
+    {
+      "id": "UT-05",
+      "name": "Beat 2: an SOS sent last still arrives first",
+      "passed": true,
+      "detail": "The SOS arrived first of 7, though it was sent last."
+    },
+    {
+      "id": "UT-06",
+      "name": "Beat 3: kill the relay on the active path, next SOS reroutes",
+      "passed": true,
+      "detail": "L2 is down. The new SOS still arrived via L1 → L3 → L4."
+    },
+    {
+      "id": "UT-07",
+      "name": "Beat 4: gateway down, 5 SOS held in store-and-forward",
+      "passed": true,
+      "detail": "5 SOS messages are being held at L1, undelivered but not lost."
+    },
+    {
+      "id": "UT-08",
+      "name": "Beat 5: gateway back, all held SOS flush",
+      "passed": true,
+      "detail": "5 of 5 held messages flushed through the returning gateway."
+    },
+    {
+      "id": "UT-09",
+      "name": "Beat 6 opens the simulator page",
+      "passed": true,
+      "detail": "http://127.0.0.1:8000/simulator"
+    },
+    {
+      "id": "UT-10",
+      "name": "All 5 mesh layouts load with the expected node counts",
+      "passed": true,
+      "detail": "demo5:5, building12:13, collapse20:21, chain6:6, blank:0"
+    },
+    {
+      "id": "UT-11",
+      "name": "A switched-off node shows \"This phone is off\" and cannot send",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "UT-12",
+      "name": "The API refuses an SOS from a switched-off node (HTTP 409)",
+      "passed": true,
+      "detail": "status 409"
+    },
+    {
+      "id": "UT-13",
+      "name": "Security drill: honest relay accepted, 3 attacks rejected",
+      "passed": true,
+      "detail": "3 attacks rejected"
+    },
+    {
+      "id": "UT-14",
+      "name": "Simulator page: weighted routing beats hop-count on the same seeds",
+      "passed": true,
+      "detail": "weighted 100% vs hop-count 54%"
+    },
+    {
+      "id": "UT-15",
+      "name": "At 390 px width no page scrolls sideways",
+      "passed": true,
+      "detail": "overflow px per page: 0, 0, 0, 0, 0, 0, 0, 0, 0"
+    },
+    {
+      "id": "UT-16",
+      "name": "No console errors or script exceptions during the whole run",
+      "passed": true,
+      "detail": "none"
+    }
+  ]
+}
