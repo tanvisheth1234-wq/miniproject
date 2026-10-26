@@ -4,81 +4,76 @@
 \input{generated/trace_numbers.tex}
 
 \subsection{Testing Strategy}
-Testing is layered, and each layer answers a different question: unit (does a module behave in isolation), integration (do modules work together in a node, between nodes, through the API and over real sockets), functional (does each SRS requirement hold), non-functional (reliability, scalability, performance, availability, security, usability), boundary and invalid-input, concurrency and stress, and live-device tests. The key design choice is the simulated transport: routing and reliability run on a deterministic in-memory network, so a failure reproduces from a seed. The suite has \NTests\ automated test cases, run completely \NRuns\ times for the results below.
-\input{generated/tests_summary.tex}
+Testing is layered (unit, integration, functional, non-functional, boundary, concurrency and live devices); the simulated transport makes routing and reliability tests deterministic, so a failure reproduces from a seed. The \NTests\ test cases were run completely \NRuns\ times. \input{generated/tests_summary.tex}
 
 \subsection{Unit Testing}
-Unit tests cover each module on its own: the packet format (47 tests: round trips, every field's range, null padding, truncation of each region, bad magic, signable and identity bytes, retransmission counter); the cost function and graph; Dijkstra including caching and \texttt{RESCUE\_\_}; gossip encoding and merging; discovery and link quality; the dedup set, priority queue, ACK tracker and store-and-forward bounds; AES-GCM and Ed25519; the SQLite log; the relay; and the simulated transport.
+Each module is tested alone: the packet format (47 tests: round trips, field ranges, truncation of each region, bad magic, signable bytes), the cost function and graph, Dijkstra with caching and \texttt{RESCUE\_\_}, gossip, discovery and link quality, the dedup set, priority queue, ACK tracker and store-and-forward bounds, AES-GCM and Ed25519, the SQLite log, the relay and the simulated transport.
 
 \subsection{Integration Testing}
-\texttt{test\_node} (27 tests) runs discovery and relay on one transport, auto-relaying, role propagation, multi-hop origination via re-flooded reports, ACK, the whole message lifecycle in the database, encryption and signing end to end, retry exhaustion into retention, eviction and expiry. \texttt{test\_ack\_multihop} checks that the ACK returns over the data's path, that a lost ACK is re-sent and that a retry crosses relays that saw the original. \texttt{test\_api} drives front end, back end and engine through FastAPI's test client, including the WebSocket: a converged snapshot, an SOS reaching the rescue queue, node views, kill and revive, the event stream, the protocol inspector and the security drill. \texttt{test\_lan\_transport} checks previous-hop identity, range emulation, the power switch, hostile bytes, a dead peer failing fast, and a full three-node mesh over TCP. The React interface and device screens have no automated browser tests; they were inspected by running them (Section~\ref{sec:shots}).
-
+\texttt{test\_node} (27 tests) covers discovery and relay on one transport, multi-hop origination, ACK, the message lifecycle, end-to-end encryption and signing, retry exhaustion, eviction and expiry; \texttt{test\_ack\_multihop} checks that ACKs and retries cross relays correctly; \texttt{test\_api} drives front end, back end and engine through FastAPI and its WebSocket; \texttt{test\_lan\_transport} runs a three-node mesh over real TCP. The screens were checked by running them (Section~\ref{sec:shots}).
 \subsection{Functional Testing}
 \label{sec:func}
-Table~\ref{tab:fr} lists every requirement with its acceptance criterion, the tests that must pass. \input{generated/trace_summary.tex} All mapped tests passed in every complete run except one timing-sensitive test that failed once (Section~\ref{sec:defects}). Two requirements are only partly met and are reported as such: SNF-3 (an immediate delivery attempt when a new neighbour appears; retained messages are instead retried every flush interval) and LOG-5 (the history filter exists in the store but the screens have no filter control).
-
+Table~\ref{tab:frsum} summarises how the requirements are verified. \input{generated/trace_summary.tex} All mapped tests passed in every complete run except one timing-sensitive test that failed once (Section~\ref{sec:defects}). SNF-3 (immediate attempt on a new neighbour) and LOG-5 (history filter on screen) are only partly met.
 \subsection{Non-Functional Testing}
 \label{sec:nonfunc}
-\textbf{Reliability:} delivery at 0--50\,\% injected loss (Table~\ref{tab:loss}). \textbf{Scalability:} 10 to 65 nodes at 5\,\% and 20\,\% loss (Table~\ref{tab:scale}). \textbf{Performance:} latency by priority (Table~\ref{tab:priority}), throughput, and live latency (Table~\ref{tab:live}). \textbf{Availability:} recovery over 50 simulated trials and 8 live failovers (Figure~\ref{fig:results}). \textbf{Security:} a relay without the session key never sees the plaintext (\texttt{test\_relay\_never\_sees\_plaintext\_payload}); a tampered ciphertext or a wrong key is detected and dropped; a forged-signature SOS and an unknown signer are rejected; signatures verify across multi-hop relays; and the API's attack drill checks that every attack is defended. \textbf{Usability:} the SOS control is a single hold of about 1.2\,s on one prominent button with plain-language status; a timed study with participants was not carried out (Section~\ref{sec:limits}).
+\textbf{Reliability:} delivery at 0--50\,\% loss (Figure~\ref{fig:results}a). \textbf{Scalability:} 10 to 65 nodes (Table~\ref{tab:scale}). \textbf{Performance:} latency by priority (Section~\ref{sec:perfresults}), throughput and live latency (Table~\ref{tab:live}). \textbf{Availability:} recovery over 50 simulated trials and 8 live failovers. \textbf{Security:} a relay without the key never sees plaintext; tampered ciphertext, a wrong key, a forged signature and an unknown signer are rejected; signatures verify across relays. \textbf{Usability:} one 1.2\,s hold on one button with plain-language status; no timed study with participants (Section~\ref{sec:limits}).
 
 \subsection{Boundary and Invalid-Input Testing}
 \label{sec:boundary}
-Tests cover empty and header-only input; a bad magic value; truncated header, path, payload and signature; TTL out of range; a payload over the 16-bit length; a path that is too long; node ids over 8 bytes or not ASCII; a wrong-length signature; the signed flag without a signature; a wrong key size; ciphertext shorter than the nonce; an empty payload (valid); and a send to an unknown destination (held, not an exception). \texttt{test\_robustness} also feeds 3\,000 random byte strings and 1\,000 bit-flipped valid packets to the parser and 200 garbage buffers to a running node, requiring only ``parsed'' or ``rejected with \texttt{PacketError}'' and that the node still delivers a normal message afterwards.
+Tests cover empty, header-only and truncated input; a bad magic value; out-of-range TTL and lengths; over-long paths and node ids; wrong-length signatures and key sizes; ciphertext shorter than the nonce; and a send to an unknown destination (held, not an exception). \texttt{test\_robustness} feeds 3\,000 random and 1\,000 bit-flipped packets to the parser and 200 garbage buffers to a running node, which must only reject them with \texttt{PacketError} and keep working.
 
 \subsection{Concurrency and Stress Testing}
 \label{sec:stress}
-200 simultaneous sends over two hops with ACKs: all 200 delivered exactly once and every ACK returned. Two senders sending 50 SOS and 50 routine messages simultaneously to one gateway: all 100 arrive intact. One packet replayed five times: delivered once, four duplicates dropped. Throughput up to 2\,000 simultaneous sends (Section~\ref{sec:perfresults}) and the congested priority scenario complete the stress tests. Because shared state lives on one thread, races and deadlocks cannot occur by construction; the tests confirm exactly-once delivery and stability under load.
+200 simultaneous sends over two hops arrived exactly once with every ACK returned; 50 SOS and 50 routine messages from two senders all arrived intact; a packet replayed five times was delivered once. Throughput to 2\,000 sends and the congested priority scenario complete the stress tests; with all shared state on one thread, races and deadlocks cannot occur.
 
 \subsection{Test Case Specification}
 \label{sec:tcs}
+Table~\ref{tab:tcs} specifies eight representative test cases with their requirement, preconditions, expected and actual results and evidence.
 \begin{table}[!htbp]
-\caption{Representative test cases (every requirement's tests are in Table~\ref{tab:fr})}
+\caption[Representative test cases]{Representative test cases}
 \label{tab:tcs}
-\scriptsize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.8cm}>{\raggedright\arraybackslash}p{1.1cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.9cm}@{}}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.15cm}>{\raggedright\arraybackslash}p{1.25cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.25cm}@{}}
 \toprule
 \textbf{ID} & \textbf{Req.} & \textbf{Scenario, input and preconditions} & \textbf{Expected result} & \textbf{Actual result and evidence} & \textbf{Result}\\ \midrule
 TC-01 & RTE-3, 4 & short path over a lossy link, long path over clean links & Dijkstra takes the clean path & as expected; \texttt{test\_dijkstra} & Pass\\
-TC-02 & RTE-8 & report from a node two hops away & re-flooded; graph complete beyond the neighbour & as expected; \texttt{test\_link\_state} & Pass\\
-TC-03 & PRI-3 & SOS reaches a relay with routine packets queued & SOS forwarded first & as expected; \texttt{test\_relay} & Pass\\
-TC-04 & REL-5, 6 & ACK lost; sender times out & route recomputed, resent, destination sees it once & as expected; \texttt{test\_ack\_multihop} & Pass\\
-TC-05 & SNF-1, 2 & no route; a route later appears & held, then flushed and delivered & as expected; live: 4 of 4 outages flushed (Table~\ref{tab:live}) & Pass\\
-TC-06 & SNF-5 & retention queue full & lowest priority evicted; an SOS is never displaced & as expected; \texttt{test\_ack\_retry} & Pass\\
-TC-07 & SEC-5 & forged-signature packet & rejected and logged & as expected; \texttt{test\_node} & Pass\\
-TC-08 & FWD-6 & 3\,000 random byte strings & only \texttt{PacketError}; node survives & one defect found and fixed (D4); \texttt{test\_robustness} & Pass\\
-TC-09 & DIS-7 & three nodes over real TCP, neighbour-restricted & routes learned; message and ACK delivered & as expected; \texttt{test\_lan\_transport} & Pass\\
-TC-10 & K1 & 40 nodes, 20\,\% loss, relay and gateway failures, 50 seeds & delivery $\ge$ 90\,\% & \CollDel\,\% (worst run \CollDelMin\,\%); Table~\ref{tab:scenarios} & Pass\\
-TC-11 & K3 & kill the relay on the active path, 50 trials & re-route $\le$ 10\,s & mean \CollRecMean\,s; \CollRecOK\ of \CollRecN\ within 10\,s; worst \CollRecMax\,s; Figure~\ref{fig:results} & Partial\\
-TC-12 & K4, K6 & congested radio; weighted versus hop count on identical seeds & SOS $\ge$ 3$\times$ faster; weighted delivers more & \SosAdv$\times$; \HopW\,\% vs \HopH\,\%; Table~\ref{tab:priority} & Pass\\
+TC-02 & PRI-3 & SOS reaches a relay with routine packets queued & SOS forwarded first & as expected; \texttt{test\_relay} & Pass\\
+TC-03 & REL-5, 6 & ACK lost; sender times out & route recomputed, resent, destination sees it once & as expected; \texttt{test\_ack\_multihop} & Pass\\
+TC-04 & SNF-1, 2 & no route; a route later appears & held, then flushed and delivered & as expected; live: 4 of 4 outages flushed (Table~\ref{tab:live}) & Pass\\
+TC-05 & FWD-6 & 3\,000 random byte strings & only \texttt{PacketError}; node survives & one defect found and fixed (D4); \texttt{test\_robustness} & Pass\\
+TC-06 & K1 & 40 nodes, 20\,\% loss, relay and gateway failures, 50 seeds & delivery $\ge$ 90\,\% & \CollDel\,\% (worst run \CollDelMin\,\%); Table~\ref{tab:scenarios} & Pass\\
+TC-07 & K3 & kill the relay on the active path, 50 trials & re-route $\le$ 10\,s & mean \CollRecMean\,s; \CollRecOK\ of \CollRecN\ within 10\,s; worst \CollRecMax\,s; Figure~\ref{fig:results} & Partial\\
+TC-08 & K4, K6 & congested radio; weighted versus hop count on identical seeds & SOS $\ge$ 3$\times$ faster; weighted delivers more & \SosAdv$\times$; \HopW\,\% vs \HopH\,\%; Section~\ref{sec:perfresults} & Pass\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{Defect Identification and Resolution}
 \label{sec:defects}
+Table~\ref{tab:defects} records each significant defect, its cause, fix and retest; D4 and D5 were fixed before the Chapter~\ref{ch:perf} measurements.
 \begin{table}[!htbp]
 \caption{Significant defects, causes, corrective actions and retesting}
 \label{tab:defects}
-\scriptsize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.6cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{5.2cm}@{}}
 \toprule
 \textbf{ID} & \textbf{Found by} & \textbf{Defect and cause} & \textbf{Fix and retest}\\ \midrule
-D1 & integration test of two components on one node & only one of discovery and relay received packets: one receive callback, the last registrant won & single dispatcher registered last; regression test\\
-D2 & Phase~4 integration & multi-hop ACK and retry failed: dedup keyed on message id dropped every ACK at the first relay and swallowed retries & key on type, id and attempt; retransmission counter in the reserved byte; re-ACK duplicates; new tests\\
+D1 & integration test & one receive callback: only the last of discovery and relay heard packets & single dispatcher; regression test\\
+D2 & Phase~4 integration & dedup keyed on message id dropped every ACK at the first relay and swallowed retries & key on type, id and attempt; retry counter in the reserved byte; new tests\\
 D3 & Phase~4 integration & dead nodes stayed routable: newer reports merged with old ones & a newer report replaces the origin's edges; tests\\
-D4 & fuzz test & a non-ASCII byte in a node-id field made \texttt{Packet.unpack} raise \texttt{UnicodeDecodeError} instead of \texttt{PacketError}; every receiver catches only \texttt{PacketError}, so one damaged packet could raise inside the receive path & decode and encode failures raise \texttt{PacketError}; both fuzz tests pass\\
-D5 & repeated runs of the socket tests & \texttt{Node.stop()} hung intermittently (in about a quarter of runs) on Windows with Python~3.10: \texttt{wait\_for} swallowed a cancellation, so a background loop survived & helper built on \texttt{asyncio.wait}; 15 of 15 test-file runs and 40 of 40 standalone iterations clean\\
-D6 & repeated full-suite runs & timing-sensitive tests fail occasionally under load: \texttt{test\_api::\allowbreak test\_node\_view\_reports\_peers\_with\_hop\_distance} in 2 of 6 runs and \texttt{test\_ack\_multihop::\allowbreak test\_ack\_returns\_over\_the\_path\_the\_data\_took} in 1 of 6; both pass alone (8 of 8) & open: the fixed sleeps in these tests should become condition polling\\
+D4 & fuzz test & a non-ASCII node id made \texttt{Packet.unpack} raise \texttt{UnicodeDecodeError}, which receivers do not catch & decode failures raise \texttt{PacketError}; fuzz tests pass\\
+D5 & repeated socket-test runs & \texttt{Node.stop()} hung in about a quarter of runs on Windows: \texttt{wait\_for} swallowed a cancellation & helper on \texttt{asyncio.wait}; 15/15 and 40/40 runs clean\\
+D6 & repeated full-suite runs & two timing-sensitive tests (\texttt{test\_api}, \texttt{test\_ack\_multihop}) failed in 2 and 1 of 6 runs under load; both pass alone & open: replace fixed sleeps with condition polling\\
 \bottomrule
 \end{tabularx}
 \end{table}
-D4 and D5 were found and fixed before the measurements in Chapter~\ref{ch:perf} were taken, so those results include the fixes.
 
 \subsection{Validation Against KPIs}
 \label{sec:kpival}
+Table~\ref{tab:kpival} compares each target of Table~\ref{tab:kpi} with the measured result.
 \input{generated/kpi_validation.tex}
-K4, K5, K6 and K10 are met with margin; K1 is met in the specified condition; K2 and K3 are met on average but not in every run, by a fraction of a second, because of timer constants; K7 holds at 5\,\% loss but not at 20\,\% above about 43 nodes; K9 has one timing-sensitive test that failed once.
+K4--K6 and K10 are met with margin and K1 in the specified condition; K2 and K3 hold on average but miss by a fraction of a second in some runs (timer constants); K7 holds at 5\,\% loss, not at 20\,\% above about 43 nodes; K9 has one flaky test.
 
 \subsection{Limitations and Untested Scenarios}
 \label{sec:limits}
-\textbf{No radio hardware:} the link is a neighbour-restricted LAN; interference, fading and mobility were not tested. \textbf{Live timing is loopback:} the five measured processes shared one machine, and the two-laptop run over a hotspot was a functional demonstration that was not timed. \textbf{No usability study:} the timed ``screen-on to SOS-sent'' test with five participants was not performed. \textbf{No automated UI tests.} \textbf{Scale:} nothing above 65 nodes and no long soak test. \textbf{Relays do not retain:} a relay with no route drops the packet (logged); only the originator retains, and its ACK timer covers the loss at the cost of a timeout. \textbf{Security:} one pre-shared key serves the mesh, so a node that holds it could read what it forwards (per-pair key agreement would remove this); no external review.
+\textbf{No radio hardware:} interference, fading and mobility were not tested. \textbf{Live timing is loopback;} the two-laptop run was not timed. \textbf{No usability study} and \textbf{no automated UI tests}. \textbf{Scale:} nothing above 65 nodes, no soak test. \textbf{Relays do not retain.} \textbf{Security:} one pre-shared key serves the mesh; no external review.

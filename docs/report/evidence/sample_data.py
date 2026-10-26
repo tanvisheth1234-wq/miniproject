@@ -61,14 +61,14 @@ def main() -> None:
             continue
         rows.append([f"{node}", short(m["msg_id"]), m["src"], m["dst"], str(m["priority"]), m["direction"], m["status"],
                      esc(m["body"]) if m["body"] else "NULL", "" if m["hop_count"] is None else str(m["hop_count"]), esc(m["path"]) if m["path"] else "NULL"])
-    t1 = [BS + "begin{table}[H]", BS + "caption{Sample rows of " + BS + "texttt{messages} for one SOS from A to C in a real run: each node holds its own view of the same message id}",
+    t1 = [BS + "begin{table}[htbp]", BS + "caption{Sample rows of " + BS + "texttt{messages} for one SOS from A to C in a real run: each node holds its own view of the same message id}",
           BS + "label{tab:samples}", BS + "footnotesize", BS + "setlength{" + BS + "tabcolsep}{3pt}",
           BS + "begin{tabular}{@{}llllllllll@{}}", BS + "toprule",
           " & ".join(BS + "textbf{" + h + "}" for h in ["DB", "msg\\_id", "src", "dst", "prio", "direction", "status", "body", "hops", "path"]) + " " + BS + BS + " " + BS + "midrule"]
     t1 += [" & ".join(r) + " " + BS + BS for r in rows]
     t1 += [BS + "bottomrule", BS + "end{tabular}", BS + "end{table}"]
     ev = d["events"]
-    t2 = [BS + "begin{table}[H]", BS + "caption{Sample rows of " + BS + "texttt{events} on node A for the same message, and of " + BS + "texttt{peers} on node B}",
+    t2 = [BS + "begin{table}[htbp]", BS + "caption{Sample rows of " + BS + "texttt{events} on node A for the same message, and of " + BS + "texttt{peers} on node B}",
           BS + "label{tab:samples2}", BS + "footnotesize", BS + "begin{tabular}{@{}llll@{}}", BS + "toprule",
           " & ".join(BS + "textbf{" + h + "}" for h in ["id", "ts\\_ms (relative)", "kind", "peer"]) + " " + BS + BS + " " + BS + "midrule"]
     base = ev[0]["ts_ms"] if ev else 0

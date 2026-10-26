@@ -77,15 +77,15 @@ def main() -> None:
     def tname(t: str) -> str:
         return BS + "texttt{" + esc(t).replace("::", "::" + BS + "allowbreak{}") + "}"
 
-    L = [BS + "begingroup" + BS + "scriptsize" + BS + "renewcommand{" + BS + "arraystretch}{1.0}", BS + "setlength{" + BS + "tabcolsep}{3pt}",
-         BS + "begin{longtable}{@{}p{0.95cm}p{6.6cm}p{1.2cm}p{7.4cm}@{}}",
-         BS + "caption{Functional requirements by feature (identifiers as in the SRS). Check: Auto = verified by automated tests, Auto+UI = automated tests plus a manual check of the screen, "
+    L = [BS + "begingroup" + BS + "footnotesize" + BS + "renewcommand{" + BS + "arraystretch}{1.0}", BS + "setlength{" + BS + "tabcolsep}{3pt}",
+         BS + "begin{longtable}{@{}p{1.25cm}p{6.3cm}p{1.65cm}p{6.95cm}@{}}",
+         BS + "caption[Functional requirements and their acceptance tests]{Functional requirements by feature (identifiers as in the SRS). Check: Auto = verified by automated tests, Auto+UI = automated tests plus a manual check of the screen, "
          "Partial = only partly implemented, Inspect = code inspection, Manual = manual check only; * marks a mapped test that failed once in repeated runs. The first mapped test is named and (+n) counts the others.}" + BS + BS,
          BS + "label{tab:fr}" + BS + BS,
          BS + "toprule " + BS + "textbf{ID} & " + BS + "textbf{Requirement (the system shall " + BS + "ldots)} & " + BS + "textbf{Check} & " + BS + "textbf{Acceptance criterion: tests that must pass} " + BS + BS + " " + BS + "midrule " + BS + "endfirsthead",
          BS + "toprule " + BS + "textbf{ID} & " + BS + "textbf{Requirement} & " + BS + "textbf{Check} & " + BS + "textbf{Acceptance criterion} " + BS + BS + " " + BS + "midrule " + BS + "endhead"]
     for n, (pref, title, inp, proc, out) in enumerate(FEATURES, start=1):
-        L.append(BS + "multicolumn{4}{@{}p{16.1cm}@{}}{" + BS + "rule{0pt}{7pt}" + BS + "textbf{3.4." + str(n) + " " + title + ".} "
+        L.append(BS + "multicolumn{4}{@{}p{16.78cm}@{}}{" + BS + "rule{0pt}{7pt}" + BS + "textbf{3.4." + str(n) + " " + title + ".} "
                  + BS + "textit{Input:} " + text(inp) + " " + BS + "textit{Processing:} " + text(proc) + " " + BS + "textit{Output:} " + text(out) + "} " + BS + BS + " " + BS + "midrule")
         for rid, (ts, kind) in MAP.items():
             if not rid.startswith(pref):

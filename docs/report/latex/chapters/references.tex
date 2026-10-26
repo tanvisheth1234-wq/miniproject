@@ -1,7 +1,9 @@
+% thebibliography starts its own page (main.tex: every \section begins one),
+% so the contents entry is added inside it, on the References page itself.
 \footnotesize
-\setlength{\itemsep}{0pt}
-\addcontentsline{toc}{section}{References}
 \begin{thebibliography}{99}
+\phantomsection\addcontentsline{toc}{section}{References}
+\setlength{\itemsep}{0.5pt}
 \bibitem{albrecht2021bridgefy}
 M.~R. Albrecht, J.~Blasco, R.~B. Jensen and L.~Mare\v{k}ov\'a, ``Mesh Messaging in Large-scale Protests: Breaking Bridgefy,'' in \emph{Topics in Cryptology -- CT-RSA 2021}, Lecture Notes in Computer Science, vol.~12704, Springer, 2021, pp.~375--398.
 
@@ -29,20 +31,11 @@ D.~S.~J. De Couto, D.~Aguayo, J.~Bicket and R.~Morris, ``A high-throughput path 
 \bibitem{vahdat2000epidemic}
 A.~Vahdat and D.~Becker, ``Epidemic Routing for Partially-Connected Ad Hoc Networks,'' Technical Report CS-2000-06, Duke University, 2000.
 
-\bibitem{spyropoulos2005snw}
-T.~Spyropoulos, K.~Psounis and C.~S. Raghavendra, ``Spray and Wait: An efficient routing scheme for intermittently connected mobile networks,'' in \emph{Proc. ACM SIGCOMM Workshop on Delay-Tolerant Networking (WDTN)}, 2005, pp.~252--259.
-
-\bibitem{lindgren2003prophet}
-A.~Lindgren, A.~Doria and O.~Schel\'en, ``Probabilistic routing in intermittently connected networks,'' \emph{ACM SIGMOBILE Mobile Computing and Communications Review}, vol.~7, no.~3, pp.~19--20, 2003.
-
 \bibitem{fall2003dtn}
 K.~Fall, ``A delay-tolerant network architecture for challenged internets,'' in \emph{Proc. ACM SIGCOMM}, 2003, pp.~27--34.
 
 \bibitem{rfc4838}
 V.~Cerf \emph{et al.}, ``Delay-Tolerant Networking Architecture,'' RFC~4838, IETF, Apr. 2007.
-
-\bibitem{pelusi2006opp}
-L.~Pelusi, A.~Passarella and M.~Conti, ``Opportunistic networking: data forwarding in disconnected mobile ad hoc networks,'' \emph{IEEE Communications Magazine}, vol.~44, no.~11, pp.~134--141, 2006.
 
 \bibitem{reina2015disaster}
 D.~G. Reina, M.~Askalani, S.~L. Toral, F.~Barrero, E.~Asimakopoulou and N.~Bessis, ``A survey on multihop ad hoc networks for disaster response scenarios,'' \emph{International Journal of Distributed Sensor Networks}, vol.~11, no.~10, art.~647037, 2015.

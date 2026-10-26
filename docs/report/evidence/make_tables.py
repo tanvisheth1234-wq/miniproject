@@ -53,7 +53,8 @@ def table(name, caption, label, colspec, header, rows, font="small", note=None):
             for p, w in zip(parts, weights))
         env, pre = "tabular", [BS + "setlength{" + BS + "tabcolsep}{4pt}"]
         head = BS + f"begin{{tabular}}{{@{{}}{cols}@{{}}}}"
-    lines = [BS + "begin{table}[H]", BS + f"caption{{{caption}}}", BS + f"label{{{label}}}", BS + font, *pre,
+    short = caption.split(" (")[0] if " (" in caption else caption
+    lines = [BS + "begin{table}[htbp]", BS + f"caption[{short}]{{{caption}}}", BS + f"label{{{label}}}", BS + font, *pre,
              head, BS + "toprule",
              " & ".join(BS + "textbf{" + h + "}" for h in header) + " " + BS + BS + " " + BS + "midrule"]
     lines += [" & ".join(r) + " " + BS + BS for r in rows]
@@ -129,8 +130,8 @@ def scenarios_tables(sc):
                      num(conv["mean"] if conv else None), num(rec["mean"] if rec else None),
                      f"{sf['flushed']}/{sf['queued']}" if sf["queued"] else "--"])
     table("scenarios", "Results of the seven simulator scenarios (weighted routing; delivery ratio shown as mean (min--max) over the runs)",
-          "tab:scenarios", "AUTO:l3.0,r1,r1,r1,r2.6,r0.9,r1.2,r1.2,r2.0",
-          ["Scenario", "Nodes", "Loss", "Runs", "Delivery", "Hops", "Conv. (s)", "Recov. (s)", "S\\&F flushed/queued"], rows, font="footnotesize",
+          "tab:scenarios", "AUTO:l2.6,r1.1,r1,r1,r3.4,r0.9,r1.2,r1.2,r2.4",
+          ["Scenario", "Nodes", "Loss", "Runs", "Delivery", "Hops", "Conv. (s)", "Recov. (s)", "S\\&F flushed / queued"], rows, font="footnotesize",
           note="Hops = median hop count of delivered messages. Conv. = mean seconds until every node's graph contains every node. Recov. = mean seconds from relay death until the sender has a route avoiding it. "
                "S\\&F counts are event counts summed over all runs: a message re-queued after a failed retry is counted each time, and messages still held when a run ends are not flushed.")
 

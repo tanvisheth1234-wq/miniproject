@@ -28,6 +28,7 @@ MEMBER = {
     "miti2109@gmail.com": "Miti Shah",
     "mitishah2109@gmail.com": "Miti Shah",
 }
+ORDER = ["Miti Shah", "Twissha Shah", "Tanvi Sheth"]  # order used throughout the report
 CONVENTIONAL = re.compile(r"^(feat|fix|docs|test|chore|refactor|perf|style|build|ci)(\([^)]+\))?!?: .+")
 
 
@@ -42,7 +43,7 @@ def main() -> None:
     per_identity = Counter(f"{name} <{email}>" for _, name, email, _ in log)
     conv = [s for _, _, _, s in log if CONVENTIONAL.match(s)]
     non_conv = [s for _, _, _, s in log if not CONVENTIONAL.match(s)]
-    branches = sorted({b.strip().lstrip("*").strip().removeprefix("remotes/origin/") for b in git("branch", "-a").splitlines()
+    branches = sorted({b.strip().lstrip("*").strip().removeprefix("remotes/").removeprefix("origin/") for b in git("branch", "-r").splitlines()
                        if "HEAD" not in b}, key=lambda b: (b != "main", b))
     tags = git("tag").split()
     total = len(log)
@@ -54,13 +55,13 @@ def main() -> None:
     def esc(t: str) -> str:
         return t.replace("\\", r"\textbackslash{}").replace("_", r"\_").replace("&", r"\&").replace("%", r"\%").replace("#", r"\#")
 
-    rows = "\n".join(f"{esc(m)} & {n} & {100 * n / total:.0f}\\,\\%\\\\" for m, n in sorted(per_member.items(), key=lambda kv: -kv[1]))
+    rows = "\n".join(f"{esc(m)} & {n} & {100 * n / total:.0f}\\,\\%\\\\" for m, n in sorted(per_member.items(), key=lambda kv: ORDER.index(kv[0]) if kv[0] in ORDER else 99))
     ident = "; ".join(esc(i) for i in per_identity)
     bad = "; ".join("``" + esc(s) + "''" for s in non_conv)
     TT = chr(92) + "texttt{"
     branch_str = ", ".join(TT + esc(b) + "}" for b in branches)
     tag_str = ", ".join(TT + esc(t) + "}" for t in tags) or "none"
-    tex = f"""\\begin{{table}}[H]
+    tex = f"""\\begin{{table}}[htbp]
 \\caption{{Commits per team member, read from \\texttt{{git log}} over all remote branches ({total} commits)}}
 \\label{{tab:commits}}
 \\small

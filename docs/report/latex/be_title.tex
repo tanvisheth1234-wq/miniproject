@@ -1,37 +1,47 @@
+% Cover page: content and order of the department template (be_title.tex),
+% with the items Section 2.1 of the guidelines asks for: title, institute,
+% department, academic year, names and UIDs, guide, semester and course.
 \begin{titlepage}
-\vspace*{0.025cm}
-{\centering
-{\Large\textbf {\ProjectTitle}}\\
-\vspace{0.55cm}
-Mini Project Report\\
-submitted in partial fulfillment of the requirement\\
-for the award of the Degree of\\\vspace{0.65cm}
-{\large\textbf {Bachelor of Technology}}\\
-in \\
-{\large\textbf {Computer Engineering}}\\
-\vspace{0.50cm}
-by\\
-\vspace{0.55cm}
-{\large \textbf {\StudentA\ (UID \UIDA)}}\\
-{\large \textbf {\StudentB\ (UID \UIDB)}}\\
-{\large \textbf {\StudentC\ (UID \UIDC)}}\\
-\vspace{0.3cm}
-\GroupNo\ \textbullet\ \Semester\ \textbullet\ \CourseName\\
-\vspace{0.55cm}
-under the guidance of\\
-\vspace{0.55cm}
-\hspace{.05cm} {\large \textbf {\GuideName}}\\
-\begin{figure}[h]
+\newgeometry{left=20mm,right=20mm,top=20mm,bottom=20mm}
 \centering
-\includegraphics[scale=0.7]{spitlogo.pdf}
-\end{figure}
-\hspace{.05cm}
-\hspace{.05cm}
-\textbf{Department of Computer Engineering}\\
-Bharatiya  Vidya Bhavan's\\
+\vspace*{4mm}
+{\LARGE\bfseries \ProjectTitleLineA\\[3pt] \ProjectTitleLineB\par}
+\vspace{9mm}
+{\large Mini Project Report\par}
+\vspace{3mm}
+submitted in partial fulfillment of the requirement\\
+for the award of the Degree of\par
+\vspace{5mm}
+{\large\bfseries Bachelor of Technology\par}
+\vspace{1mm}
+in\par
+\vspace{1mm}
+{\large\bfseries Computer Engineering\par}
+\vspace{8mm}
+by\par
+\vspace{4mm}
+{\large
+\begin{tabular}{@{}l@{\hspace{14mm}}l@{}}
+\textbf{\StudentA} & \textbf{UID \UIDA}\\[3pt]
+\textbf{\StudentB} & \textbf{UID \UIDB}\\[3pt]
+\textbf{\StudentC} & \textbf{UID \UIDC}\\
+\end{tabular}\par}
+\vspace{6mm}
+\Semester\ \textbullet\ \CourseName\ \textbullet\ \GroupNo\par
+\vspace{8mm}
+under the guidance of\par
+\vspace{3mm}
+{\large\bfseries \GuideName\par}
+\vfill
+\includegraphics[scale=0.7]{spitlogo.pdf}\par
+\vfill
+{\large\bfseries Department of Computer Engineering\par}
+\vspace{2mm}
+Bharatiya Vidya Bhavan's\\
 Sardar Patel Institute of Technology\\
 (Autonomous Institute Affiliated to University of Mumbai)\\
-Munshi Nagar, Andheri-West, Mumbai-400058\\
-\vspace{0.4cm}
-Academic Year \AcademicYear}
+Munshi Nagar, Andheri (West), Mumbai -- 400058\par
+\vspace{5mm}
+{\large\bfseries Academic Year \AcademicYear\par}
+\restoregeometry
 \end{titlepage}

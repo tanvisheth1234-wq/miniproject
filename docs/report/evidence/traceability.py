@@ -125,7 +125,7 @@ def main() -> None:
     CODE = {"A": "Auto", "M": "Auto+UI", "P": "Partial", "U": "Manual", "I": "Inspect"}
     def sh(t):
         return esc(t).replace("::", "::" + BS + "allowbreak{}")
-    lines = [BS + "begingroup" + BS + "scriptsize", BS + "setlength{" + BS + "tabcolsep}{3pt}",
+    lines = [BS + "begingroup" + BS + "footnotesize", BS + "setlength{" + BS + "tabcolsep}{3pt}",
              BS + "begin{longtable}{@{}p{0.95cm}p{6.6cm}p{1.15cm}p{8.6cm}@{}}",
              BS + "caption{Requirements (the system shall " + BS + "ldots), how each is verified, and the tests that verify it. Auto = automated tests; Auto+UI = automated tests plus a manual check of the screen; * = one mapped test was occasionally flaky; all other mapped tests passed in all " + str(len(tests["runs"])) + " complete runs}" + BS + BS,
              BS + "label{tab:trace}" + BS + BS,

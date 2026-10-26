@@ -1,15 +1,23 @@
 %----------------------------------------------------------
 % EcoMesh -- Mini Project Report (SPIT, Computer Engineering, AY 2026-27)
-% Page set-up, cover, certificates and declaration follow the department's
-% Overleaf mini-project template (synopsis.tex); the chapter structure follows
-% the "Mini Project Report Preparation Guidelines" (Chapters 1-11).
 %
-% Build:  pdflatex main.tex  (run twice for the table of contents)
+% Page set-up follows the department's Mini Project / ESE report template
+% (synopsis.tex): 12 pt, A4, single-sided, margins 20 mm left, right and top
+% and 50 mm bottom, plain page style, 25-40 pages of report.  Preliminary
+% pages follow Section 2 of the "Mini Project Report Preparation Guidelines"
+% and the chapters follow its Section 3 (Chapters 1-11).
+%
+% Preliminary pages are numbered in roman numerals and the chapters from 1,
+% so the 25-40 page count applies to the report itself.
+%
+% Build:  pdflatex main.tex  (run twice for the contents and lists)
+%         or: tectonic -X compile main.tex --outdir build
 % Overleaf: upload this whole folder, set main.tex as the main document.
 %----------------------------------------------------------
-\documentclass[12pt,singleside,a4paper]{article}
+\documentclass[12pt,a4paper,oneside]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{epsfig}
 \usepackage{graphicx}
 \usepackage{cite}
@@ -19,51 +27,117 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{placeins}
+\usepackage{flafter}
+\usepackage{needspace}
 \usepackage{caption}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{amsmath}
+\usepackage{titlesec}
 \usepackage{tocloft}
 \usepackage{hyperref}
-\geometry{left=20mm,right=20mm,top=20mm,bottom=30mm}
+
+% ---- page set-up exactly as in the department template ----
+\geometry{left=20mm,right=20mm,top=20mm,bottom=50mm}
 \pagestyle{plain}
+
+% ---- headings: each chapter starts on a new page with a "Chapter n" line ----
 \setcounter{secnumdepth}{3}
-\setcounter{tocdepth}{2}
-\setlength{\cftbeforesecskip}{1pt}\renewcommand{\cftsecfont}{\footnotesize\bfseries}\renewcommand{\cftsecpagefont}{\footnotesize\bfseries}\setlength{\cftbeforesubsecskip}{-1pt}\setlength{\cftbeforesubsecskip}{0pt}
-\renewcommand{\cftsubsecfont}{\footnotesize}\renewcommand{\cftsubsecpagefont}{\footnotesize}\setlength{\cftbeforesecskip}{2pt}
-\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black}
-\captionsetup{font=small,labelfont=bf}
-\setlist{itemsep=1pt,topsep=2pt,parsep=0pt}
-\renewcommand{\arraystretch}{1.08}
-
-\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible,
-        keepspaces=true,xleftmargin=2pt,xrightmargin=2pt,showstringspaces=false}
-
-% each chapter (\section) starts on a new page, as the template asks
+\setcounter{tocdepth}{1}
+\titleformat{\section}[display]
+  {\normalfont\bfseries\centering}
+  {\large CHAPTER \thesection}{6pt}{\LARGE}
+  [\vspace{4pt}\titlerule]
+\titleformat{name=\section,numberless}[block]
+  {\normalfont\LARGE\bfseries\centering}{}{0pt}{}
+\titlespacing*{\section}{0pt}{0pt}{12pt}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{10pt plus 2pt minus 2pt}{4pt plus 1pt}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{0.8em}{}
+\titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 2pt}{3pt}
+\newcommand{\chapterpage}{\clearpage}
 \let\oldsection\section
-\renewcommand{\section}{\clearpage\oldsection}
+\renewcommand{\section}{\chapterpage\oldsection}
+% a figure or table never appears before the text that introduces it (flafter)
 
+% ---- contents, list of figures, list of tables ----
+\renewcommand{\cfttoctitlefont}{\hfill\LARGE\bfseries}
+\renewcommand{\cftaftertoctitle}{\hfill\mbox{}}
+\renewcommand{\cftloftitlefont}{\hfill\LARGE\bfseries}
+\renewcommand{\cftafterloftitle}{\hfill}
+\renewcommand{\cftlottitlefont}{\hfill\LARGE\bfseries}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\contentsname}{Table of Contents}
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftbeforelottitleskip}{14pt}
+\setlength{\cftaftertoctitleskip}{16pt}
+\setlength{\cftafterloftitleskip}{16pt}
+\setlength{\cftafterlottitleskip}{16pt}
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecpagefont}{\bfseries}
+\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{7pt}
+\renewcommand{\cftsubsecfont}{\small}
+\renewcommand{\cftsubsecpagefont}{\small}
+\setlength{\cftsubsecindent}{1.6em}
+\setlength{\cftsubsecnumwidth}{2.8em}
+\renewcommand{\cftfigfont}{\footnotesize}
+\renewcommand{\cftfigpagefont}{\footnotesize}
+\renewcommand{\cfttabfont}{\footnotesize}
+\renewcommand{\cfttabpagefont}{\footnotesize}
+\renewcommand{\cftfigpresnum}{Figure }
+\renewcommand{\cfttabpresnum}{Table }
+\setlength{\cftfignumwidth}{5.2em}
+\setlength{\cfttabnumwidth}{5.2em}
+\setlength{\cftfigindent}{0pt}
+\setlength{\cfttabindent}{0pt}
+\setlength{\cftbeforefigskip}{0pt}
+\setlength{\cftbeforetabskip}{0pt}
+
+% ---- figures and tables: table titles above, figure titles below (template) ----
+\captionsetup{font=small,labelfont=bf,labelsep=colon,justification=centering}
+\captionsetup[table]{position=top,skip=4pt}
+\captionsetup[figure]{position=bottom,skip=6pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\setlength{\textfloatsep}{8pt plus 2pt minus 3pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+% pages holding only figures/tables start at the top instead of being centred
+\makeatletter\setlength{\@fptop}{0pt}\setlength{\@fpbot}{0pt plus 1fil}\makeatother
+\renewcommand{\arraystretch}{1.05}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
+% ---- body text ----
+\setlist{itemsep=2pt,topsep=4pt,parsep=0pt}
+\setlength{\parskip}{0pt plus 1pt}
+\emergencystretch=2em
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible,
+        keepspaces=true,xleftmargin=2pt,xrightmargin=2pt,showstringspaces=false,aboveskip=6pt,belowskip=4pt}
+
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black,
+            pdftitle={EcoMesh: A Distributed Peer-to-Peer Disaster Relief Communication Mesh},
+            pdfauthor={Miti Shah, Twissha Shah, Tanvi Sheth},
+            pdfsubject={T.E. Computer Engineering Mini Project Report, SPIT, AY 2026-27},
+            bookmarksnumbered=true}
+
 \begin{document}
-\pagenumbering{arabic}
 \input{students.tex}
+
+% ================= preliminary pages (roman numerals) =================
+\pagenumbering{roman}
 \input{be_title.tex}
-\input{be_certificate1.tex}
+\setcounter{page}{2}% the cover counts as page i
 \input{be_certificate2.tex}
-
-\clearpage
-\section*{\centering{Declaration}}
-
-\vspace{2cm}
-We wish to state that the work embodied in this work titled ``\ProjectTitle'' forms our own contribution to the work carried out under the guidance of \GuideName\ at the Sardar Patel Institute of Technology. We declare that this written submission represents our ideas in our own words and where others' ideas or words have been included, we have adequately cited and referenced the original sources. We also declare that we have adhered to all principles of academic honesty and integrity and have not misrepresented or fabricated or falsified any idea/data/fact/source in our submission.
-\\
-\\
-\\
-\textbf{\StudentA} \hspace{2cm} \textbf{\StudentB} \hspace{2cm} \textbf{\StudentC}\\
-\vspace{3cm}
-\textbf{UID \UIDA} \hspace{2cm} \textbf{UID \UIDB} \hspace{2cm} \textbf{UID \UIDC}\\
+\input{declaration.tex}
 
 \clearpage
 \input{chapters/acknowledgement.tex}
@@ -72,14 +146,23 @@ We wish to state that the work embodied in this work titled ``\ProjectTitle'' fo
 \input{chapters/abstract.tex}
 
 \clearpage
+\phantomsection\addcontentsline{toc}{section}{Table of Contents}
 \tableofcontents
 \clearpage
+\phantomsection\addcontentsline{toc}{section}{List of Figures}
 \listoffigures
-\clearpage
+\renewcommand{\chapterpage}{\vspace{2em}}
+\phantomsection\addcontentsline{toc}{section}{List of Tables}
 \listoftables
+\renewcommand{\chapterpage}{\clearpage}
 \clearpage
 \input{chapters/abbreviations.tex}
 
+% ================= report (arabic numerals from Chapter 1) =================
+\clearpage
+\pagenumbering{arabic}
+\setcounter{table}{0}
+\setcounter{figure}{0}
 \input{chapters/ch01_introduction.tex}
 \input{chapters/ch02_literature.tex}
 \input{chapters/ch03_srs.tex}
@@ -93,5 +176,6 @@ We wish to state that the work embodied in this work titled ``\ProjectTitle'' fo
 \input{chapters/ch11_conclusion.tex}
 
 \input{chapters/references.tex}
+\input{chapters/appendix.tex}
 
 \end{document}
