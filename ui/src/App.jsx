@@ -114,11 +114,9 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="mt-24 border-t border-line">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <div className="flex items-center gap-3"><Logo small /><span>Distributed Peer-to-Peer Disaster Relief Communication Mesh</span></div>
-        <div>TE Sem V Mini Project I · Computer Engineering, SPIT · Group 20</div>
-      </div>
+    <footer className="mt-24 px-5 pb-10 text-center text-sm text-muted">
+      <div className="mx-auto mb-6 h-px w-24 bg-line" />
+      No server. No internet. Every device is a relay.
     </footer>
   )
 }

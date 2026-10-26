@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  ArrowRight, Boxes, Building2, CheckCircle2, Cpu, Database, FlaskConical, Fingerprint, GitBranch, HardDriveDownload,
+  ArrowRight, Boxes, Building2, CheckCircle2, Cpu, Database, FlaskConical, Fingerprint, HardDriveDownload,
   KeyRound, Layers, MapPinned, MessageSquareOff, Network, Radio, Route as RouteIcon, ServerOff, Shield, ShieldCheck,
   Siren, Smartphone, TowerControl, Users, Waypoints,
 } from 'lucide-react'
 import MeshGraph from '../components/MeshGraph'
-import { Badge, Button, Callout, Card, Mono, cx } from '../components/ui'
+import { Badge, Button, Callout, Card, Mono } from '../components/ui'
 import { useLab } from '../lib/lab'
 import { pct } from '../lib/format'
 
@@ -63,14 +63,6 @@ const FEATURES = [
   ['Network simulator with injectable loss, latency and failures', 'sim/ · api/lab.py', '/simulator'],
   ['Metrics harness: delivery, hops, latency by priority, recovery', 'api/metrics.py', '/simulator'],
   ['React node UI and rescue dashboard, served by each node', 'ui/ · api/', '/node'],
-]
-
-const PHASES = [
-  { n: 1, name: 'Problem definition & wire protocol', done: 'Packet format, UDP/TCP transport, two-node demo', who: 'Tanvi · Miti' },
-  { n: 2, name: 'SRS, UML & algorithm design', done: 'Discovery, relay, simulator transport; use-case, class, sequence, activity diagrams', who: 'Miti · Group' },
-  { n: 3, name: 'Module-wise coding', done: 'Routing, reliability, security, storage, node integration; 256 tests', who: 'Twissha' },
-  { n: 4, name: 'Integration, API & interface', done: 'FastAPI + WebSocket, node view, rescue dashboard, simulator with metrics, this website', who: 'Tanvi', current: true },
-  { n: 5, name: 'End semester', done: 'Evaluation, report, viva', who: 'Group' },
 ]
 
 export default function Overview() {
@@ -192,25 +184,6 @@ export default function Overview() {
         </Card>
       </Section>
 
-      {/* ---------------- phases ---------------- */}
-      <Section eyebrow="Project timeline" title="Five phases, one branch each">
-        <div className="relative grid gap-4 md:grid-cols-5">
-          {PHASES.map((p, i) => (
-            <motion.div key={p.n} {...fade} transition={{ delay: i * 0.07 }}>
-              <Card className={cx('h-full p-5', p.current && 'border-crimson-300 ring-2 ring-crimson-100')}>
-                <div className="flex items-center justify-between">
-                  <span className={cx('grid h-8 w-8 place-items-center rounded-full text-sm font-semibold', p.current ? 'bg-crimson-600 text-white' : 'bg-brown-100 text-brown-700')}>{p.n}</span>
-                  {p.current ? <Badge tone="crimson">You are here</Badge> : p.n < 4 ? <Badge tone="ok">Done</Badge> : <Badge tone="outline">Next</Badge>}
-                </div>
-                <h3 className="mt-4 text-sm font-semibold leading-snug">{p.name}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-muted">{p.done}</p>
-                <div className="mt-3 flex items-center gap-1.5 text-xs text-brown-500"><GitBranch size={12} /> {p.who}</div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </Section>
-
       <section className="mt-24">
         <Callout tone="crimson" icon={Fingerprint} title="The honest statement">
           The mesh currently runs over LAN sockets, which stand in for Bluetooth Low Energy or Wi-Fi Direct. On LAN we restrict each node’s visible neighbour set to emulate limited
@@ -218,22 +191,6 @@ export default function Overview() {
           all transport-agnostic — replacing LAN sockets with a radio transport does not change any layer above it.
           A browser also can’t open raw UDP sockets, so this website is a <em>screen for</em> a node, not a node: the nodes run in the Python engine behind it.
         </Callout>
-      </section>
-
-      <section className="mt-24 grid gap-5 md:grid-cols-3">
-        {[
-          { name: 'Tanvi Sheth', track: 'Track A', role: 'Protocol & networking · Phase 4: API, interface, integration' },
-          { name: 'Twissha Shah', track: 'Track B', role: 'Routing & reliability · security, storage, node integration' },
-          { name: 'Miti Shah', track: 'Track C', role: 'Platform, data & interface · discovery, relay, simulator' },
-        ].map((m) => (
-          <Card key={m.name} className="p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-crimson-600 font-display text-lg font-semibold text-white">{m.name[0]}</span>
-              <div><div className="font-semibold">{m.name}</div><div className="text-xs font-medium text-crimson-700">{m.track}</div></div>
-            </div>
-            <p className="mt-4 text-[13.5px] leading-relaxed text-muted">{m.role}</p>
-          </Card>
-        ))}
       </section>
     </div>
   )
