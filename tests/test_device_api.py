@@ -201,3 +201,28 @@ async def test_structured_sos_round_trip_and_plain_sos_still_works(fast_timers):
     assert (plain_at_rescue["body"], plain_at_rescue["need"], plain_at_rescue["where"]) == ("trapped", "", "")
     assert at_sender["need"] == "Injured"                     # the sender's own copy reads the same way
     assert {m["need"] for m in history} == {"Injured", ""}
+
+
+@pytest.mark.asyncio
+async def test_safe_check_in_reaches_rescue_at_status_priority(fast_timers):
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        reply = await dev["A"].post("/api/safe", json={"where": "Assembly point"})
+        entry = await wait_for(lambda: thread_entry(dev["C"], reply.json()["msg_id"]))
+        bare = await dev["A"].post("/api/safe")
+    assert reply.status_code == 200 and bare.status_code == 200
+    assert entry["priority_name"] == "STATUS"
+    assert (entry["need"], entry["where"], entry["body"]) == ("Safe", "Assembly point", "Device A is safe")
+
+
+def test_a_safe_check_in_never_overtakes_an_sos():
+    from mesh.core.packet import Packet, PacketType, Priority
+    from mesh.core.reliability import MessagePriorityQueue
+
+    queue = MessagePriorityQueue()
+    safe = Packet(type=PacketType.DATA, priority=Priority.STATUS, src="A", dst="C", payload=b"safe")
+    sos = Packet(type=PacketType.DATA, priority=Priority.SOS, src="B", dst="C", payload=b"sos")
+    queue.push(safe)            # the check-in was queued first ...
+    queue.push(sos)
+    assert queue.pop() is sos   # ... but the SOS leaves first

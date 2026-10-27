@@ -77,6 +77,10 @@ def with_fields(message: dict) -> dict:
     return {**message, "body": parsed["text"], "need": parsed["need"], "where": parsed["where"]}
 
 
+class SafeBody(BaseModel):
+    where: Optional[str] = Field(None, max_length=120)
+
+
 class SendBody(BaseModel):
     dst: str
     text: str = Field("", max_length=400)
@@ -286,6 +290,19 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
             "now_ms": int(time.time() * 1000),
             "events": [{k: r[k] for k in ("ts_ms", "kind", "peer", "msg_id", "detail")} for r in rows],
         }
+
+    @app.post("/api/safe")
+    async def safe(body: SafeBody = SafeBody()):
+        """"I am safe": a STATUS check-in for the rescue team. Lowest priority,
+        so it never delays an SOS at any hop."""
+        node: Node = state["node"]
+        if not state["transport"].enabled:
+            raise HTTPException(409, "this device is switched off")
+        rescue_ids = [i for i, n in cfg["nodes"].items() if n["role"] == "RESCUE" and i != node_id]
+        dst = rescue_ids[0] if rescue_ids else RESCUE_DST
+        text = structured_payload(f"{labels.get(node_id, node_id)} is safe", "Safe", body.where)
+        pkt = await node.send(dst, text.encode("utf-8"), priority=Priority.STATUS, needs_ack=True)
+        return {"msg_id": str(pkt.msg_id)}
 
     @app.post("/api/power")
     async def power(body: PowerBody):
