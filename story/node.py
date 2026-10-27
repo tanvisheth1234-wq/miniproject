@@ -47,6 +47,34 @@ SF_RETRY_INTERVAL = 3.0
 
 class SosBody(BaseModel):
     text: Optional[str] = Field(None, max_length=400)
+    need: Optional[str] = Field(None, max_length=40)
+    where: Optional[str] = Field(None, max_length=120)
+
+
+def structured_payload(text: str, need: Optional[str] = None, where: Optional[str] = None) -> str:
+    """The structured SOS format: a small JSON object inside the encrypted
+    payload. The packet header is untouched."""
+    return json.dumps({"v": 1, "need": need or "", "where": where or "", "text": text}, separators=(",", ":"))
+
+
+def parse_payload(body: Optional[str]) -> dict:
+    """Split a message body into text, need and where. Anything that is not
+    the structured format (an older plain-text message) is shown as it is."""
+    if body:
+        try:
+            data = json.loads(body)
+        except ValueError:
+            data = None
+        if isinstance(data, dict) and data.get("v") == 1 and isinstance(data.get("text"), str):
+            return {"text": data["text"], "need": str(data.get("need") or ""), "where": str(data.get("where") or "")}
+    return {"text": body, "need": "", "where": ""}
+
+
+def with_fields(message: dict) -> dict:
+    """A message view with the structured fields filled in; ``body`` becomes
+    the readable text so screens never show raw JSON."""
+    parsed = parse_payload(message.get("body"))
+    return {**message, "body": parsed["text"], "need": parsed["need"], "where": parsed["where"]}
 
 
 class SendBody(BaseModel):
@@ -169,7 +197,7 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         rescue_ids = [i for i, n in cfg["nodes"].items() if n["role"] == "RESCUE" and i != node_id]
         route = views.route_view(node.router, node.graph, rescue_ids[0] if rescue_ids else RESCUE_DST) if online else None
         view = views.node_view(node, labels.get(node_id))
-        thread = view["thread"]
+        thread = [with_fields(m) for m in view["thread"]]
         for m in thread:
             if m["direction"] != "sent":
                 continue
@@ -204,6 +232,8 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         if not state["transport"].enabled:
             raise HTTPException(409, "this device is switched off")
         text = body.text or f"SOS from {labels.get(node_id, node_id)}: need help"
+        if body.need or body.where:
+            text = structured_payload(text, body.need, body.where)
         # address the rescue team itself when the config has one, so the
         # gateway is a relay on the way; otherwise "nearest rescue/gateway"
         rescue_ids = [i for i, n in cfg["nodes"].items() if n["role"] == "RESCUE" and i != node_id]
@@ -244,7 +274,7 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         if direction and direction not in ("sent", "received", "forwarded"):
             raise HTTPException(400, "direction must be sent, received or forwarded")
         rows = node.store.list_messages(direction=direction, status=status, limit=limit, priority=priority)
-        return {"messages": [views.message_view(r) for r in rows]}
+        return {"messages": [with_fields(views.message_view(r)) for r in rows]}
 
     @app.get("/api/events")
     async def events(since: int = Query(0, ge=0), limit: int = Query(200, ge=1, le=1000)):

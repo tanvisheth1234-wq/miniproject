@@ -175,3 +175,29 @@ async def test_history_filters_by_priority_and_direction(fast_timers):
     assert all(m["body"] is None for m in relay)                    # a relay keeps no message text
     assert [m["msg_id"] for m in sent_normal] == [note]
     assert bad_kind.status_code == 400 and bad_direction.status_code == 400
+
+
+def test_payload_parsing_handles_structured_and_plain_text():
+    structured = device.structured_payload("Two of us", "Injured", "Stairwell B")
+    assert device.parse_payload(structured) == {"text": "Two of us", "need": "Injured", "where": "Stairwell B"}
+    assert device.parse_payload("trapped, need help") == {"text": "trapped, need help", "need": "", "where": ""}
+    assert device.parse_payload('{"no": "version"}')["text"] == '{"no": "version"}'   # not ours: shown raw
+    assert device.parse_payload(None) == {"text": None, "need": "", "where": ""}
+
+
+@pytest.mark.asyncio
+async def test_structured_sos_round_trip_and_plain_sos_still_works(fast_timers):
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        rich = (await dev["A"].post("/api/sos", json={"text": "Two of us", "need": "Injured",
+                                                       "where": "3rd floor"})).json()["msg_id"]
+        plain = (await dev["A"].post("/api/sos", json={"text": "trapped"})).json()["msg_id"]
+        at_rescue = await wait_for(lambda: thread_entry(dev["C"], rich))
+        plain_at_rescue = await wait_for(lambda: thread_entry(dev["C"], plain))
+        at_sender = await thread_entry(dev["A"], rich)
+        history = (await dev["C"].get("/api/history", params={"kind": "SOS"})).json()["messages"]
+    assert (at_rescue["body"], at_rescue["need"], at_rescue["where"]) == ("Two of us", "Injured", "3rd floor")
+    assert (plain_at_rescue["body"], plain_at_rescue["need"], plain_at_rescue["where"]) == ("trapped", "", "")
+    assert at_sender["need"] == "Injured"                     # the sender's own copy reads the same way
+    assert {m["need"] for m in history} == {"Injured", ""}
