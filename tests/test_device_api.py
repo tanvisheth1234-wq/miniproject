@@ -248,3 +248,22 @@ async def test_rescue_exports_received_requests_as_csv(fast_timers):
     assert rows[1][1:8] == ["Device A", "SOS", "Injured", "3rd floor, room 304", "2",
                             "Device A > Device B > Device C", "Two of us"]
     assert refused.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_rescue_replies_to_the_survivor_across_the_mesh(fast_timers):
+    """The two-way story: an SOS reaches the rescue team and the rescue team's
+    "Help is on the way" travels back over the same mesh to the survivor."""
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        sos = (await dev["A"].post("/api/sos", json={"text": "Trapped", "need": "Trapped",
+                                                      "where": "Room 304"})).json()["msg_id"]
+        request = await wait_for(lambda: thread_entry(dev["C"], sos))
+        reply = await dev["C"].post("/api/send", json={"dst": request["src"], "text": "Help is on the way",
+                                                        "priority": "SOS"})
+        answer = await wait_for(lambda: thread_entry(dev["A"], reply.json()["msg_id"]))
+    assert request["src"] == "A"
+    assert reply.status_code == 200
+    assert answer["direction"] == "received" and answer["body"] == "Help is on the way"
+    assert answer["src"] == "C" and answer["priority_name"] == "SOS"
