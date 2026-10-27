@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -201,6 +201,17 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         dst = rescue_ids[0] if rescue_ids else RESCUE_DST
         pkt = await node.send(dst, text.encode("utf-8"), priority=Priority.SOS, needs_ack=True)
         return {"msg_id": str(pkt.msg_id)}
+
+    @app.get("/api/events")
+    async def events(since: int = Query(0, ge=0), limit: int = Query(200, ge=1, le=1000)):
+        """Raw engine events (the kinds the store logs), oldest first; poll with
+        ``since`` = the ``now_ms`` of the previous answer to get only new ones."""
+        node: Node = state["node"]
+        rows = node.store.events_after(since, limit)
+        return {
+            "now_ms": int(time.time() * 1000),
+            "events": [{k: r[k] for k in ("ts_ms", "kind", "peer", "msg_id", "detail")} for r in rows],
+        }
 
     @app.post("/api/power")
     async def power(body: PowerBody):
