@@ -221,3 +221,12 @@ def test_events_after_limit_keeps_the_newest(store):
         store.record_event("peer_up", peer=f"N{t}", ts_ms=t * 100)
     newest = store.events_after(0, limit=3)
     assert [e["peer"] for e in newest] == ["N8", "N9", "N10"]
+
+
+def test_list_messages_filters_by_priority(store):
+    store.record_message("m1", "A", "C", 0, "sent", "pending", body="SOS", created_ms=1)
+    store.record_message("m2", "A", "C", 1, "sent", "pending", body="normal", created_ms=2)
+    store.record_message("m3", "B", "A", 0, "received", "delivered", body="SOS in", created_ms=3)
+    assert [r["msg_id"] for r in store.list_messages(priority=0)] == ["m3", "m1"]
+    assert [r["msg_id"] for r in store.list_messages(priority=0, direction="sent")] == ["m1"]
+    assert [r["msg_id"] for r in store.list_messages(priority=2)] == []

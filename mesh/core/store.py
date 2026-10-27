@@ -138,8 +138,9 @@ class Store:
         direction: Optional[str] = None,
         status: Optional[str] = None,
         limit: Optional[int] = None,
+        priority: Optional[int] = None,
     ) -> list[dict]:
-        """Newest first. Both filters are optional -- this is what the
+        """Newest first. Every filter is optional -- this is what the
         message-history view and the aggregate stats read from."""
         clauses, params = [], []
         if direction is not None:
@@ -148,6 +149,9 @@ class Store:
         if status is not None:
             clauses.append("status = ?")
             params.append(status)
+        if priority is not None:
+            clauses.append("priority = ?")
+            params.append(priority)
         sql = "SELECT * FROM messages"
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
