@@ -113,6 +113,12 @@
   .tag.other { background: var(--accent); color: #07162b; }
   .tag.new { background: var(--text); color: #111; margin-right: 4px; }
   .req .actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+  .seg button { background: var(--surface); border: 0; border-left: 1px solid var(--border-strong); padding: 0 14px; min-height: 34px; font-size: var(--fs-sm); font-weight: 600; color: var(--text-2); }
+  .seg button:first-child { border-left: 0; }
+  .seg button.on { background: var(--raised); color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
+  select.text.sm { width: auto; min-height: 34px; padding: 4px 10px; font-size: var(--fs-sm); }
   .replybox { margin-top: 10px; }
   .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .empty { padding: 30px 10px; text-align: center; color: var(--text-2); }
@@ -203,7 +209,17 @@
   <div class="grid">
     <section>
       <div class="card-head" style="margin-bottom:12px"><h2>Incoming requests</h2></div>
+      <div class="toolbar">
+        <div class="seg" id="fKind" role="group" aria-label="Show">
+          <button data-kind="all" class="on">All</button><button data-kind="SOS">SOS</button><button data-kind="NORMAL">Messages</button>
+        </div>
+        <select id="fNeed" class="text sm" aria-label="Filter by need"></select>
+        <select id="fSort" class="text sm" aria-label="Sort">
+          <option value="priority">SOS first, then newest</option><option value="newest">Newest first</option><option value="oldest">Oldest first</option>
+        </select>
+      </div>
       <div id="sosList"></div>
+      <div class="card" style="margin-top:16px"><div class="card-head"><h2>Marked safe</h2><span class="small muted" id="safeCount"></span></div><ul id="cSafe"></ul></div>
     </section>
     <section>
       <div class="card"><div class="card-head"><h2>Network map</h2></div><svg id="cMap" class="map" viewBox="0 0 1000 440"></svg>
@@ -226,6 +242,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const QUICK = ['Help is on the way', 'Stay where you are', 'Are you safe?', 'Move to a safer place if you can'];
 const ROLE = { NORMAL: 'phone', GATEWAY: 'gateway', RESCUE: 'rescue team' };
 const drafts = {}, replyOpen = new Set();
+const filt = { kind: 'all', need: 'all', sort: 'priority' };
 let data = null, flash = null, seen = new Set(), first = true, soundOn = false, need = 'Need help';
 
 const lbl = (id) => ((data.nodes.find((n) => n.id === id)) || {}).label || id;
@@ -385,6 +402,16 @@ function renderPhone() {
 }
 
 /* ------------------------------- rescue console ------------------------------- */
+function fillNeedFilter(needs) {
+  const sel = $('fNeed'), sigN = needs.join('|');
+  if (sel.__sig !== sigN) {
+    sel.innerHTML = '<option value="all">All needs</option>' + needs.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    sel.__sig = sigN;
+  }
+  if (filt.need !== 'all' && !needs.includes(filt.need)) filt.need = 'all';
+  sel.value = filt.need;
+}
+
 function mapSvg(svg) {
   svg.innerHTML = '';
   const px = (n) => 60 + n.x * 880, py = (n) => 50 + n.y * 300;
@@ -405,8 +432,15 @@ function mapSvg(svg) {
 
 function renderConsole() {
   const d = data;
-  const recv = d.thread.filter((m) => m.direction === 'received').reverse();
-  recv.sort((a, b) => a.priority - b.priority);        // stable: SOS first, then newest first
+  const recv = d.thread.filter((m) => m.direction === 'received').reverse();    // newest first
+  const safeList = recv.filter((m) => m.priority_name === 'STATUS');
+  let reqs = recv.filter((m) => m.priority_name !== 'STATUS');
+  const needsSeen = [...new Set(reqs.map((m) => m.need).filter(Boolean))].sort();
+  fillNeedFilter(needsSeen);
+  if (filt.kind !== 'all') reqs = reqs.filter((m) => m.priority_name === filt.kind);
+  if (filt.need !== 'all') reqs = reqs.filter((m) => m.need === filt.need);
+  if (filt.sort === 'oldest') reqs = reqs.slice().reverse();
+  else if (filt.sort === 'priority') reqs = reqs.slice().sort((a, b) => a.priority - b.priority);   // stable
   const sosCount = recv.filter((m) => m.priority === 0).length;
   const online = d.nodes.filter((n) => n.known).length, total = d.nodes.length;
   const avg = recv.length ? (recv.reduce((s, m) => s + m.relays.length + 1, 0) / recv.length) : null;
@@ -420,7 +454,7 @@ function renderConsole() {
 
   const answered = {};
   d.thread.filter((x) => x.direction === 'sent').forEach((x) => { answered[x.dst] = asText(x); });
-  setHTML($('sosList'), recv.length ? recv.map((m) => {
+  setHTML($('sosList'), reqs.length ? reqs.map((m) => {
     const age = Math.max(0, Math.round((d.now_ms - m.created_ms) / 1000));
     const isNew = age < 20, sos = m.priority === 0;
     return `<div class="req ${sos ? '' : 'other'} ${isNew && sos ? 'fresh' : ''}">
@@ -437,7 +471,11 @@ function renderConsole() {
         <textarea class="text" data-key="reply-${esc(m.msg_id)}" rows="2" maxlength="400" placeholder="Write a reply to ${esc(lbl(m.src))}" style="margin-bottom:10px"></textarea>
         <button class="btn sm primary" data-sendreply="${esc(m.msg_id)}" data-to="${esc(m.src)}">Send reply</button>
       </div>` : ''}</div>`;
-  }).join('') : `<div class="card empty"><b>No messages yet</b><br>Listening for requests from the network.</div>`);
+  }).join('') : `<div class="card empty"><b>${recv.length > safeList.length ? 'No requests match these filters' : 'No requests yet'}</b><br>${recv.length > safeList.length ? 'Change or clear the filters above.' : 'Listening for requests from the network.'}</div>`);
+
+  $('safeCount').textContent = safeList.length ? `${safeList.length} checked in` : '';
+  setHTML($('cSafe'), safeList.length ? safeList.map((m) => `<li class="row msg"><div><b>${esc(lbl(m.src))}</b><span>${m.where ? esc(m.where) + ' &middot; ' : ''}${ago(m.created_ms)}</span></div><span class="tag" style="background:var(--ok);color:#06251a">SAFE</span></li>`).join('')
+    : '<li class="muted small">Nobody has checked in as safe yet.</li>');
 
   mapSvg($('cMap'));
   renderActivity('cActivity');
@@ -497,6 +535,12 @@ document.addEventListener('click', async (e) => {
   const nb = e.target.closest('.need');
   if (nb) { document.querySelectorAll('.need').forEach((b) => { const on = b === nb; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); need = nb.dataset.need; }
 });
+$('fKind').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  filt.kind = b.dataset.kind; document.querySelectorAll('#fKind button').forEach((x) => x.classList.toggle('on', x === b)); if (data) render();
+});
+$('fNeed').addEventListener('change', (e) => { filt.need = e.target.value; if (data) render(); });
+$('fSort').addEventListener('change', (e) => { filt.sort = e.target.value; if (data) render(); });
 document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.key) drafts[e.target.dataset.key] = e.target.value; });
 $('soundBtn').addEventListener('click', () => {
   soundOn = !soundOn; $('soundBtn').textContent = soundOn ? 'Alert sound: on' : 'Alert sound: off'; if (soundOn) beep();
