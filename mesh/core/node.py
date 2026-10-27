@@ -237,6 +237,13 @@ class Node:
             self._known_keys[peer_id] = peer_key  # learned first-hand, immediately -- no gossip wait
         self.store.upsert_peer(peer_id, role=role, public_key=peer_key)
         self.store.record_event("peer_up", peer=peer_id)
+        # the new direct link changes routes: a cached "no route" from before
+        # must not survive it
+        self.router.invalidate()
+        # a new neighbour may be the path a held message was waiting for:
+        # try at once instead of at the next flush tick (SNF-3)
+        if self.store_forward.all():
+            self._flush_held()
 
     def _on_peer_down(self, peer_id: str) -> None:
         self.relay.clear_next_hop(peer_id)
@@ -471,18 +478,24 @@ class Node:
         with contextlib.suppress(asyncio.CancelledError):
             while True:
                 await asyncio.sleep(self._sf_retry_interval)
-                # bound by age (Algorithm 8's EXPIRE): applies regardless of
-                # priority, unlike count eviction -- a stale message is no
-                # longer useful no matter how urgent it once was
-                for expired in self.store_forward.expire():
-                    self.store.update_message_status(str(expired.msg_id), "failed")
-                    self.store.record_event("expired", msg_id=str(expired.msg_id), detail="retention period elapsed")
-                for pkt in self.store_forward.all():
-                    next_hop = self.router.next_hop(pkt.dst)
-                    if next_hop is None:
-                        continue
-                    self.store_forward.remove(pkt.msg_id)
-                    asyncio.create_task(self._flush_one(next_hop, pkt))
+                self._flush_held()
+
+    def _flush_held(self) -> None:
+        """Expire stale held messages, then send every one that now has a
+        route. Runs on the flush timer and also the moment a neighbour
+        appears (SNF-3), so a held SOS does not wait out the interval."""
+        # bound by age (Algorithm 8's EXPIRE): applies regardless of
+        # priority, unlike count eviction -- a stale message is no
+        # longer useful no matter how urgent it once was
+        for expired in self.store_forward.expire():
+            self.store.update_message_status(str(expired.msg_id), "failed")
+            self.store.record_event("expired", msg_id=str(expired.msg_id), detail="retention period elapsed")
+        for pkt in self.store_forward.all():
+            next_hop = self.router.next_hop(pkt.dst)
+            if next_hop is None:
+                continue
+            self.store_forward.remove(pkt.msg_id)
+            asyncio.create_task(self._flush_one(next_hop, pkt))
 
     async def _flush_one(self, next_hop: str, pkt: Packet) -> None:
         pkt = self._next_attempt(pkt)

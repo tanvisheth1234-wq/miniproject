@@ -609,6 +609,38 @@ async def test_store_forward_flushes_once_a_route_appears():
 
 
 @pytest.mark.asyncio
+async def test_held_message_is_sent_the_moment_its_neighbour_appears():
+    """SNF-3: the flush timer is set to a minute, so only the peer-up trigger
+    can deliver the held message within the second we allow."""
+    import time
+
+    net = SimulatedNetwork(seed=21)
+    a = make_node("A", net, sf_retry_interval=60.0)
+    c = make_node("C", net)
+    delivered = []
+    c.on_deliver = delivered.append
+
+    await a.start()
+    pkt = await a.send("C", b"held until C appears", priority=Priority.SOS)
+    assert pkt.msg_id in a.store_forward
+
+    net.set_link("A", "C")
+    started = time.monotonic()
+    await c.start()
+    while not delivered and time.monotonic() - started < 1.0:
+        await asyncio.sleep(0.01)
+    elapsed = time.monotonic() - started
+    flushes = a.store.count_events("sf_flush")
+    await a.stop()
+    await c.stop()
+
+    assert [p.payload for p in delivered] == [b"held until C appears"]
+    assert elapsed < 1.0
+    assert pkt.msg_id not in a.store_forward
+    assert flushes == 1
+
+
+@pytest.mark.asyncio
 async def test_store_forward_evicts_lowest_priority_when_queue_is_full():
     net = SimulatedNetwork(seed=12)
     a = make_node("A", net, sf_max_count=2)  # no links -- everything queues
