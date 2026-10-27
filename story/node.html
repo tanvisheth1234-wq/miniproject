@@ -166,6 +166,17 @@
     </div>
   </section>
 
+  <details class="card" id="pSend">
+    <summary class="muted">Send a message to another device</summary>
+    <div style="margin-top:14px">
+      <label class="field-label" for="sendTo">To</label>
+      <select id="sendTo" class="text" data-key="sendTo" style="margin-bottom:12px"></select>
+      <label class="field-label" for="sendText">Message</label>
+      <textarea id="sendText" class="text" data-key="sendText" rows="3" maxlength="400" placeholder="Type your message" style="margin-bottom:12px"></textarea>
+      <button id="sendBtn" class="btn primary block">Send message</button>
+    </div>
+  </details>
+
   <section class="card"><div class="card-head"><h2>Path to the rescue team</h2></div><div id="pRoute"></div></section>
   <section class="card"><div class="card-head"><h2>Phones near you</h2></div><ul id="pNear"></ul></section>
   <section class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="pActivity" class="feed"></ul></section>
@@ -262,6 +273,26 @@ function renderBar() {
     : '<span class="dot bad"></span>Switched off';
 }
 
+/* ------------------------------- send a message ------------------------------- */
+// Fill the "To" list with every other device; keep what the user already picked.
+function fillTargets(id) {
+  const sel = $(id), others = data.nodes.filter((n) => !n.me);
+  const sig2 = others.map((n) => n.id).join(',');
+  if (sel.__sig === sig2) return;
+  const keep = sel.value;
+  sel.innerHTML = others.map((n) => `<option value="${esc(n.id)}">${esc(n.label)} (${ROLE[n.role] || 'phone'})</option>`).join('');
+  if (keep && others.some((n) => n.id === keep)) sel.value = keep;
+  sel.__sig = sig2;
+}
+async function sendText(toId, textId) {
+  const dst = $(toId).value, text = $(textId).value.trim();
+  if (!text) { toast('Type a message first.'); return; }
+  try {
+    await api('POST', '/api/send', { dst, text, priority: 'NORMAL' });
+    $(textId).value = ''; toast('Message sent to ' + lbl(dst) + '.'); poll();
+  } catch (e) { toast('Could not send: ' + e.message); }
+}
+
 /* ------------------------------- activity feed ------------------------------- */
 // The device's own event log, already worded in plain English by the server.
 function renderActivity(id) {
@@ -312,7 +343,7 @@ function renderPhone() {
       ${m.retries > 0 ? `<p class="muted small" style="margin:6px 0 0">A link failed ${m.retries} time${m.retries > 1 ? 's' : ''}; your phone re-routed automatically.</p>` : ''}`);
   }
 
-  renderActivity('pActivity');
+  renderActivity('pActivity'); fillTargets('sendTo'); $('sendBtn').disabled = !d.online;
   setHTML($('pRoute'), d.route.length > 1 ? chips(d.route) : '<span class="muted">No path right now.</span>');
   setHTML($('pNear'), near.length
     ? near.map((n) => `<li class="row"><span>${esc(lbl(n.id))} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span>${sig(n.link_quality)}</li>`).join('')
@@ -409,6 +440,7 @@ async function poll() {
 document.addEventListener('click', async (e) => {
   const pb = e.target.closest('.powerBtn');
   if (pb && data) { await api('POST', '/api/power', { on: !data.online }); poll(); return; }
+  if (e.target.closest('#sendBtn') && data) { await sendText('sendTo', 'sendText'); return; }
   if (e.target.closest('#safeBtn') && data) {
     try {
       await api('POST', '/api/safe', { where: $('where').value.trim() });
