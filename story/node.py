@@ -229,6 +229,23 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         pkt = await node.send(body.dst, body.text.strip().encode("utf-8"), priority=priority, needs_ack=True)
         return {"msg_id": str(pkt.msg_id)}
 
+    @app.get("/api/history")
+    async def history(kind: Optional[str] = None, direction: Optional[str] = None,
+                      status: Optional[str] = None, limit: int = Query(100, ge=1, le=500)):
+        """This device's message history (requirement LOG-5), newest first.
+        ``kind`` is the priority (SOS, NORMAL or STATUS); ``direction`` is
+        sent, received or forwarded; every filter is optional."""
+        node: Node = state["node"]
+        priority = None
+        if kind:
+            priority = PRIORITY_BY_NAME.get(kind.upper())
+            if priority is None:
+                raise HTTPException(400, "kind must be SOS, NORMAL or STATUS")
+        if direction and direction not in ("sent", "received", "forwarded"):
+            raise HTTPException(400, "direction must be sent, received or forwarded")
+        rows = node.store.list_messages(direction=direction, status=status, limit=limit, priority=priority)
+        return {"messages": [views.message_view(r) for r in rows]}
+
     @app.get("/api/events")
     async def events(since: int = Query(0, ge=0), limit: int = Query(200, ge=1, le=1000)):
         """Raw engine events (the kinds the store logs), oldest first; poll with
