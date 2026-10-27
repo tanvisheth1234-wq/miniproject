@@ -49,6 +49,15 @@ class SosBody(BaseModel):
     text: Optional[str] = Field(None, max_length=400)
 
 
+class SendBody(BaseModel):
+    dst: str
+    text: str = Field("", max_length=400)
+    priority: str = "NORMAL"
+
+
+PRIORITY_BY_NAME = {"SOS": Priority.SOS, "NORMAL": Priority.NORMAL, "STATUS": Priority.STATUS}
+
+
 class PowerBody(BaseModel):
     on: bool
 
@@ -200,6 +209,24 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         rescue_ids = [i for i, n in cfg["nodes"].items() if n["role"] == "RESCUE" and i != node_id]
         dst = rescue_ids[0] if rescue_ids else RESCUE_DST
         pkt = await node.send(dst, text.encode("utf-8"), priority=Priority.SOS, needs_ack=True)
+        return {"msg_id": str(pkt.msg_id)}
+
+    @app.post("/api/send")
+    async def send(body: SendBody):
+        """A text message to one named device, routed over the mesh like an SOS."""
+        node: Node = state["node"]
+        if body.dst not in cfg["nodes"]:
+            raise HTTPException(404, f"unknown device {body.dst!r}")
+        if body.dst == node_id:
+            raise HTTPException(400, "cannot send a message to this device itself")
+        if not body.text.strip():
+            raise HTTPException(400, "message text is empty")
+        priority = PRIORITY_BY_NAME.get(body.priority.upper())
+        if priority is None:
+            raise HTTPException(400, "priority must be SOS, NORMAL or STATUS")
+        if not state["transport"].enabled:
+            raise HTTPException(409, "this device is switched off")
+        pkt = await node.send(body.dst, body.text.strip().encode("utf-8"), priority=priority, needs_ack=True)
         return {"msg_id": str(pkt.msg_id)}
 
     @app.get("/api/events")
