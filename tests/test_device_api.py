@@ -106,3 +106,45 @@ async def test_events_show_the_neighbour_coming_up_and_since_filters(fast_timers
     assert times == sorted(times)                                   # oldest first
     assert all(e["ts_ms"] > first["now_ms"] for e in later["events"])
     assert bad.status_code == 422
+
+
+async def thread_entry(client, msg_id):
+    thread = (await client.get("/api/me")).json()["thread"]
+    return next((m for m in thread if m["msg_id"] == msg_id), None)
+
+
+@pytest.mark.asyncio
+async def test_send_delivers_a_text_message_across_the_mesh(fast_timers):
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        sent = await dev["A"].post("/api/send", json={"dst": "C", "text": "Two of us on floor 3"})
+        msg_id = sent.json()["msg_id"]
+        received = await wait_for(lambda: thread_entry(dev["C"], msg_id))
+
+        async def delivered():
+            entry = await thread_entry(dev["A"], msg_id)
+            return entry if entry and entry["status"] == "delivered" else None
+
+        at_sender = await wait_for(delivered)
+    assert sent.status_code == 200
+    assert received["body"] == "Two of us on floor 3"
+    assert received["priority_name"] == "NORMAL"
+    assert at_sender["status"] == "delivered"
+
+
+@pytest.mark.asyncio
+async def test_send_rejects_bad_requests(fast_timers):
+    cfg = line_config({"A": "NORMAL", "B": "RESCUE"})
+    async with running(cfg) as dev:
+        unknown = await dev["A"].post("/api/send", json={"dst": "ZZ", "text": "hello"})
+        empty = await dev["A"].post("/api/send", json={"dst": "B", "text": "   "})
+        to_self = await dev["A"].post("/api/send", json={"dst": "A", "text": "hello"})
+        bad_priority = await dev["A"].post("/api/send", json={"dst": "B", "text": "hi", "priority": "LOUD"})
+        await dev["A"].post("/api/power", json={"on": False})
+        switched_off = await dev["A"].post("/api/send", json={"dst": "B", "text": "hello"})
+    assert unknown.status_code == 404
+    assert empty.status_code == 400
+    assert to_self.status_code == 400
+    assert bad_priority.status_code == 400
+    assert switched_off.status_code == 409
