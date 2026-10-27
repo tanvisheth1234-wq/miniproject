@@ -52,6 +52,7 @@
   .banner.ok { border-left-color: var(--ok); } .banner.warn { border-left-color: var(--warn); } .banner.bad { border-left-color: var(--danger); }
   .btn { min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--raised); font-weight: 600; }
   .btn:hover { border-color: var(--text-3); }
+  .btn.block { width: 100%; }
   .btn.sm { min-height: 34px; padding: 0 12px; font-size: var(--fs-sm); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #07162b; }
   .btn:disabled { opacity: .45; cursor: not-allowed; }
@@ -158,6 +159,11 @@
     <input id="where" class="text" maxlength="120" placeholder="Floor, room or landmark" style="margin-bottom:16px">
     <button id="sosBtn" aria-label="Hold to send SOS"><span class="fill" id="sosFill"></span><span class="t1">SOS</span><span class="t2">Hold for one second to send</span></button>
     <p class="holdhint">Holding the button prevents sending by accident.</p>
+    <div class="card">
+      <div class="card-head"><h2>Already safe?</h2></div>
+      <p class="muted small" style="margin-bottom:12px">Let the rescue team know you are safe, so they can focus on people who are not. This never delays an SOS.</p>
+      <button id="safeBtn" class="btn block">I am safe</button>
+    </div>
   </section>
 
   <section class="card"><div class="card-head"><h2>Path to the rescue team</h2></div><div id="pRoute"></div></section>
@@ -279,7 +285,7 @@ function renderPhone() {
   else st = ['warn', 'Looking for nearby phones', 'Stay where you are and keep this screen open.'];
   $('pStatus').className = 'banner ' + st[0];
   setHTML($('pStatus'), `<b>${esc(st[1])}</b><span>${esc(st[2])}</span>`);
-  $('sosBtn').disabled = !d.online;
+  $('sosBtn').disabled = !d.online; $('safeBtn').disabled = !d.online;
 
   // tracker for the latest SOS sent from this phone
   const sent = d.thread.filter((m) => m.direction === 'sent');
@@ -287,13 +293,16 @@ function renderPhone() {
   const tr = $('pTracker'); tr.hidden = !m;
   if (m) {
     const done = m.status === 'delivered', held = m.status === 'queued_sf', failed = m.status === 'failed';
-    const head = done ? ['var(--ok)', 'The rescue team has your request', 'Stay where you are and keep your phone on. Help has been alerted.']
+    const safe = m.priority_name === 'STATUS';
+    const head = safe && done ? ['var(--ok)', 'The rescue team knows you are safe', 'Thank you. Keep your phone on in case they need to reach you.']
+      : safe ? ['var(--accent)', 'Sending your check-in', 'It goes out at low priority and never delays an SOS.']
+      : done ? ['var(--ok)', 'The rescue team has your request', 'Stay where you are and keep your phone on. Help has been alerted.']
       : held ? ['var(--warn)', 'Saved, waiting for a path', 'There is no route to the rescue team right now. Your phone keeps the message safe and sends it automatically as soon as a path appears.']
       : failed ? ['var(--danger)', 'Could not be delivered', 'Please send it again.']
       : ['var(--accent)', 'Sending your request', 'Nearby phones are passing it along.'];
     const s1 = ['done', 'Created on your phone', ago(m.created_ms)];
     const s2 = m.first_hop ? ['done', `Handed to ${lbl(m.first_hop)}`, 'It is on its way'] : [held ? 'warn' : 'wait', 'Looking for a phone to pass it to', ''];
-    const s3 = done ? ['done', 'Rescue team confirmed receipt', ''] : [held ? 'warn' : 'wait', 'Waiting for the rescue team to confirm', held ? 'Will retry automatically' : ''];
+    const s3 = done ? ['done', safe ? 'Rescue team recorded your check-in' : 'Rescue team confirmed receipt', ''] : [held ? 'warn' : 'wait', 'Waiting for the rescue team to confirm', held ? 'Will retry automatically' : ''];
     const row = (s) => `<li><span class="mk ${s[0]}">${s[0] === 'done' ? '&#10003;' : s[0] === 'warn' ? '!' : ''}</span><div class="t"><b>${esc(s[1])}</b>${s[2] ? `<span>${esc(s[2])}</span>` : ''}</div></li>`;
     setHTML(tr, `<p class="headline" style="color:${head[0]}">${esc(head[1])}</p><p class="muted" style="margin:0 0 8px">${esc(head[2])}</p>
       <div class="muted small" style="margin-bottom:6px">&ldquo;${esc(m.body)}&rdquo;</div>
@@ -397,6 +406,13 @@ async function poll() {
 document.addEventListener('click', async (e) => {
   const pb = e.target.closest('.powerBtn');
   if (pb && data) { await api('POST', '/api/power', { on: !data.online }); poll(); return; }
+  if (e.target.closest('#safeBtn') && data) {
+    try {
+      await api('POST', '/api/safe', { where: $('where').value.trim() });
+      toast('Check-in sent. The rescue team will see that you are safe.'); poll();
+    } catch (err) { toast('Could not send: ' + err.message); }
+    return;
+  }
   const nb = e.target.closest('.need');
   if (nb) { document.querySelectorAll('.need').forEach((b) => { const on = b === nb; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); need = nb.dataset.need; }
 });
