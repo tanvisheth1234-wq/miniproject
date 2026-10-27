@@ -15,7 +15,7 @@ import time
 import webbrowser
 from pathlib import Path
 
-from .node import load_config
+from .node import lan_ip, load_config
 
 
 def main() -> None:
@@ -25,7 +25,10 @@ def main() -> None:
     parser.add_argument("--only", help="comma-separated device ids to start on this machine, e.g. L1,L2,L3")
     parser.add_argument("--secret")
     parser.add_argument("--sign", action="store_true")
+    parser.add_argument("--phone", action="store_true",
+                        help="serve the screens on every interface so a phone on the same Wi-Fi can open them")
     args = parser.parse_args()
+    web_host = "0.0.0.0" if args.phone else "127.0.0.1"
 
     cfg = load_config(args.config)
     mine = [i.strip() for i in args.only.split(",")] if args.only else list(cfg["nodes"])
@@ -34,7 +37,7 @@ def main() -> None:
         raise SystemExit(f"unknown device(s) {unknown}; config has {sorted(cfg['nodes'])}")
     procs = []
     for node_id in mine:
-        cmd = [sys.executable, "-m", "story.node", "--id", node_id, "--config", args.config, "--web-host", "127.0.0.1"]
+        cmd = [sys.executable, "-m", "story.node", "--id", node_id, "--config", args.config, "--web-host", web_host]
         if args.secret:
             cmd += ["--secret", args.secret]
         if args.sign:
@@ -43,7 +46,8 @@ def main() -> None:
     print("\n  Started", ", ".join(mine), "as separate processes. Ctrl+C stops them all.\n")
     for node_id in mine:
         spec = cfg["nodes"][node_id]
-        print(f"  {spec['label']:<16} http://127.0.0.1:{spec['web']}")
+        phone = f"   phone: http://{lan_ip()}:{spec['web']}" if args.phone else ""
+        print(f"  {spec['label']:<16} http://127.0.0.1:{spec['web']}{phone}")
     try:
         if not args.no_browser:
             time.sleep(4)

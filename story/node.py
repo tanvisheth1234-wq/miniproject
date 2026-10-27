@@ -223,7 +223,11 @@ def main() -> None:
     if args.id not in cfg["nodes"]:
         raise SystemExit(f"unknown device {args.id!r}; config has {sorted(cfg['nodes'])}")
     web = cfg["nodes"][args.id]["web"]
-    print(f"\n  device {args.id}  screen: http://{lan_ip()}:{web}   (this laptop: http://127.0.0.1:{web})\n")
+    print(f"\n  device {args.id}  this laptop: http://127.0.0.1:{web}")
+    if args.web_host == "127.0.0.1":
+        print("  (page is local only; drop --web-host 127.0.0.1 to open it from a phone)\n")
+    else:
+        print(f"  Open on your phone: http://{lan_ip()}:{web}   (phone on the same Wi-Fi or hotspot)\n")
     uvicorn.run(build_app(args.id, cfg, args.secret, args.sign), host=args.web_host, port=web, log_level="warning")
 
 
