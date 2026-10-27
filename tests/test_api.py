@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from api.lab import FAST, MeshLab
 from api.server import create_app
+from conftest import wait_until
 
 
 def wait_for(predicate, timeout=6.0, step=0.1):
@@ -56,8 +57,14 @@ def test_sos_reaches_the_rescue_queue_and_the_sender_sees_it_delivered(client):
 
 
 def test_node_view_reports_peers_with_hop_distance(client):
-    view = client.get("/api/nodes/L1").json()
-    assert view["nearby"] == 2
+    # the view is read from live gossip, so wait for it to settle instead of
+    # assuming it already has (an earlier test may have just changed traffic)
+    def settled():
+        view = client.get("/api/nodes/L1").json()
+        hops = {p["id"]: p["hops"] for p in view["reachable"]}
+        return view if view["nearby"] == 2 and hops.get("L5") == 3 else None
+
+    view = wait_until(settled)
     hops = {p["id"]: p["hops"] for p in view["reachable"]}
     assert hops["L2"] == 1 and hops["L4"] == 2 and hops["L5"] == 3
     assert view["rescue_route"]["hops"] >= 2

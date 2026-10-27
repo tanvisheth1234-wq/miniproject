@@ -12,6 +12,7 @@ from mesh.core.discovery import NodeRole
 from mesh.core.node import Node
 from mesh.core.packet import PacketType, Priority
 from mesh.core.transport_sim import SimulatedNetwork, SimulatedTransport
+from conftest import async_wait_until
 
 
 def make_node(node_id, network, **kwargs):
@@ -30,7 +31,8 @@ async def chain(*ids, roles=None):
     nodes = {i: make_node(i, net, role=(roles or {}).get(i, NodeRole.NORMAL)) for i in ids}
     for node in nodes.values():
         await node.start()
-    await asyncio.sleep(0.4)  # discovery + link-state converge
+    # discovery + link-state have converged once the first node routes to the last
+    await async_wait_until(lambda: nodes[ids[0]].router.shortest_path(ids[-1]) == list(ids))
     return nodes
 
 
@@ -44,9 +46,9 @@ async def test_ack_returns_over_the_path_the_data_took():
     nodes = await chain("A", "B", "C", "D")
     try:
         pkt = await nodes["A"].send("D", b"hello", Priority.SOS, needs_ack=True)
-        await asyncio.sleep(0.3)
+        row = await async_wait_until(
+            lambda: (r := nodes["A"].store.get_message(str(pkt.msg_id)))["status"] == "delivered" and r)
 
-        row = nodes["A"].store.get_message(str(pkt.msg_id))
         assert row["status"] == "delivered"
         assert row["hop_count"] == 2          # the sender learns the route from the ACK
         assert row["path"] == "B,C"
