@@ -112,6 +112,9 @@
   .tag { font-size: .72rem; font-weight: 700; letter-spacing: .05em; padding: 2px 8px; border-radius: 4px; background: var(--danger); color: #fff; }
   .tag.other { background: var(--accent); color: #07162b; }
   .tag.new { background: var(--text); color: #111; margin-right: 4px; }
+  .req .actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .replybox { margin-top: 10px; }
+  .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .empty { padding: 30px 10px; text-align: center; color: var(--text-2); }
   svg.map { width: 100%; height: auto; display: block; }
   .m-link { stroke: #4a525d; stroke-width: 3; } .m-link.off { stroke-dasharray: 5 7; opacity: .5; }
@@ -220,7 +223,9 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const NS = 'http://www.w3.org/2000/svg';
+const QUICK = ['Help is on the way', 'Stay where you are', 'Are you safe?', 'Move to a safer place if you can'];
 const ROLE = { NORMAL: 'phone', GATEWAY: 'gateway', RESCUE: 'rescue team' };
+const drafts = {}, replyOpen = new Set();
 let data = null, flash = null, seen = new Set(), first = true, soundOn = false, need = 'Need help';
 
 const lbl = (id) => ((data.nodes.find((n) => n.id === id)) || {}).label || id;
@@ -241,6 +246,7 @@ function setHTML(el, html) {
   const a = document.activeElement, key = a && el.contains(a) ? a.dataset.key : null;
   const val = key ? a.value : null, s0 = key && a.selectionStart, s1 = key && a.selectionEnd;
   el.innerHTML = html; el.__h = html;
+  el.querySelectorAll('[data-key]').forEach((n) => { if (drafts[n.dataset.key] != null) n.value = drafts[n.dataset.key]; });
   if (key) { const n = el.querySelector(`[data-key="${key}"]`); if (n) { if (val != null) n.value = val; n.focus(); try { n.setSelectionRange(s0, s1); } catch (e) {} } }
 }
 
@@ -288,6 +294,10 @@ function fillTargets(id) {
   sel.innerHTML = others.map((n) => `<option value="${esc(n.id)}">${esc(n.label)} (${ROLE[n.role] || 'phone'})</option>`).join('');
   if (keep && others.some((n) => n.id === keep)) sel.value = keep;
   sel.__sig = sig2;
+}
+async function replyTo(dst, text) {
+  try { await api('POST', '/api/send', { dst, text, priority: 'NORMAL' }); toast('Reply sent to ' + lbl(dst) + '.'); poll(); return true; }
+  catch (e) { toast('Could not send: ' + e.message); return false; }
 }
 async function sendText(toId, textId) {
   const dst = $(toId).value, text = $(textId).value.trim();
@@ -408,6 +418,8 @@ function renderConsole() {
     <div class="kpi"><div class="n">${online}/${total}</div><div class="l">Devices reachable</div></div>
     <div class="kpi"><div class="n">${avg == null ? '&ndash;' : avg.toFixed(1)}</div><div class="l">Average hops</div></div>`);
 
+  const answered = {};
+  d.thread.filter((x) => x.direction === 'sent').forEach((x) => { answered[x.dst] = asText(x); });
   setHTML($('sosList'), recv.length ? recv.map((m) => {
     const age = Math.max(0, Math.round((d.now_ms - m.created_ms) / 1000));
     const isNew = age < 20, sos = m.priority === 0;
@@ -415,7 +427,16 @@ function renderConsole() {
       <div class="top"><span class="who">${esc(lbl(m.src))}</span><span>${isNew ? '<span class="tag new">NEW</span>' : ''}<span class="tag ${sos ? '' : 'other'}">${esc(m.priority_name)}</span> <span class="muted small">${ago(m.created_ms)}</span></span></div>
       <div class="body">${esc(m.need || m.body)}</div>
       ${m.where ? `<div class="small" style="margin-bottom:6px"><span class="muted">Location:</span> ${esc(m.where)}</div>` : ''}
-      <div><span class="muted small">Route:</span> ${chips(fullRoute(m))}</div></div>`;
+      <div><span class="muted small">Route:</span> ${chips(fullRoute(m))}</div>
+      <div class="actions">
+        <span class="small muted">${answered[m.src] ? 'You replied: &ldquo;' + esc(answered[m.src]) + '&rdquo;' : 'No reply sent yet'}</span>
+        <button class="btn sm" data-reply="${esc(m.msg_id)}">${replyOpen.has(m.msg_id) ? 'Close' : 'Reply'}</button>
+      </div>
+      ${replyOpen.has(m.msg_id) ? `<div class="replybox">
+        <div class="quick">${QUICK.map((q) => `<button class="btn sm" data-quick="${esc(q)}" data-to="${esc(m.src)}">${esc(q)}</button>`).join('')}</div>
+        <textarea class="text" data-key="reply-${esc(m.msg_id)}" rows="2" maxlength="400" placeholder="Write a reply to ${esc(lbl(m.src))}" style="margin-bottom:10px"></textarea>
+        <button class="btn sm primary" data-sendreply="${esc(m.msg_id)}" data-to="${esc(m.src)}">Send reply</button>
+      </div>` : ''}</div>`;
   }).join('') : `<div class="card empty"><b>No messages yet</b><br>Listening for requests from the network.</div>`);
 
   mapSvg($('cMap'));
@@ -454,6 +475,17 @@ async function poll() {
 document.addEventListener('click', async (e) => {
   const pb = e.target.closest('.powerBtn');
   if (pb && data) { await api('POST', '/api/power', { on: !data.online }); poll(); return; }
+  const rb = e.target.closest('[data-reply]');
+  if (rb) { const id = rb.dataset.reply; replyOpen.has(id) ? replyOpen.delete(id) : replyOpen.add(id); render(); return; }
+  const qb = e.target.closest('[data-quick]');
+  if (qb) { await replyTo(qb.dataset.to, qb.dataset.quick); return; }
+  const sb = e.target.closest('[data-sendreply]');
+  if (sb) {
+    const key = 'reply-' + sb.dataset.sendreply, text = (drafts[key] || '').trim();
+    if (!text) { toast('Write a reply first.'); return; }
+    if (await replyTo(sb.dataset.to, text)) { drafts[key] = ''; replyOpen.delete(sb.dataset.sendreply); render(); }
+    return;
+  }
   if (e.target.closest('#sendBtn') && data) { await sendText('sendTo', 'sendText'); return; }
   if (e.target.closest('#safeBtn') && data) {
     try {
@@ -465,6 +497,7 @@ document.addEventListener('click', async (e) => {
   const nb = e.target.closest('.need');
   if (nb) { document.querySelectorAll('.need').forEach((b) => { const on = b === nb; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); need = nb.dataset.need; }
 });
+document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.key) drafts[e.target.dataset.key] = e.target.value; });
 $('soundBtn').addEventListener('click', () => {
   soundOn = !soundOn; $('soundBtn').textContent = soundOn ? 'Alert sound: on' : 'Alert sound: off'; if (soundOn) beep();
 });
