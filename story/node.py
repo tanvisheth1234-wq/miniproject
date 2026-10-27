@@ -12,7 +12,9 @@ the config on this one machine for a rehearsal.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
+import io
 import json
 import socket
 import time
@@ -22,7 +24,7 @@ from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from api import views
@@ -303,6 +305,27 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         text = structured_payload(f"{labels.get(node_id, node_id)} is safe", "Safe", body.where)
         pkt = await node.send(dst, text.encode("utf-8"), priority=Priority.STATUS, needs_ack=True)
         return {"msg_id": str(pkt.msg_id)}
+
+    @app.get("/api/export.csv")
+    async def export_csv():
+        """Every message this rescue device received, as a spreadsheet to hand
+        over to emergency services. Rescue devices only."""
+        if spec["role"] != "RESCUE":
+            raise HTTPException(403, "only the rescue device can export its requests")
+        node: Node = state["node"]
+        out = io.StringIO()
+        writer = csv.writer(out)
+        writer.writerow(["time", "from", "priority", "need", "where", "hops", "route", "message"])
+        for row in reversed(node.store.list_messages(direction="received")):
+            m = with_fields(views.message_view(row))
+            route = [m["src"], *m["relays"], node_id]
+            writer.writerow([
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(m["created_ms"] / 1000)),
+                labels.get(m["src"], m["src"]), m["priority_name"], m["need"], m["where"],
+                len(m["relays"]) + 1, " > ".join(labels.get(i, i) for i in route), m["body"] or "",
+            ])
+        return Response(out.getvalue(), media_type="text/csv",
+                        headers={"Content-Disposition": f'attachment; filename="ecomesh_{node_id}_requests.csv"'})
 
     @app.post("/api/power")
     async def power(body: PowerBody):

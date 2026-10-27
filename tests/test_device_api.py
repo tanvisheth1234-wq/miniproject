@@ -226,3 +226,25 @@ def test_a_safe_check_in_never_overtakes_an_sos():
     queue.push(safe)            # the check-in was queued first ...
     queue.push(sos)
     assert queue.pop() is sos   # ... but the SOS leaves first
+
+
+@pytest.mark.asyncio
+async def test_rescue_exports_received_requests_as_csv(fast_timers):
+    import csv
+    import io
+
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        sos = (await dev["A"].post("/api/sos", json={"text": "Two of us", "need": "Injured",
+                                                      "where": "3rd floor, room 304"})).json()["msg_id"]
+        await wait_for(lambda: thread_entry(dev["C"], sos))
+        export = await dev["C"].get("/api/export.csv")
+        refused = await dev["A"].get("/api/export.csv")
+    rows = list(csv.reader(io.StringIO(export.text)))
+    assert export.status_code == 200 and export.headers["content-type"].startswith("text/csv")
+    assert rows[0] == ["time", "from", "priority", "need", "where", "hops", "route", "message"]
+    assert len(rows) == 2                                           # header + the one request
+    assert rows[1][1:8] == ["Device A", "SOS", "Injured", "3rd floor, room 304", "2",
+                            "Device A > Device B > Device C", "Two of us"]
+    assert refused.status_code == 403
