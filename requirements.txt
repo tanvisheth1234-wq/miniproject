@@ -4,3 +4,4 @@ cryptography
 fastapi
 uvicorn
 websockets
+httpx
