@@ -34,9 +34,12 @@
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .01em; }
   .brand svg { width: 22px; height: 22px; stroke: var(--text); fill: var(--text); }
   .who { display: flex; align-items: center; gap: 10px; font-size: var(--fs-sm); color: var(--text-2); min-width: 0; }
-  .who .name { color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .who { flex-wrap: wrap; justify-content: flex-end; row-gap: 2px; }
+  .who .name { max-width: 46vw; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .badge { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px;
     border: 1px solid var(--border-strong); color: var(--text-2); white-space: nowrap; }
+  .net .short { display: none; }
+  @media (max-width: 520px) { .net .full { display: none; } .net .short { display: inline; } .appbar .in { padding: 10px 12px; } .page { padding-left: 12px; padding-right: 12px; } }
   .net { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
   .dot.bad { background: var(--danger); } .dot.warn { background: var(--warn); }
@@ -125,11 +128,14 @@
   .empty { padding: 30px 10px; text-align: center; color: var(--text-2); }
   svg.map { width: 100%; height: auto; display: block; }
   .m-link { stroke: #4a525d; stroke-width: 3; } .m-link.off { stroke-dasharray: 5 7; opacity: .5; }
+  .m-route { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; opacity: .55; }
+  .m-link.good { stroke: var(--ok); } .m-link.fair { stroke: var(--warn); } .m-link.weak { stroke: var(--danger); }
+  .m-lq { fill: var(--text-2); font-size: 23px; text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; }
   .m-flash { fill: none; stroke: var(--danger); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
   .m-node .b { fill: var(--raised); stroke: var(--text-3); stroke-width: 3; }
   .m-node.ok .b { stroke: var(--ok); } .m-node.lost { opacity: .5; } .m-node.lost .b { stroke: var(--danger); stroke-dasharray: 4 5; }
-  .m-node text.n { fill: var(--text); font-size: 21px; font-weight: 600; text-anchor: middle; }
-  .m-node text.s { fill: var(--text-2); font-size: 16px; text-anchor: middle; }
+  .m-node text.n { fill: var(--text); font-size: 27px; font-weight: 600; text-anchor: middle; }
+  .m-node text.s { fill: var(--text-2); font-size: 21px; text-anchor: middle; }
   .legend { color: var(--text-3); font-size: .8rem; margin-top: 6px; }
   /* ---------- activity feed ---------- */
   .feed li { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--border); font-size: var(--fs-sm); }
@@ -193,6 +199,8 @@
   </details>
 
   <section class="card"><div class="card-head"><h2>Path to the rescue team</h2></div><div id="pRoute"></div></section>
+  <section class="card"><div class="card-head"><h2>Network map</h2></div><svg id="pMap" class="map" viewBox="0 0 1000 470"></svg>
+    <div class="legend">Highlighted: the path your messages take. Percentages: quality of the links this phone can hear.</div></section>
   <section class="card"><div class="card-head"><h2>Phones near you</h2></div><ul id="pNear"></ul></section>
   <section class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="pActivity" class="feed"></ul></section>
   <section class="card" id="pHelping"><div class="card-head"><h2>Passing messages for others</h2></div><p id="pHelpingText" class="small muted" style="margin-bottom:8px"></p><ul id="pFwd"></ul></section>
@@ -228,8 +236,8 @@
       <details class="card" id="cHistBox"><summary class="muted">Message history</summary><div id="cHist"></div></details>
     </section>
     <section>
-      <div class="card"><div class="card-head"><h2>Network map</h2></div><svg id="cMap" class="map" viewBox="0 0 1000 440"></svg>
-        <div class="legend">Circle: phone &nbsp; Square: gateway &nbsp; Diamond: rescue team. Dashed outline: no contact.</div></div>
+      <div class="card"><div class="card-head"><h2>Network map</h2></div><svg id="cMap" class="map" viewBox="0 0 1000 470"></svg>
+        <div class="legend">Circle: phone &nbsp; Square: gateway &nbsp; Diamond: rescue team. Dashed outline: no contact. Percentages: quality of the links this device can hear.</div></div>
       <div class="card"><div class="card-head"><h2>Devices</h2></div><ul id="cDevs"></ul></div>
       <div class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="cActivity" class="feed"></ul></div>
       <details class="card"><summary class="muted">Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power.</p><button class="btn sm powerBtn"></button></details>
@@ -303,7 +311,7 @@ function renderBar() {
   $('whoRole').textContent = ROLE[data.role] || 'phone';
   const online = data.nodes.filter((n) => n.known).length, total = data.nodes.length;
   $('netState').innerHTML = data.online
-    ? `<span class="dot"></span>${online} of ${total} devices reachable`
+    ? `<span class="dot"></span><span class="full">${online} of ${total} devices reachable</span><span class="short">${online}/${total} reachable</span>`
     : '<span class="dot bad"></span>Switched off';
 }
 
@@ -413,7 +421,7 @@ function renderPhone() {
       ${m.retries > 0 ? `<p class="muted small" style="margin:6px 0 0">A link failed ${m.retries} time${m.retries > 1 ? 's' : ''}; your phone re-routed automatically.</p>` : ''}`);
   }
 
-  renderActivity('pActivity'); fillTargets('sendTo'); $('sendBtn').disabled = !d.online;
+  mapSvg($('pMap'), d.route); renderActivity('pActivity'); fillTargets('sendTo'); $('sendBtn').disabled = !d.online;
   setHTML($('pRoute'), d.route.length > 1 ? chips(d.route) : '<span class="muted">No path right now.</span>');
   setHTML($('pNear'), near.length
     ? near.map((n) => `<li class="row"><span>${esc(lbl(n.id))} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span>${sig(n.link_quality)}</li>`).join('')
@@ -441,21 +449,32 @@ function fillNeedFilter(needs) {
   sel.value = filt.need;
 }
 
-function mapSvg(svg) {
+function mapSvg(svg, highlight) {
   svg.innerHTML = '';
   const px = (n) => 60 + n.x * 880, py = (n) => 50 + n.y * 300;
   const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
   const pos = {}; data.nodes.forEach((n) => { pos[n.id] = n; });
-  data.links.forEach((l) => el('line', { class: 'm-link' + (l.known ? '' : ' off'), x1: px(pos[l.a]), y1: py(pos[l.a]), x2: px(pos[l.b]), y2: py(pos[l.b]) }));
+  const quality = {}; data.neighbours.forEach((n) => { quality[n.id] = n.link_quality; });   // only links this device can hear
+  data.links.forEach((l) => {
+    const other = l.a === data.id ? l.b : l.b === data.id ? l.a : null;
+    const q = other != null ? quality[other] : undefined;
+    const grade = q == null ? '' : q >= 0.8 ? ' good' : q >= 0.5 ? ' fair' : ' weak';
+    const ln = el('line', { class: 'm-link' + (l.known ? '' : ' off') + grade, x1: px(pos[l.a]), y1: py(pos[l.a]), x2: px(pos[l.b]), y2: py(pos[l.b]) });
+    if (q != null) {
+      ln.setAttribute('stroke-width', 2 + Math.round(q * 4));
+      el('text', { class: 'm-lq', x: (px(pos[l.a]) + px(pos[l.b])) / 2, y: (py(pos[l.a]) + py(pos[l.b])) / 2 - 8 }).textContent = Math.round(q * 100) + '%';
+    }
+  });
   const pts = (ids) => ids.filter((i) => pos[i]).map((i) => `${px(pos[i])},${py(pos[i])}`).join(' ');
+  if (highlight && highlight.length > 1) el('polyline', { class: 'm-route', points: pts(highlight) });
   if (flash && flash.until > Date.now()) el('polyline', { class: 'm-flash', points: pts(flash.path) });
   data.nodes.forEach((n) => {
     const g = el('g', { class: 'm-node ' + (n.known ? 'ok' : 'lost'), transform: `translate(${px(n)},${py(n)})` });
     if (n.role === 'GATEWAY') el('rect', { class: 'b', x: -32, y: -32, width: 64, height: 64, rx: 6 }, g);
     else if (n.role === 'RESCUE') el('rect', { class: 'b', x: -28, y: -28, width: 56, height: 56, rx: 4, transform: 'rotate(45)' }, g);
     else el('circle', { class: 'b', r: 32 }, g);
-    el('text', { class: 'n', y: 66 }, g).textContent = n.label;
-    el('text', { class: 's', y: 88 }, g).textContent = n.me ? 'this screen' : (n.known ? '' : 'no contact');
+    el('text', { class: 'n', y: 74 }, g).textContent = n.label;
+    el('text', { class: 's', y: 100 }, g).textContent = n.me ? 'this screen' : (n.known ? '' : 'no contact');
   });
 }
 
@@ -507,7 +526,7 @@ function renderConsole() {
   setHTML($('cSafe'), safeList.length ? safeList.map((m) => `<li class="row msg"><div><b>${esc(lbl(m.src))}</b><span>${m.where ? esc(m.where) + ' &middot; ' : ''}${ago(m.created_ms)}</span></div><span class="tag" style="background:var(--ok);color:#06251a">SAFE</span></li>`).join('')
     : '<li class="muted small">Nobody has checked in as safe yet.</li>');
 
-  mapSvg($('cMap'));
+  mapSvg($('cMap'), null);
   renderActivity('cActivity');
   setHTML($('cDevs'), d.nodes.filter((n) => !n.me).map((n) =>
     `<li class="row"><span>${esc(n.label)} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span><span class="small muted"><span class="dot ${n.known ? '' : 'bad'}" style="margin-right:6px"></span>${n.known ? 'reachable' : 'no contact'}</span></li>`).join(''));
