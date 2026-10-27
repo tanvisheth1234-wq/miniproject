@@ -1,0 +1,32 @@
+{
+  "_help": "The defect register: one source for the testing document, the final deck and the target-metric rule (docs/testing/kpis.py). 'scope' is engine, lab or test. A defect with scope 'test' and status 'Open' keeps target K9 (correctness) at 'Partly met'.",
+  "defects": [
+    {"id": "D1", "scope": "engine", "found_by": "Integration test of two components on one node",
+     "defect": "Only one of discovery and relay received packets: one receive callback, the last registrant won",
+     "fix": "A single dispatcher registered last; regression test added", "status": "Closed"},
+    {"id": "D2", "scope": "engine", "found_by": "Phase IV integration",
+     "defect": "Multi-hop ACK and retry failed: duplicate filtering keyed on the message id dropped every ACK at the first relay and swallowed retries",
+     "fix": "Key on type, id and attempt; retransmission counter in the formerly reserved header byte; re-ACK duplicates; new tests that fail on the old code", "status": "Closed"},
+    {"id": "D3", "scope": "engine", "found_by": "Phase IV integration",
+     "defect": "Dead nodes stayed routable: a newer link-state report was merged with the old one, so edges to a dead node never disappeared",
+     "fix": "A newer report replaces the origin's edges; tests added", "status": "Closed"},
+    {"id": "D4", "scope": "engine", "found_by": "Fuzz test",
+     "defect": "A non-ASCII byte in a node-id field made the parser raise UnicodeDecodeError instead of PacketError, so one damaged packet could raise inside the receive path",
+     "fix": "Decode and encode failures now raise PacketError; both fuzz tests pass", "status": "Closed"},
+    {"id": "D5", "scope": "engine", "found_by": "Repeated runs of the socket tests",
+     "defect": "Node.stop() hung in about a quarter of runs on Windows: wait_for swallowed a cancellation, so a background loop survived",
+     "fix": "Helper built on asyncio.wait; 15 of 15 test-file runs and 40 of 40 standalone iterations clean", "status": "Closed"},
+    {"id": "D6", "scope": "test", "found_by": "Repeated full-suite runs",
+     "defect": "Two timing-sensitive tests (test_api node-view hop distance; test_ack_multihop) failed in 2 and 1 of 6 runs under load; both pass alone",
+     "fix": "A wait_until polling helper replaces the fixed sleeps in both tests; the helpers have their own tests", "status": "Closed"},
+    {"id": "D7", "scope": "test", "found_by": "Repeated full-suite runs of the final suite",
+     "defect": "test_history_filters_by_priority_and_direction fails intermittently: two messages created in the same millisecond have no defined order, and the test expects newest first. The history query sorts by creation time only",
+     "fix": "Open: add a second sort key (the row id) to the history query, or compare as sets. The test and the query belong to the device server's owner", "status": "Open"},
+    {"id": "D8", "scope": "lab", "found_by": "Lab website test, first navigation click",
+     "defect": "The whole lab website went blank when a menu link was clicked: three React effects returned a value instead of nothing, which React then called as a cleanup function. Opening a page directly by URL did not show it",
+     "fix": "The effects now return nothing; the browser test (UT-01) clicks through every page and now passes", "status": "Closed"},
+    {"id": "D9", "scope": "lab", "found_by": "Phone-width check of the lab website",
+     "defect": "The phone header's node selector ran past the right edge of the frame at 390 px width",
+     "fix": "Selector capped at 46% of the header width; UT-15 passes", "status": "Closed"}
+  ]
+}

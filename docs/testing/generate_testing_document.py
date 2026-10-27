@@ -7,7 +7,9 @@ and the code cannot drift apart:
   * requirement text, acceptance criteria   docs/report/evidence/requirements.json, traceability.py
   * latest automated run                    docs/testing/results/pytest_latest.xml  (python -m pytest --junitxml=...)
   * earlier repeat runs                     docs/report/evidence/results/tests.json
-  * browser test of the website             docs/testing/results/ui_walkthrough.json (node docs/testing/ui_walkthrough.cjs)
+  * browser test of the device screens      docs/testing/results/device_walkthrough.json (node docs/testing/device_walkthrough.cjs)
+  * browser test of the simulation lab      docs/testing/results/ui_walkthrough.json (node docs/testing/ui_walkthrough.cjs)
+  * target metrics                          docs/testing/kpis.py
   * simulator, live-device and loss data    docs/report/evidence/results/*.json
   * the attack drill                        run live by this script (api/security_demo.py)
 
@@ -42,6 +44,12 @@ sys.path.insert(0, str(ROOT))
 import fr_table as F  # noqa: E402  (feature headings)
 import traceability as T  # noqa: E402  (requirement -> tests)
 
+import importlib.util as _ilu  # noqa: E402
+
+_kspec = _ilu.spec_from_file_location("kpis", Path(__file__).resolve().parent / "kpis.py")
+kpis = _ilu.module_from_spec(_kspec)  # the one definition of the ten targets, shared with the deck and the poster
+_kspec.loader.exec_module(kpis)
+
 OUT_PDF = HERE / "EcoMesh_Phase4_P2_Functional_and_NonFunctional_Testing.pdf"
 CHROME = os.environ.get("CHROME", "C:/Program Files/Google/Chrome/Application/chrome.exe")
 E = html.escape
@@ -69,7 +77,8 @@ SCALE20 = jload(RESULTS / "scale_lossy.json")
 SCEN = jload(RESULTS / "scenarios.json")["scenarios"]
 THR = jload(RESULTS / "throughput.json")
 LIVE = jload(RESULTS / "live.json")
-UI = jload(HERE / "results" / "ui_walkthrough.json")
+UI = jload(HERE / "results" / "ui_walkthrough.json")        # the simulation-lab website
+DEV = jload(HERE / "results" / "device_walkthrough.json")   # the device screens: the one app
 
 junit_root = ET.parse(HERE / "results" / "pytest_latest.xml").getroot()
 SUITE = junit_root if junit_root.tag == "testsuite" else junit_root.find("testsuite")
@@ -107,6 +116,8 @@ FILE_AREA = OrderedDict([
     ("test_lan_transport", "Real TCP transport between processes, range emulation, three-node mesh"),
     ("test_sim_runner", "Simulator runner and topologies"),
     ("test_ack_multihop", "ACK over several hops, lost-ACK re-send, retry through relays"),
+    ("test_device_api", "The device server: events, send, history filters, structured SOS, I am safe, CSV export, rescue reply"),
+    ("test_conftest_helpers", "The wait_until polling helpers used by the timing-sensitive tests"),
 ])
 
 
@@ -211,7 +222,7 @@ says why.</p>
 
 <h3>1.2 Scope</h3>
 {table(["In scope", "Out of scope (stated openly)"], [[
-"The nine engine modules and the node that joins them; the REST and WebSocket API; the React website (node view, rescue dashboard and the engineering pages); the simulator and its seven scenarios; a five-process real-socket deployment.",
+"The nine engine modules and the node that joins them; the device app (survivor, gateway and rescue screens, the one app) and its server API; the simulation lab (REST and WebSocket API and React website); the simulator and its seven scenarios; a five-process real-socket deployment.",
 "Real radio hardware (Bluetooth LE or Wi-Fi Direct); a native mobile application; a timed usability study with participants; browsers other than Chrome; printing and installation of the PWA on physical phones."]],
 widths=["52%", "48%"])}
 
@@ -230,7 +241,8 @@ def sec_strategy():
         ["Unit", "One module in isolation: packet, discovery, routing, reliability, crypto, store, relay", "pytest", "Developer, on every change"],
         ["Integration", "Modules together inside one node; several nodes over the simulated radio and over real TCP", "pytest, pytest-asyncio", "Developer, on every change"],
         ["System (API)", "Front end to back end to engine: REST and WebSocket against a live mesh", "FastAPI test client, httpx", "Developer, on every change"],
-        ["System (UI)", "The website driven as a user would: menus, the long-press SOS, the six demo beats", "Headless Chrome, puppeteer-core", "Scripted run (Section 5.5)"],
+        ["System (device screens)", "The one app in a real browser against five live device processes: SOS with need and location, I am safe, messages, replies, filters, history, CSV export, gateway off and on", "Headless Chrome, puppeteer-core", "Scripted run (Section 5.5)"],
+        ["System (simulation lab)", "The lab website driven as a user would: menus, the long-press SOS, the six demo beats", "Headless Chrome, puppeteer-core", "Scripted run (Section 5.6)"],
         ["Simulation", "Whole meshes of 5 to 65 nodes with seeded loss, latency and scripted failures, on a virtual clock", "sim/scenarios.py, api/vtime.py", "20 to 50 seeded runs per scenario"],
         ["Live devices", "Five real processes with their own sockets: latency, failover, store-and-forward", "story/ + live_test.py", "Repeated trials"],
     ]
@@ -262,7 +274,7 @@ def sec_env():
 ["Machine / OS", "Windows 11 Home, one laptop (all processes on one host)"],
 ["Language and runtime", "Python 3.11.9 (the code base targets Python 3.10 or newer); Node.js 22 for the UI build and the browser test"],
 ["Test framework", "pytest 9.1.1 with pytest-asyncio 1.4.0; FastAPI 0.139 test client with httpx 0.28"],
-["Browser", "Google Chrome (headless) controlled by puppeteer-core; desktop viewport 1440 x 1000 and phone viewport 390 x 844"],
+["Browser", "Google Chrome (headless) controlled by puppeteer-core; desktop viewports and phone viewports of 390 and 320 px wide"],
 ["Simulator", "In-process <span class='mono'>SimulatedTransport</span> with seeded loss and latency; a virtual-time event loop so the specified 3 s HELLO, 10 s timeout and 4 s ACK timer values run in milliseconds"],
 ["Live deployment", "Five real processes (<span class='mono'>python -m story.local</span>) with TCP between them and a topology file that emulates radio range"],
 ["Code under test", f"branch <span class='mono'>{E(BRANCH)}</span>, commit <span class='mono'>{E(COMMIT)}</span>, tested on {TODAY.strftime('%d %B %Y')}"],
@@ -273,9 +285,10 @@ def sec_env():
 
 <h3>3.3 How to reproduce every result</h3>
 <pre>pip install -r requirements.txt
-python -m pytest -q --junitxml=docs/testing/results/pytest_latest.xml     # 312 automated tests
-python -m api.server                                                        # terminal 1: the website and API
-node docs/testing/ui_walkthrough.cjs                                        # terminal 2: 16 browser checks
+python -m pytest -q --junitxml=docs/testing/results/pytest_latest.xml     # {N_TESTS} automated tests
+node docs/testing/device_walkthrough.cjs                                    # starts the five devices itself; checks of the device screens
+python -m api.server                                                        # terminal 1: the simulation lab website and API
+node docs/testing/ui_walkthrough.cjs                                        # terminal 2: checks of the lab website
 python -m sim.scenarios --scenario collapse_40 --runs 50                   # one simulator scenario
 python docs/report/evidence/collect.py all                                  # all simulator measurements
 python docs/report/evidence/live_test.py                                    # five-process live trials
@@ -295,24 +308,30 @@ def sec_summary():
         rows.append([mono(f + ".py"), n, f'<b class="okt">{ok}</b>' if ok == n else f'<b class="badt">{ok}</b>', f"{tm:.1f}", E(area)])
     total_t = sum(v[2] for v in per_file.values())
     rows.append(["<b>Total</b>", f"<b>{N_TESTS}</b>", f"<b>{N_TESTS - N_FAIL}</b>", f"<b>{total_t:.1f}</b>", ""])
-    ui_pass = sum(1 for c in UI["checks"] if c["passed"])
+    dev_pass = sum(1 for c in DEV["checks"] if c["passed"])
+    web_pass = sum(1 for c in UI["checks"] if c["passed"])
     runs = TESTS_JSON["runs"]
     hist = ", ".join(f"run {r['run']}: {E(r['summary'].split(' in ')[0])}" for r in runs)
+    green = sum(1 for r in runs if r["exit_code"] == 0)
+    flaky = ", ".join(mono(x) for x in TESTS_JSON.get("flaky", []))
+    met, total_k, _not_met = kpis.summary()
+    kinds = Counter(k for _t, k in T.MAP.values())
+    verified = kinds["A"] + kinds["M"]
     return f"""
 <div class="kpis">
  <div><b>{N_TESTS - N_FAIL}/{N_TESTS}</b><span>automated tests passed<br>in the latest run ({RUN_DATE})</span></div>
- <div><b>{ui_pass}/{len(UI['checks'])}</b><span>browser checks passed<br>on the website</span></div>
+ <div><b>{dev_pass}/{len(DEV['checks'])}</b><span>browser checks passed<br>on the device screens</span></div>
  <div><b>68</b><span>functional requirements,<br>each traced to evidence</span></div>
- <div><b>7 of 10</b><span>target metrics met;<br>3 partly met, explained</span></div>
+ <div><b>{met} of {total_k}</b><span>target metrics fully met;<br>{total_k - met} partly met, explained</span></div>
 </div>
 
 <h3>4.1 Automated suite, latest run</h3>
-<p>Run on {RUN_DATE}: <b>{N_TESTS - N_FAIL} passed, {N_FAIL} failed</b> in {RUN_TIME:.1f} s. The suite was also run three times in a row earlier for the report ({hist}); two of the three
-were fully green and one timing-sensitive API test failed once (defect D6 in Section 7). Times below are the sum of the tests in each file.</p>
+<p>Run on {RUN_DATE}: <b>{N_TESTS - N_FAIL} passed, {N_FAIL} failed</b> in {RUN_TIME:.1f} s. The suite was also run three times in a row earlier for the report ({hist}); {green} of the {len(runs)}
+were fully green{(' and one timing-sensitive test failed: ' + flaky + ' (defect D7 in Section 7)') if flaky else ''}. Times below are the sum of the tests in each file.</p>
 {table(["Test file", "Tests", "Passed", "Time (s)", "What it covers"], rows, widths=["25%", "7%", "8%", "9%", "51%"], cls="compact")}
 
 <h3>4.2 Overall verdict</h3>
-{callout("<b>Functional:</b> 62 of the 68 requirements are fully verified by automated tests (52 by tests alone, 10 by tests plus a manual look at the screen). 2 are only partly implemented, 2 were verified by code inspection and 2 by a manual check. <b>Non-functional:</b> 7 of the 10 target metrics are met; the other 3 are met only partly, and Section 6 gives the measured numbers and the reasons.", "ok")}
+{callout(f"<b>Functional:</b> {verified} of the {sum(kinds.values())} requirements are fully verified by automated tests ({kinds['A']} by tests alone, {kinds['M']} by tests plus a check of the screen). {kinds['P']} are only partly implemented, {kinds['I']} were verified by code inspection and {kinds['U']} by a manual check. <b>Non-functional:</b> {met} of the {total_k} target metrics are fully met; the other {total_k - met} are met only partly, and Section 6 gives the measured numbers and the reasons.", "ok")}
 """
 
 
@@ -365,13 +384,16 @@ def sec_functional():
         ["TC-09", "DIS-7", "Three nodes over real TCP, neighbour-restricted", "Routes learned; message and ACK delivered", "As expected (test_lan_transport)", "Pass"],
         ["TC-10", "K1", "40 nodes, 20% loss, relay and gateway failures, 50 seeds", "Delivery at least 90%", "92.6% mean, worst run 75.9%", "Pass"],
         ["TC-11", "K3", "Kill the relay on the active path, 50 trials", "Re-route within 10 s", "Mean 8.1 s; 23 of 50 trials within 10 s; worst 10.25 s", "Partial"],
+        ["TC-13", "SNF-3", "A message held for node C; C then appears", "Sent at once, not after the 10 s flush interval", "As expected (test_node); on devices: DT-15 and DT-16", "Pass"],
+        ["TC-14", "LOG-5", "Message history filtered by priority and by direction", "Only matching messages are listed; the CSV export has a header and rows", "As expected (test_device_api); on screen: DT-12", "Pass"],
         ["TC-12", "K4, K6", "Congested radio; weighted vs hop-count on identical seeds", "SOS at least 3 times faster; weighted delivers more", "4.4 times; 99.2% vs 57.4%", "Pass"],
     ]
     tcs_html = [[r[0], r[1], E(r[2]), E(r[3]), E(r[4]), verdict(r[5])] for r in tcs]
 
-    ui_rows = []
-    for c in UI["checks"]:
-        ui_rows.append([f"<b>{c['id']}</b>", E(c["name"]), E(c["detail"]) if c["detail"] else "", verdict("Pass" if c["passed"] else "Fail")])
+    def walk_rows(checks):
+        return [[f"<b>{c['id']}</b>", E(c["name"]), E(c["detail"]) if c["detail"] else "", verdict("Pass" if c["passed"] else "Fail")] for c in checks]
+
+    dev_rows, ui_rows = walk_rows(DEV["checks"]), walk_rows(UI["checks"])
 
     api_tests = [(n, st) for (f, n), (st, _t) in LATEST.items() if f == "test_api"]
     api_rows = [[mono(n), verdict("Pass" if st == "passed" else "Fail")] for n, st in sorted(api_tests)]
@@ -395,20 +417,26 @@ Notes under a requirement explain anything that is not a clean pass.</p>
 <p>Twelve cases chosen to cover every feature, written in the usual form: scenario and input, expected result, actual result and evidence, verdict.</p>
 {table(["ID", "Req.", "Scenario and input", "Expected result", "Actual result and evidence", "Verdict"], tcs_html, widths=["6%", "8%", "27%", "24%", "27%", "8%"], cls="compact")}
 
-<h3>5.5 User-interface functional tests (browser)</h3>
-<p>The website has no unit tests of its own, so it was tested the way a user meets it: a scripted real Chrome opens each page, presses the
-on-screen buttons and reads back what the page shows. The script is <span class="mono">docs/testing/ui_walkthrough.cjs</span>; the results below are from
-its latest run ({E(UI['date'][:10])}) against the running server. The demo-beat checks use the real engine, so each outcome message is read from the
-screen after the engine produced it.</p>
+<h3>5.5 Device-screen functional tests (browser)</h3>
+<p>The device screen is the one app and the demonstration, so it was tested the way a user meets it: a script starts five real device processes, opens the survivor phone,
+a second phone, the gateway and the rescue console in a real Chrome, presses the on-screen buttons and reads back what each page shows. The script is
+<span class="mono">docs/testing/device_walkthrough.cjs</span>; the results below are from its latest run ({E(DEV['date'][:10])}). Every outcome is produced by the real engine
+and read from the screen afterwards.</p>
+{table(["ID", "Check", "Evidence read from the page", "Result"], dev_rows, widths=["7%", "38%", "43%", "12%"], cls="compact")}
+
+<h3>5.6 Simulation-lab website tests (browser)</h3>
+<p>The React website is not part of the demonstration; it is the simulation lab that produced the experiments. It was tested the same way, with
+<span class="mono">docs/testing/ui_walkthrough.cjs</span> (latest run {E(UI['date'][:10])}) against the running API server.</p>
 {table(["ID", "Check", "Evidence read from the page", "Result"], ui_rows, widths=["7%", "38%", "43%", "12%"], cls="compact")}
 
-<h3>5.6 API tests</h3>
-<p>Twelve tests in <span class="mono">test_api.py</span> start a real mesh of five nodes and call the API through FastAPI's test client, including a live WebSocket.
+<h3>5.7 API tests</h3>
+<p>Twelve tests in <span class="mono">test_api.py</span> start a real mesh of five nodes and call the simulation-lab API through FastAPI's test client, including a live WebSocket.
 They cover the converged snapshot, an SOS reaching the rescue queue, hop distances in a node's view, route comparison, clear error codes for bad requests (404 unknown node, 409 node switched off, 422 empty text, 400 bad priority),
-killing and reviving a node, the event stream, the protocol inspector, the cryptography endpoints, the attack drill and resetting the mesh with encryption and signing on.</p>
+killing and reviving a node, the event stream, the protocol inspector, the cryptography endpoints, the attack drill and resetting the mesh with encryption and signing on.
+Twelve more in <span class="mono">test_device_api.py</span> start real device processes and call the device API: the event feed, sending a message, rejecting bad sends, history filters, structured SOS, the safe check-in, CSV export and the rescue reply.</p>
 {table(["Test", "Result"], api_rows, widths=["82%", "18%"], cls="compact")}
 
-<h3>5.7 Boundary, invalid-input and concurrency tests</h3>
+<h3>5.8 Boundary, invalid-input and concurrency tests</h3>
 {table(["Area", "What is tested", "Outcome"], [
 ["Boundary input", "Empty and header-only input; bad magic value; truncated header, path, payload and signature; TTL out of range; payload over the 16-bit length; path too long; node id over 8 bytes or not ASCII; wrong-length signature; signed flag without a signature; wrong key size; ciphertext shorter than the nonce; an empty payload (valid); a send to an unknown destination (held, not an exception)", verdict("Pass")],
 ["Fuzzing", "3,000 random byte strings and 1,000 bit-flipped valid packets to the parser; 200 garbage buffers to a running node, which must still deliver a normal message afterwards", verdict("Pass")],
@@ -419,20 +447,19 @@ killing and reviving a node, the event stream, the protocol inspector, the crypt
 """
 
 
+WHY = {
+    "K2": "it holds in most runs but not at 35% loss, because convergence moves in multiples of the 5 s gossip interval.",
+    "K3": "the mean is under 10 s, but recovery is defined by the 10 s heartbeat timer and measured in 0.25 s steps, so many trials miss by a quarter of a second. A faster 7 s timeout was tried and lowered delivery at 20% loss, so it was dropped.",
+    "K7": "scale holds at 5% loss and fails at 20% loss beyond about 43 nodes.",
+    "K9": "one timing-sensitive test fails intermittently (D7).",
+}
+
+
 def sec_nonfunctional():
-    kpi = [
-        ["K1", "Delivery ratio", "&ge; 90% (40 nodes, 20% loss, failures injected)", "92.6% mean over 50 runs (worst run 76%). Without failures, a 43-node grid at 20% loss: 95.8%", "Met"],
-        ["K2", "Convergence", "&le; 15 s", "Mean 9.6 s in collapse_40; 47 of 50 runs within 15 s; worst 15.25 s. Mean 17.7 s in the 35%-loss scenario. Values come in multiples of the 5 s gossip interval", "Met"],
-        ["K3", "Recovery after relay death", "&le; 10 s", "Mean 8.1 s, median 10.2 s; 23 of 50 trials within 10 s. The other 27 took 10.2 to 10.25 s: the 10 s heartbeat timeout plus the 0.25 s sampling step", "Partly met"],
-        ["K4", "SOS latency advantage", "&ge; 3 times faster", "4.4 times (median routine latency over median SOS latency)", "Met"],
-        ["K5", "Store-and-forward flush", "100% flushed", "201 of 201 in the no-gateway scenario; all live trials flushed", "Met"],
-        ["K6", "Weighted vs hop-count routing", "Weighted is better", "99.2% against 57.4% delivery on identical seeds", "Met"],
-        ["K7", "Scale", "50 nodes within the targets", "50 nodes at 5% loss: 100%. At 20% loss: 88.2%. Largest tested, 65 nodes: 98.9% (5% loss) and 86.0% (20% loss)", "Partly met"],
-        ["K8", "Screen freshness", "&le; 2 s", "API response median 16 ms (p95 31 ms); the screens refresh every 0.7 s", "Met"],
-        ["K9", "Correctness", "100% of tests pass", f"{N_TESTS - N_FAIL} of {N_TESTS} in the latest run; in three earlier repeated runs one timing-sensitive test failed once", "Partly met"],
-        ["K10", "Security", "All properties hold", "A relay cannot read the payload; a forged signature, a tampered payload and a wrong key are all rejected (Section 6.6)", "Met"],
-    ]
-    kpi_html = [[f"<b>{r[0]}</b>", E(r[1]), r[2], E(r[3]), verdict(r[4])] for r in kpi]
+    kpi = [[r['id'], r['name'], r['target'], r['measured'], r['verdict']] for r in kpis.evaluate()]
+    kpi_html = [[f"<b>{r[0]}</b>", E(r[1]), E(r[2]), E(r[3]), verdict(r[4])] for r in kpi]
+    met_ids = ", ".join(r[0] for r in kpi if r[4] == "Met")
+    partly = [r for r in kpi if r[4] != "Met"]
 
     loss_rows = [[f"{int(r['loss'] * 100)}%", pct(r["delivery_mean"]), pct(r["delivery_min"]), f"{r['overhead_tx_per_delivered']:.1f}", r["runs"]] for r in LOSS]
     loss_chart = svg_lines([("delivery, 21-node mesh", [r["delivery_mean"] * 100 for r in LOSS])], [f"{int(r['loss'] * 100)}%" for r in LOSS], 40, 100,
@@ -473,7 +500,7 @@ def sec_nonfunctional():
 <p>The targets were fixed in the project plan before any measurement. Each value below comes from stored raw data in
 <span class="mono">docs/report/evidence/results/</span> and can be regenerated with the commands in Section 3.3.</p>
 {table(["ID", "Metric", "Target", "Measured", "Verdict"], kpi_html, widths=["6%", "16%", "19%", "47%", "12%"], cls="compact")}
-{callout("<b>Reading this table.</b> K1, K4, K5, K6, K8 and K10 are met with margin. K2 is met on average (47 of 50 runs). K3 is met on average but in only 23 of 50 trials, by a quarter of a second, because failure detection is defined by a 10 s heartbeat timer and measured in 0.25 s steps. K7 holds at 5% loss and fails at 20% loss beyond about 43 nodes. K9 had one timing-sensitive failure in three repeated runs (D6).", "")}
+{callout(f"<b>Reading this table.</b> {met_ids} are fully met. " + " ".join(f"{r[0]} ({r[1].lower()}) is only partly met: {WHY[r[0]]}" for r in partly), "")}
 
 <h3>6.2 Performance</h3>
 <h4>Latency and throughput</h4>
@@ -541,8 +568,8 @@ A, M and B with M hostile, and records what B does. The drill below was executed
 
 <h3>6.8 Usability, accessibility and compatibility</h3>
 {table(["Aspect", "What was checked", "Outcome"], [
-["Emergency usability", "The SOS control is a single hold of about 1.3 s on one prominent button; releasing early sends nothing (UT-02); status is shown in plain words with the hop path (UT-03, UT-05)", verdict("Pass")],
-["Responsive layout", "Every one of the 9 pages at 390 px width: no sideways scrolling (UT-15)", verdict("Pass")],
+["Emergency usability", "The SOS control is a single hold of about 1.2 s on one prominent button; releasing early sends nothing (DT-04); the need and location travel with it (DT-05); status is shown in plain words with the route (DT-06, DT-15, DT-16)", verdict("Pass")],
+["Responsive layout", "Both device screens at 390 px and 320 px wide (DT-17) and every page of the lab website at 390 px (UT-15): no sideways scrolling", verdict("Pass")],
 ["Keyboard access", "The SOS button is written to be armed with Space or Enter, but keyboard use and screen-reader use were not tested", verdict("Not done")],
 ["Browsers", "Google Chrome only (desktop and a phone-sized viewport). Firefox, Edge and Safari were not tested", verdict("Partial")],
 ["Real phones", "Not tested on physical devices; the PWA manifest and service worker are present but installation was not tested", verdict("Partial")],
@@ -568,14 +595,15 @@ def sec_defects():
         ["D3", "Phase IV integration", "Dead nodes stayed routable: a newer link-state report was merged with the old one, so edges to a dead node never disappeared", "A newer report replaces the origin's edges; tests added", "Closed"],
         ["D4", "Fuzz test", "A non-ASCII byte in a node-id field made the parser raise UnicodeDecodeError instead of PacketError, so one damaged packet could raise inside the receive path", "Decode and encode failures now raise PacketError; both fuzz tests pass", "Closed"],
         ["D5", "Repeated runs of the socket tests", "Node.stop() hung in about a quarter of runs on Windows: wait_for swallowed a cancellation, so a background loop survived", "Helper built on asyncio.wait; 15 of 15 test-file runs and 40 of 40 standalone iterations clean", "Closed"],
-        ["D6", "Repeated full-suite runs", "Timing-sensitive tests fail occasionally under load (test_api node-view hop distance in 2 of 6 runs; test_ack_multihop in 1 of 6); both pass alone", "Open: the fixed sleeps should become condition polling. The suite was fully green in today's run", "Open"],
-        ["D7", "Browser test, first navigation click", "The whole website went blank when a menu link was clicked: three React effects returned a value instead of nothing, which React then called as a cleanup function. Opening a page directly by URL did not show it", "The effects now return nothing; the browser test (UT-01) clicks through every page and now passes", "Closed"],
-        ["D8", "Phone-width check", "The phone header's node selector ran past the right edge of the frame at 390 px width", "Selector capped at 46% of the header width; UT-15 passes", "Closed"],
+        ["D6", "Repeated full-suite runs", "Two timing-sensitive tests (test_api node-view hop distance; test_ack_multihop) failed in 2 and 1 of 6 runs under load; both pass alone", "A wait_until polling helper replaces the fixed sleeps in both tests; the helpers have their own tests", "Closed"],
+        ["D7", "Repeated full-suite runs of the final suite", "test_history_filters_by_priority_and_direction fails intermittently: two messages created in the same millisecond have no defined order, and the test expects newest first. The history query sorts by creation time only", "Open: add a second sort key (the row id) to the history query, or compare as sets. The test belongs to the device server's owner", "Open"],
+        ["D8", "Lab website test, first navigation click", "The whole lab website went blank when a menu link was clicked: three React effects returned a value instead of nothing, which React then called as a cleanup function. Opening a page directly by URL did not show it", "The effects now return nothing; the browser test (UT-01) clicks through every page and now passes", "Closed"],
+        ["D9", "Phone-width check of the lab website", "The phone header's node selector ran past the right edge of the frame at 390 px width", "Selector capped at 46% of the header width; UT-15 passes", "Closed"],
     ]
     pill = {"Closed": '<span class="pill ok">Closed</span>', "Open": '<span class="pill warn">Open</span>'}
     html_rows = [[f"<b>{r[0]}</b>", E(r[1]), E(r[2]), E(r[3]), pill[r[4]]] for r in rows]
     return f"""
-<p>Every defect found while testing, with its cause and how it was fixed and retested. Defects D2, D3, D7 and D8 were found by testing the integrated system, not by the unit tests, which is why the integration, API and browser levels exist.</p>
+<p>Every defect found while testing, with its cause and how it was fixed and retested. Defects D2, D3, D8 and D9 were found by testing the integrated system, not by the unit tests, which is why the integration, API and browser levels exist.</p>
 {table(["ID", "Found by", "Defect and cause", "Fix and retest", "Status"], html_rows, widths=["5%", "17%", "37%", "31%", "10%"], cls="compact")}
 """
 
@@ -587,23 +615,27 @@ def sec_limits():
 <li><b>One machine.</b> All live-device timings were taken with five processes on one laptop. A two-laptop split worked over a phone hotspot, but it was not timed under the same protocol.</li>
 <li><b>Recovery time is quantised.</b> Failure detection is defined by a 10 s heartbeat timer, so the "10 s or less" target is met only on average (K3).</li>
 <li><b>Scale at high loss.</b> Delivery falls below 90% beyond about 43 nodes at 20% loss (K7).</li>
-<li><b>No automated browser tests in the main suite.</b> The browser script is a separate command and needs a running server and Chrome.</li>
+<li><b>Browser checks are not part of the pytest suite.</b> The two browser scripts are separate commands that need Chrome; the device script starts its own devices.</li>
 <li><b>Untested:</b> a timed usability study, browsers other than Chrome, physical phones, installing the PWA.</li>
-<li><b>One open defect (D6):</b> two timing-sensitive tests can fail under heavy machine load.</li>
+<li><b>One open defect (D7):</b> one test is intermittently order-sensitive when two messages are created in the same millisecond.</li>
 <li><b>Security scope.</b> One pre-shared key for the mesh; signing is optional; an unsigned forgery is not caught.</li>
 </ul>
 """
 
 
 def sec_conclusion():
-    ui_pass = sum(1 for c in UI["checks"] if c["passed"])
+    dev_pass = sum(1 for c in DEV["checks"] if c["passed"])
+    web_pass = sum(1 for c in UI["checks"] if c["passed"])
+    met, total_k, not_met = kpis.summary()
+    kinds = Counter(k for _t, k in T.MAP.values())
+    verified = kinds["A"] + kinds["M"]
     return f"""
 <p>EcoMesh was tested at six levels, from single-module unit tests to five real processes exchanging messages over TCP.</p>
 <ul>
-<li><b>Functional:</b> {N_TESTS - N_FAIL} of {N_TESTS} automated tests passed in the latest run and {ui_pass} of {len(UI['checks'])} browser checks passed. 62 of the 68 requirements are fully verified; 2 are partial (immediate flush when a new neighbour appears, and a history filter on the screens), 2 were verified by inspection and 2 by a manual check.</li>
-<li><b>Non-functional:</b> 7 of 10 target metrics are met. The three that are only partly met are recovery time (a timer-defined quarter-second miss), scale at 20% loss (below 90% past about 43 nodes) and one timing-sensitive test.</li>
+<li><b>Functional:</b> {N_TESTS - N_FAIL} of {N_TESTS} automated tests passed in the latest run, {dev_pass} of {len(DEV['checks'])} browser checks of the device screens passed and {web_pass} of {len(UI['checks'])} of the simulation lab. {verified} of the {sum(kinds.values())} requirements are fully verified; {kinds['P']} are partial, {kinds['I']} were verified by inspection and {kinds['U']} by a manual check.</li>
+<li><b>Non-functional:</b> {met} of {total_k} target metrics are fully met. The {total_k - met} that are only partly met are {", ".join(r["id"] + " (" + r["name"].lower() + ")" for r in not_met)}.</li>
 <li><b>Design validated:</b> weighted routing delivered 99.2% against 57.4% for hop-count routing on identical seeds, SOS arrived 4.4 times faster under congestion, and every held message was flushed when a path returned.</li>
-<li><b>Defects:</b> eight found, seven closed, one open and explained.</li>
+<li><b>Defects:</b> nine found, eight closed, one open (D7) and explained.</li>
 </ul>
 <p>The system is fit for its stated purpose, a software mesh demonstrated on LAN sockets and a simulator, with the limits in Section 8 stated openly.</p>
 
@@ -698,7 +730,7 @@ BODIES = [
     ("7", "Defects found and resolved", sec_defects),
     ("8", "Limitations and risks", sec_limits),
     ("9", "Conclusion and sign-off", sec_conclusion),
-    ("A", "Appendix A: all 312 automated test cases", sec_appendix),
+    ("A", f"Appendix A: all {N_TESTS} automated test cases", sec_appendix),
 ]
 
 
