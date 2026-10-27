@@ -216,6 +216,8 @@ const ago = (ms) => {
 const sig = (q) => { const n = (q == null || q >= 0.8) ? 3 : q >= 0.5 ? 2 : 1; return `<span class="sig s${n}" title="link quality"><i></i><i></i><i></i></span>`; };
 const chips = (ids) => ids.map((i) => `<span class="rc">${esc(lbl(i))}</span>`).join('<span class="arr">&rarr;</span>');
 const fullRoute = (m) => [m.src, ...m.relays, data.id];
+// A message as one readable line. SOS and check-ins carry need and location as separate fields.
+const asText = (m) => (m.need ? m.need + (m.where ? ' — ' + m.where : '') : m.body);
 
 // Replace an element's content only when it changed, and keep the user's typing and focus.
 function setHTML(el, html) {
@@ -305,7 +307,7 @@ function renderPhone() {
     const s3 = done ? ['done', safe ? 'Rescue team recorded your check-in' : 'Rescue team confirmed receipt', ''] : [held ? 'warn' : 'wait', 'Waiting for the rescue team to confirm', held ? 'Will retry automatically' : ''];
     const row = (s) => `<li><span class="mk ${s[0]}">${s[0] === 'done' ? '&#10003;' : s[0] === 'warn' ? '!' : ''}</span><div class="t"><b>${esc(s[1])}</b>${s[2] ? `<span>${esc(s[2])}</span>` : ''}</div></li>`;
     setHTML(tr, `<p class="headline" style="color:${head[0]}">${esc(head[1])}</p><p class="muted" style="margin:0 0 8px">${esc(head[2])}</p>
-      <div class="muted small" style="margin-bottom:6px">&ldquo;${esc(m.body)}&rdquo;</div>
+      <div class="muted small" style="margin-bottom:6px">&ldquo;${esc(asText(m))}&rdquo;</div>
       <ul class="steps">${row(s1)}${row(s2)}${row(s3)}</ul>
       ${m.retries > 0 ? `<p class="muted small" style="margin:6px 0 0">A link failed ${m.retries} time${m.retries > 1 ? 's' : ''}; your phone re-routed automatically.</p>` : ''}`);
   }
@@ -322,8 +324,8 @@ function renderPhone() {
   setHTML($('pFwd'), d.forwarded.map((f) => `<li class="row msg"><div><b>${esc(f.priority_name === 'SOS' ? 'SOS' : 'Message')} from ${esc(lbl(f.src))} to ${esc(lbl(f.dst))}</b><span>${ago(f.created_ms)}</span></div></li>`).join(''));
 
   const rows = d.thread.slice().reverse().slice(0, 6).map((x) => x.direction === 'sent'
-    ? `<li class="row msg"><div><b>You: ${esc(x.body)}</b><span>${x.status === 'delivered' ? 'Delivered' : x.status === 'queued_sf' ? 'Saved, waiting for a path' : x.status === 'failed' ? 'Failed' : 'Sending'} &middot; ${ago(x.created_ms)}</span></div></li>`
-    : `<li class="row msg"><div><b>${esc(lbl(x.src))}: ${esc(x.body)}</b><span>Received ${ago(x.created_ms)}</span></div></li>`);
+    ? `<li class="row msg"><div><b>You: ${esc(asText(x))}</b><span>${x.status === 'delivered' ? 'Delivered' : x.status === 'queued_sf' ? 'Saved, waiting for a path' : x.status === 'failed' ? 'Failed' : 'Sending'} &middot; ${ago(x.created_ms)}</span></div></li>`
+    : `<li class="row msg"><div><b>${esc(lbl(x.src))}: ${esc(asText(x))}</b><span>Received ${ago(x.created_ms)}</span></div></li>`);
   setHTML($('pMsgs'), rows.length ? rows.join('') : '<li class="muted">No messages yet.</li>');
 }
 
@@ -366,7 +368,8 @@ function renderConsole() {
     const isNew = age < 20, sos = m.priority === 0;
     return `<div class="req ${sos ? '' : 'other'} ${isNew && sos ? 'fresh' : ''}">
       <div class="top"><span class="who">${esc(lbl(m.src))}</span><span>${isNew ? '<span class="tag new">NEW</span>' : ''}<span class="tag ${sos ? '' : 'other'}">${esc(m.priority_name)}</span> <span class="muted small">${ago(m.created_ms)}</span></span></div>
-      <div class="body">${esc(m.body)}</div>
+      <div class="body">${esc(m.need || m.body)}</div>
+      ${m.where ? `<div class="small" style="margin-bottom:6px"><span class="muted">Location:</span> ${esc(m.where)}</div>` : ''}
       <div><span class="muted small">Route:</span> ${chips(fullRoute(m))}</div></div>`;
   }).join('') : `<div class="card empty"><b>No messages yet</b><br>Listening for requests from the network.</div>`);
 
@@ -392,7 +395,7 @@ function render() {
     flash = { path: fullRoute(m), until: Date.now() + 8000 };
     if (m.priority === 0) {
       if (soundOn && con) beep();
-      if (!con) toast(`Message from ${lbl(m.src)}: ${m.body}`);
+      if (!con) toast(`Message from ${lbl(m.src)}: ${asText(m)}`);
       document.title = 'New SOS - EcoMesh'; clearTimeout(render.t); render.t = setTimeout(() => { document.title = 'EcoMesh'; }, 8000);
     }
   });
@@ -443,9 +446,8 @@ btn.addEventListener('contextmenu', (e) => e.preventDefault());
 
 async function sendSOS() {
   const where = $('where').value.trim();
-  const text = `${need}${where ? ' — ' + where : ''}`;
   try {
-    await api('POST', '/api/sos', { text });
+    await api('POST', '/api/sos', { text: need, need, where });
     if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
     toast('SOS sent. Nearby phones are passing it along.'); poll();
   } catch (e) { toast('Could not send: ' + e.message); }
