@@ -6,14 +6,14 @@
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.482\textwidth}>{\raggedright\arraybackslash}p{0.482\textwidth}@{}}
 \toprule
 \textbf{Measurement} & \textbf{Result} \\ \midrule
-Process start \textrightarrow{} every device knows every device & 3.8 s \\
-SOS arrives at the rescue device (30/30 delivered) & median 47 ms, 95th pct 102 ms, max 281 ms \\
-ACK back at the sender & median 63 ms, 95th pct 149 ms \\
-Relay switched off \textrightarrow{} sender re-routes (8 trials) & median 4.0 s, max 4.5 s; every later SOS delivered \\
-Gateway down, 5 SOS held; gateway back (4 trials) & 100\% flushed, median 4.5 s, max 6.1 s \\
+Process start \textrightarrow{} every device knows every device & 4.4 s \\
+SOS arrives at the rescue device (30/30 delivered) & median 32 ms, 95th pct 63 ms, max 78 ms \\
+ACK back at the sender & median 47 ms, 95th pct 87 ms \\
+Relay switched off \textrightarrow{} sender re-routes (8 trials) & median 4.1 s, max 4.4 s; every later SOS delivered \\
+Gateway down, 5 SOS held; gateway back (4 trials) & 100\% flushed, median 4.2 s, max 4.2 s \\
 Device API response (200 requests) & median 16 ms, 95th pct 31 ms \\
-Per-process memory and CPU, idle & 53--54 MB; 0.4--1.9\% of one core \\
-Per-process CPU while sending SOS (includes the harness polling every 20 ms) & up to 19\% of one core \\
+Per-process memory and CPU, idle & 55--55 MB; 0.2--1.0\% of one core \\
+Per-process CPU while sending SOS (includes the harness polling every 20 ms) & up to 12\% of one core \\
 \bottomrule
 \end{tabular}
 \par\smallskip\footnotesize Timer settings: HELLO 1 s, neighbour timeout 4 s, link-state 2 s, ACK timeout 3 s. Latency is measured by polling each device's own API every 20 ms (up to 20 ms of error). Wireless delay and loss are not included.

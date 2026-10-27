@@ -3,6 +3,7 @@
 \input{generated/collapse_numbers.tex}
 \input{generated/hopcount_numbers.tex}
 \input{generated/priority_numbers.tex}
+\input{generated/walkthrough_numbers.tex}
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
@@ -14,10 +15,10 @@
 
 \textbf{Technologies and engineering concepts.} Python with \texttt{asyncio} (one event-loop thread per node, no locks); a custom 52-byte binary protocol; link-state gossip; Dijkstra routing over the cost $1+5(1-q)+3f$; a per-hop priority queue; ACK with retry and route recomputation; AES-256-GCM and Ed25519; per-node SQLite logs; FastAPI and WebSocket; a React web application; and a transport interface so one engine runs on an in-memory simulator, on loopback sockets and on separate laptops.
 
-\textbf{Key implementation features.} Neighbour discovery with measured link quality; network-wide link-state flooding with sequence numbers; duplicate suppression; bounded store-and-forward that never evicts an SOS for routine traffic; signatures that survive multi-hop relaying; a survivor screen with a hold-to-send SOS button and a rescue console.
+\textbf{Key implementation features.} Neighbour discovery with measured link quality; network-wide link-state flooding with sequence numbers; duplicate suppression; bounded store-and-forward that never evicts an SOS for routine traffic; signatures that survive multi-hop relaying; and one device app that becomes a survivor screen (hold-to-send SOS with need and location, ``I am safe'', messages, the rescue team's reply), a gateway view or a rescue console (requests with their route, replies, filters, history, CSV export, a live network map and a live panel of what the device is doing).
 
-\textbf{Testing methodology.} \NTests\ automated tests (unit, integration, boundary, fuzz, replay, concurrency and a three-node mesh over real TCP), a requirement-to-test table for 68 requirements, seven simulator scenarios with seeded repeated runs, loss and scale sweeps up to 65 nodes, and measurements on five real processes over real sockets.
+\textbf{Testing methodology.} \NTests\ automated tests (unit, integration, boundary, fuzz, replay, concurrency and a three-node mesh over real TCP), a requirement-to-test table for 68 requirements, seven simulator scenarios with seeded repeated runs, loss and scale sweeps up to 65 nodes, measurements on five real processes over real sockets, and scripted browser checks of the device screens (\NDevPass\ of \NDevChecks\ pass).
 
-\textbf{Results.} On a 40-node mesh with 20\,\% per-link loss and injected failures, \CollDel\,\% of messages were delivered (50 runs). Weighted routing delivered \HopW\,\% against \HopH\,\% for hop-count routing on identical seeds. Under load an SOS had a \SosAdv$\times$ lower median latency than routine traffic. On five live processes an SOS arrived in a median of 47\,ms, the sender re-routed around a failed relay in a median of 4.0\,s, and every held message was delivered after a gateway outage. Convergence and recovery met their targets on average but not in every run, and delivery fell below 90\,\% above about 43 nodes at 20\,\% loss.
+\textbf{Results.} On a 40-node mesh with 20\,\% per-link loss and injected failures, \CollDel\,\% of messages were delivered (50 runs). Weighted routing delivered \HopW\,\% against \HopH\,\% for hop-count routing on identical seeds. Under load an SOS had a \SosAdv$\times$ lower median latency than routine traffic. On five live processes an SOS arrived in a median of 32\,ms, the sender re-routed around a failed relay in a median of 4.1\,s, and every held message was delivered after a gateway outage. Convergence and recovery met their targets on average but not in every run, and at 20\,\% loss delivery stayed above 90\,\% up to 50 nodes and fell to 83.1\,\% at 65.
 
 \textbf{Practical applicability and limitations.} The system is directly usable as an institutional safety network on laptops. The radio link is emulated by a neighbour-restricted LAN, so it does not yet run phone to phone; a Bluetooth or Wi-Fi Direct transport, adaptive timers, a timed usability study and per-pair key agreement are the main future work.

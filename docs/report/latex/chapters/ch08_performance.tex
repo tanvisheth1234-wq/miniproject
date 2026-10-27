@@ -41,9 +41,9 @@ The 40-node collapse scenario (20\,\% loss, a relay on the active path killed at
 
 \textbf{Scalability.}
 \input{generated/scale_all.tex}
-At 5\,\% loss delivery is 100\,\% to 50 nodes and 98.9\,\% at 65; at 20\,\% loss it holds above 95\,\% to about 43 nodes and falls to 88.2\,\% at 50 and 86.0\,\% at 65. Transmissions per delivered message grow roughly linearly with size, not quadratically as flooding would.
+At 5\,\% loss delivery is 100\,\% to 50 nodes and 98.0\,\% at 65; at 20\,\% loss it holds above 95\,\% to 43 nodes and falls to 92.9\,\% at 50 and 83.1\,\% at 65. Transmissions per delivered message grow roughly linearly with size, not quadratically as flooding would.
 
-\textbf{Recovery and convergence} are quantised by design constants (Figure~\ref{fig:results}d): convergence comes in multiples of the 5\,s gossip interval, and recovery takes under 10\,s in 23 of 50 trials (ACK failures penalise the link at once) and 10.2--10.25\,s in the other 27, bounded by the 10\,s heartbeat timeout.
+\textbf{Recovery and convergence} are quantised by design constants (Figure~\ref{fig:results}d): convergence comes in multiples of the 5\,s gossip interval, and recovery takes under 10\,s in 24 of 50 trials (ACK failures penalise the link at once) and 10.2--10.25\,s in the other 26, bounded by the 10\,s heartbeat timeout.
 
 \textbf{Live devices.} Table~\ref{tab:live} gives the measurements on five real processes over real TCP sockets.
 \input{generated/live_summary.tex}
@@ -56,4 +56,4 @@ No optimisation was applied after these measurements, so there is no before-and-
 Not applicable: the system has no server and was not deployed on cloud infrastructure.
 
 \subsection{Scalability Limitations}
-Tested up to 65 simulated nodes (98.9\,\% delivery at 5\,\% loss, 86.0\,\% at 20\,\%) and 5 live devices. More nodes, wireless interference and mobility were not tested; capacity beyond these sizes is a projection.
+Tested up to 65 simulated nodes (98.0\,\% delivery at 5\,\% loss, 83.1\,\% at 20\,\%) and 5 live devices. More nodes, wireless interference and mobility were not tested; capacity beyond these sizes is a projection.

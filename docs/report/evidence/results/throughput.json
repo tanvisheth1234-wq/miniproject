@@ -3,32 +3,32 @@
     "messages": 100,
     "delivered": 100,
     "acked": 100,
-    "seconds": 0.039,
-    "ack_seconds": 0.066,
-    "msgs_per_s": 2544.1
+    "seconds": 0.012,
+    "ack_seconds": 0.018,
+    "msgs_per_s": 8413.1
   },
   {
     "messages": 500,
     "delivered": 500,
     "acked": 500,
-    "seconds": 0.207,
-    "ack_seconds": 0.354,
-    "msgs_per_s": 2420.7
+    "seconds": 0.07,
+    "ack_seconds": 0.125,
+    "msgs_per_s": 7182.6
   },
   {
     "messages": 1000,
     "delivered": 1000,
     "acked": 1000,
-    "seconds": 0.41,
-    "ack_seconds": 0.854,
-    "msgs_per_s": 2441.1
+    "seconds": 0.142,
+    "ack_seconds": 0.291,
+    "msgs_per_s": 7029.2
   },
   {
     "messages": 2000,
     "delivered": 2000,
     "acked": 2000,
-    "seconds": 1.281,
-    "ack_seconds": 2.737,
-    "msgs_per_s": 1560.8
+    "seconds": 0.427,
+    "ack_seconds": 0.99,
+    "msgs_per_s": 4686.0
   }
 ]

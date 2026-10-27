@@ -1,0 +1,28 @@
+\begin{table}[!htbp]
+\caption{Browser checks of the device screens (the one app), run against five live device processes}
+\label{tab:devwalk}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}p{1.0cm}X p{1.3cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Check} & \textbf{Result}\\ \midrule
+DT-01 & Survivor screen loads and the app bar names the device & Pass \\
+DT-02 & Rescue device shows the console, with its name in the app bar & Pass \\
+DT-03 & The mesh organises itself: the survivor is connected to the rescue team through phones in between & Pass \\
+DT-04 & Releasing the SOS button after 0.4 s sends nothing & Pass \\
+DT-05 & A held SOS with need and location reaches the rescue console with the route it took & Pass \\
+DT-06 & The survivor screen confirms "The rescue team has your request" & Pass \\
+DT-07 & "I am safe" from another phone appears under Marked safe, not among the requests & Pass \\
+DT-08 & A typed message sent to the rescue team is delivered and listed on the console & Pass \\
+DT-09 & Reply opens and a quick reply "Help is on the way" reaches the survivor & Pass \\
+DT-10 & A typed reply survives the 0.7 s refresh (text and focus kept) and reaches the survivor & Pass \\
+DT-11 & Console filters: SOS only, Messages only, and by need & Pass \\
+DT-12 & History filter shows only the chosen priority; the CSV button is shown and the export has a header and rows & Pass \\
+DT-13 & The "What this device is doing" panel lists live events in plain language & Pass \\
+DT-14 & The gateway view says it is online and shows the messages it passed on & Pass \\
+DT-15 & With the gateway off, an SOS shows "Saved, waiting for a path" & Pass \\
+DT-16 & With the gateway back on, the held SOS is delivered and appears on the console & Pass \\
+DT-17 & At 390 px and 320 px wide neither screen scrolls sideways & Pass \\
+DT-18 & No script errors or console errors on any device screen during the run & Pass \\
+\bottomrule
+\end{tabularx}
+\end{table}

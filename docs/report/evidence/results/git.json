@@ -1,18 +1,18 @@
 {
-  "commits": 53,
+  "commits": 84,
   "per_member": {
-    "Tanvi Sheth": 22,
-    "Twissha Shah": 19,
-    "Miti Shah": 12
+    "Twissha Shah": 31,
+    "Miti Shah": 31,
+    "Tanvi Sheth": 22
   },
   "per_identity": {
+    "twissha0206 <twisshashah@gmail.com>": 31,
+    "mitishah2109 <mitishah2109@gmail.com>": 31,
     "tanvi-sheth2006 <tanvisheth1234@gmail.com>": 3,
-    "twissha0206 <twisshashah@gmail.com>": 19,
-    "mitishah2109 <mitishah2109@gmail.com>": 12,
     "tanvi-sheth2006 <tanvisheth1964@gmail.com>": 18,
     "tanvisheth1234-wq <tanvisheth1234@gmail.com>": 1
   },
-  "conventional": 47,
+  "conventional": 78,
   "non_conventional": [
     "Merge remote-tracking branch 'origin/develop_5' into develop_5",
     "phase 2 final",
@@ -27,7 +27,8 @@
     "develop_2",
     "develop_3",
     "develop_4",
-    "develop_5"
+    "develop_5",
+    "develop_6"
   ],
   "tags": [
     "v0.3-phase3"

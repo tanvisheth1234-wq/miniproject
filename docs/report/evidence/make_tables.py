@@ -232,6 +232,8 @@ def live_tables(live):
 
 # ------------------------------------------------------------------ KPI validation ----------------
 def kpi_table(S, scale, scale_lossy, live, tests, loss):
+    reg = json.loads((HERE.parents[1] / "testing" / "defects.json").read_text(encoding="utf-8"))["defects"]
+    open_flaky = [d for d in reg if d["scope"] == "test" and d["status"] == "Open"]
     c = S["collapse_40"]["weighted"]
     cd = c["delivery_ratio"]["mean"]
     raw = c["raw"]
@@ -274,12 +276,14 @@ def kpi_table(S, scale, scale_lossy, live, tests, loss):
          ok(sf_ng["flushed"] == sf_ng["queued"])],
         ["K6 Weighted vs hop count", "Weighted better", f"{100 * h['weighted']['delivery_ratio']['mean']:.1f}{PC} vs {100 * h['hopcount']['delivery_ratio']['mean']:.1f}{PC}",
          ok(h["weighted"]["delivery_ratio"]["mean"] > h["hopcount"]["delivery_ratio"]["mean"])],
-        ["K7 Scale", f"${ge}$ 50 nodes within the targets", k7, f"Met at 5{PC} loss; not at 20{PC}"],
+        ["K7 Scale", f"${ge}$ 50 nodes within the targets", k7,
+         "Met" if (big5 and big20 and big5["delivery_mean"] >= 0.9 and big20["delivery_mean"] >= 0.9) else f"Met at 5{PC} loss; not at 20{PC}"],
         ["K8 UI freshness", f"${le}$ 2{D}s", (f"API response median {live['api_me_response_ms']['median']:.0f}{D}ms; screens poll every 0.7{D}s" if live else "screens poll every 0.7" + D + "s (API time not measured)"),
          "Met" if live else "Met by design"],
         ["K9 Correctness", f"100{PC} passed", f"{sum(1 for x in tests['cases'] if x['status'] == 'passed')}/{len(tests['cases'])} passed in all {len(tests['runs'])} runs"
-         + (f"; {len(tests['flaky'])} timing-sensitive test failed once" if tests.get("flaky") else ""),
-         "Met" if not tests.get("flaky") else "Met except one flaky test"],
+         + (f"; {len(tests['flaky'])} timing-sensitive test failed once" if tests.get("flaky") else "")
+         + (f"; {', '.join(d['id'] for d in open_flaky)} (an intermittent test) is still open" if open_flaky else ""),
+         "Met" if (not tests.get("flaky") and not open_flaky) else "Met except one flaky test"],
         ["K10 Security", "All hold", "relay cannot decrypt, forged signature rejected, tampered payload rejected: automated tests pass", "Met"],
     ]
     table("kpi_validation", "Validation of the key performance indicators of Table~" + BS + "ref{tab:kpi} against measured data", "tab:kpival",

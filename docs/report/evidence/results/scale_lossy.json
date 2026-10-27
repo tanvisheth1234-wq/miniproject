@@ -4,24 +4,24 @@
     "loss": 0.2,
     "nodes": 10,
     "links": 13,
-    "runs": 6,
+    "runs": 10,
     "delivery_mean": 1.0,
     "delivery_min": 1.0,
-    "convergence_mean_s": 7.75,
-    "convergence_max_s": 10.25,
-    "cpu_s_mean": 2.9765625,
-    "peak_mb_mean": 1.2445463333333333,
-    "sent_per_run": 16.0,
-    "overhead_tx_per_delivered": 7.8125,
-    "median_hops": 1.0833333333333333,
+    "convergence_mean_s": 8.25,
+    "convergence_max_s": 15.25,
+    "cpu_s_mean": 1.9578125,
+    "peak_mb_mean": 0.790282,
+    "sent_per_run": 15.9,
+    "overhead_tx_per_delivered": 8.936666666666667,
+    "median_hops": 0.95,
     "latency_ms": {
       "SOS": {
-        "median": 3462.75,
-        "p95": 6914.116666666666
+        "median": 2713.35,
+        "p95": 7812.339999999999
       },
       "NORMAL": {
-        "median": 765.6666666666666,
-        "p95": 12647.425000000001
+        "median": 478.2,
+        "p95": 10603.3
       }
     }
   },
@@ -30,24 +30,24 @@
     "loss": 0.2,
     "nodes": 21,
     "links": 32,
-    "runs": 6,
-    "delivery_mean": 0.9791666666666666,
+    "runs": 10,
+    "delivery_mean": 0.9875,
     "delivery_min": 0.9375,
-    "convergence_mean_s": 9.416666666666666,
+    "convergence_mean_s": 10.75,
     "convergence_max_s": 15.25,
-    "cpu_s_mean": 10.963541666666666,
-    "peak_mb_mean": 2.112890333333333,
-    "sent_per_run": 15.5,
-    "overhead_tx_per_delivered": 15.70734126984127,
-    "median_hops": 1.9166666666666667,
+    "cpu_s_mean": 14.453125,
+    "peak_mb_mean": 1.6500881,
+    "sent_per_run": 15.7,
+    "overhead_tx_per_delivered": 16.076190476190476,
+    "median_hops": 2.0,
     "latency_ms": {
       "SOS": {
-        "median": 4917.333333333333,
-        "p95": 12557.658333333333
+        "median": 6225.0,
+        "p95": 17190.45
       },
       "NORMAL": {
-        "median": 1512.8333333333333,
-        "p95": 20456.0
+        "median": 1943.0,
+        "p95": 19798.379999999997
       }
     }
   },
@@ -56,24 +56,24 @@
     "loss": 0.2,
     "nodes": 31,
     "links": 50,
-    "runs": 6,
-    "delivery_mean": 0.9568452380952381,
+    "runs": 10,
+    "delivery_mean": 0.9616071428571429,
     "delivery_min": 0.875,
-    "convergence_mean_s": 9.414268418194297,
-    "convergence_max_s": 10.25,
-    "cpu_s_mean": 27.1171875,
-    "peak_mb_mean": 3.5243971666666667,
-    "sent_per_run": 15.666666666666666,
-    "overhead_tx_per_delivered": 23.42906746031746,
-    "median_hops": 2.8333333333333335,
+    "convergence_mean_s": 9.748561050916578,
+    "convergence_max_s": 15.25,
+    "cpu_s_mean": 36.3875,
+    "peak_mb_mean": 2.7482352,
+    "sent_per_run": 15.1,
+    "overhead_tx_per_delivered": 26.515540293040296,
+    "median_hops": 2.9,
     "latency_ms": {
       "SOS": {
-        "median": 8942.2,
-        "p95": 24538.93
+        "median": 9093.111111111111,
+        "p95": 22996.03888888889
       },
       "NORMAL": {
-        "median": 3195.6666666666665,
-        "p95": 20641.616666666665
+        "median": 3993.45,
+        "p95": 27305.109999999997
       }
     }
   },
@@ -82,24 +82,24 @@
     "loss": 0.2,
     "nodes": 43,
     "links": 72,
-    "runs": 6,
-    "delivery_mean": 0.9583333333333334,
+    "runs": 10,
+    "delivery_mean": 0.9625,
     "delivery_min": 0.875,
-    "convergence_mean_s": 9.416664361616009,
-    "convergence_max_s": 15.249986169696058,
-    "cpu_s_mean": 43.953125,
-    "peak_mb_mean": 5.870947833333333,
-    "sent_per_run": 15.833333333333334,
-    "overhead_tx_per_delivered": 24.601091269841266,
-    "median_hops": 3.0833333333333335,
+    "convergence_mean_s": 10.24943092124704,
+    "convergence_max_s": 20.25,
+    "cpu_s_mean": 69.128125,
+    "peak_mb_mean": 4.5892348,
+    "sent_per_run": 15.7,
+    "overhead_tx_per_delivered": 24.838749999999997,
+    "median_hops": 3.25,
     "latency_ms": {
       "SOS": {
-        "median": 519.4,
-        "p95": 8928.57
+        "median": 4634.222222222223,
+        "p95": 16650.605555555558
       },
       "NORMAL": {
-        "median": 2915.6666666666665,
-        "p95": 26352.483333333334
+        "median": 3491.7,
+        "p95": 19579.09
       }
     }
   },
@@ -108,24 +108,24 @@
     "loss": 0.2,
     "nodes": 50,
     "links": 85,
-    "runs": 6,
-    "delivery_mean": 0.8819444444444445,
-    "delivery_min": 0.8,
-    "convergence_mean_s": 8.581458843557206,
-    "convergence_max_s": 10.25,
-    "cpu_s_mean": 60.739583333333336,
-    "peak_mb_mean": 7.3925529999999995,
-    "sent_per_run": 15.5,
-    "overhead_tx_per_delivered": 33.30416666666667,
-    "median_hops": 3.8333333333333335,
+    "runs": 10,
+    "delivery_mean": 0.92875,
+    "delivery_min": 0.8666666666666667,
+    "convergence_mean_s": 9.246138010953837,
+    "convergence_max_s": 15.25,
+    "cpu_s_mean": 92.815625,
+    "peak_mb_mean": 5.651815,
+    "sent_per_run": 15.2,
+    "overhead_tx_per_delivered": 31.90577838827839,
+    "median_hops": 3.45,
     "latency_ms": {
       "SOS": {
-        "median": 5802.333333333333,
-        "p95": 25282.983333333334
+        "median": 6502.65,
+        "p95": 24043.829999999998
       },
       "NORMAL": {
-        "median": 3934.3333333333335,
-        "p95": 32134.45
+        "median": 3415.85,
+        "p95": 33898.595
       }
     }
   },
@@ -134,24 +134,24 @@
     "loss": 0.2,
     "nodes": 65,
     "links": 113,
-    "runs": 6,
-    "delivery_mean": 0.8596230158730158,
-    "delivery_min": 0.7333333333333333,
-    "convergence_mean_s": 11.077544862066437,
+    "runs": 10,
+    "delivery_mean": 0.8307921245421246,
+    "delivery_min": 0.6875,
+    "convergence_mean_s": 10.742098405545402,
     "convergence_max_s": 15.237039456624188,
-    "cpu_s_mean": 111.06510416666667,
-    "peak_mb_mean": 11.192959166666666,
-    "sent_per_run": 15.0,
-    "overhead_tx_per_delivered": 39.267815517815514,
-    "median_hops": 4.916666666666667,
+    "cpu_s_mean": 175.028125,
+    "peak_mb_mean": 8.6529438,
+    "sent_per_run": 14.7,
+    "overhead_tx_per_delivered": 39.42435397935398,
+    "median_hops": 4.5,
     "latency_ms": {
       "SOS": {
-        "median": 9602.666666666666,
-        "p95": 18369.266666666666
+        "median": 11561.2,
+        "p95": 15784.285
       },
       "NORMAL": {
-        "median": 5117.833333333333,
-        "p95": 35656.75833333333
+        "median": 3954.1,
+        "p95": 35019.465000000004
       }
     }
   }

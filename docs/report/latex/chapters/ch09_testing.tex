@@ -13,7 +13,11 @@ Each module is tested alone: the packet format (47 tests: round trips, field ran
 \texttt{test\_node} (27 tests) covers discovery and relay on one transport, multi-hop origination, ACK, the message lifecycle, end-to-end encryption and signing, retry exhaustion, eviction and expiry; \texttt{test\_ack\_multihop} checks that ACKs and retries cross relays correctly; \texttt{test\_api} drives front end, back end and engine through FastAPI and its WebSocket; \texttt{test\_lan\_transport} runs a three-node mesh over real TCP. The screens were checked by running them (Section~\ref{sec:shots}).
 \subsection{Functional Testing}
 \label{sec:func}
-Table~\ref{tab:frsum} summarises how the requirements are verified. \input{generated/trace_summary.tex} All mapped tests passed in every complete run except one timing-sensitive test that failed once (Section~\ref{sec:defects}). SNF-3 (immediate attempt on a new neighbour) and LOG-5 (history filter on screen) are only partly met.
+Table~\ref{tab:frsum} summarises how the requirements are verified. \input{generated/trace_summary.tex} All mapped tests passed in every complete run except one timing-sensitive test that failed once (Section~\ref{sec:defects}). SNF-3 (an immediate attempt to send held messages when a neighbour appears) and LOG-5 (a filtered message history on the screens) are now fully met: each has automated tests, and the device-screen browser checks exercise the filters and the CSV export.
+
+\input{generated/walkthrough_numbers.tex}
+The device screens, which are the one app, are also tested the way a user meets them. A script (\texttt{docs/testing/device\_walkthrough.cjs}) starts five device processes, opens the survivor phone, a second phone, the gateway and the rescue console in a real browser, and records each check in a results file: \NDevPass\ of \NDevChecks\ checks pass (Table~\ref{tab:devwalk}). A second script (\texttt{ui\_walkthrough.cjs}) does the same for the simulation-lab website: \NWebPass\ of \NWebChecks\ pass. Both are run by hand; they are not part of the \texttt{pytest} suite.
+\input{generated/device_walkthrough.tex}
 \subsection{Non-Functional Testing}
 \label{sec:nonfunc}
 \textbf{Reliability:} delivery at 0--50\,\% loss (Figure~\ref{fig:results}a). \textbf{Scalability:} 10 to 65 nodes (Table~\ref{tab:scale}). \textbf{Performance:} latency by priority (Section~\ref{sec:perfresults}), throughput and live latency (Table~\ref{tab:live}). \textbf{Availability:} recovery over 50 simulated trials and 8 live failovers. \textbf{Security:} a relay without the key never sees plaintext; tampered ciphertext, a wrong key, a forged signature and an unknown signer are rejected; signatures verify across relays. \textbf{Usability:} one 1.2\,s hold on one button with plain-language status; no timed study with participants (Section~\ref{sec:limits}).
@@ -63,7 +67,8 @@ D2 & Phase~4 integration & dedup keyed on message id dropped every ACK at the fi
 D3 & Phase~4 integration & dead nodes stayed routable: newer reports merged with old ones & a newer report replaces the origin's edges; tests\\
 D4 & fuzz test & a non-ASCII node id made \texttt{Packet.unpack} raise \texttt{UnicodeDecodeError}, which receivers do not catch & decode failures raise \texttt{PacketError}; fuzz tests pass\\
 D5 & repeated socket-test runs & \texttt{Node.stop()} hung in about a quarter of runs on Windows: \texttt{wait\_for} swallowed a cancellation & helper on \texttt{asyncio.wait}; 15/15 and 40/40 runs clean\\
-D6 & repeated full-suite runs & two timing-sensitive tests (\texttt{test\_api}, \texttt{test\_ack\_multihop}) failed in 2 and 1 of 6 runs under load; both pass alone & open: replace fixed sleeps with condition polling\\
+D6 & repeated full-suite runs & two timing-sensitive tests (\texttt{test\_api}, \texttt{test\_ack\_multihop}) failed in 2 and 1 of 6 runs under load; both pass alone & closed: a \texttt{wait\_until} polling helper replaces the fixed sleeps\\
+D7 & repeated full-suite runs & \texttt{test\_history\_filters\_by\_priority\_and\_direction} fails intermittently: two messages created in the same millisecond have no defined order, and the test expects newest first & open: add a second sort key (row id) to the history query\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -72,8 +77,8 @@ D6 & repeated full-suite runs & two timing-sensitive tests (\texttt{test\_api}, 
 \label{sec:kpival}
 Table~\ref{tab:kpival} compares each target of Table~\ref{tab:kpi} with the measured result.
 \input{generated/kpi_validation.tex}
-K4--K6 and K10 are met with margin and K1 in the specified condition; K2 and K3 hold on average but miss by a fraction of a second in some runs (timer constants); K7 holds at 5\,\% loss, not at 20\,\% above about 43 nodes; K9 has one flaky test.
+K4--K6 and K10 are met with margin and K1 in the specified condition; K2 and K3 hold on average but miss by a fraction of a second in some runs (timer constants); K7 holds to 50 nodes at both loss rates (92.9\,\% at 20\,\%) but not at the 65 nodes tested beyond the target (83.1\,\%); K9 is partly met: all 331 tests passed in three repeated runs, but defect D7, an intermittent history-order test, is open.
 
 \subsection{Limitations and Untested Scenarios}
 \label{sec:limits}
-\textbf{No radio hardware:} interference, fading and mobility were not tested. \textbf{Live timing is loopback;} the two-laptop run was not timed. \textbf{No usability study} and \textbf{no automated UI tests}. \textbf{Scale:} nothing above 65 nodes, no soak test. \textbf{Relays do not retain.} \textbf{Security:} one pre-shared key serves the mesh; no external review.
+\textbf{No radio hardware:} interference, fading and mobility were not tested. \textbf{Live timing is loopback;} the two-laptop run was not timed. \textbf{No usability study with participants.} The browser checks are scripts run by hand, not part of the automated suite. \textbf{Scale:} nothing above 65 nodes, no soak test. \textbf{Relays do not retain.} \textbf{Security:} one pre-shared key serves the mesh; no external review.

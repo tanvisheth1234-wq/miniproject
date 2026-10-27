@@ -1,17 +1,17 @@
 \begin{table}[htbp]
-\caption[Scalability, 10 to 65 simulated nodes]{Scalability, 10 to 65 simulated nodes (6 runs per size and loss rate)}
+\caption[Scalability, 10 to 65 simulated nodes]{Scalability, 10 to 65 simulated nodes (10 runs per size and loss rate)}
 \label{tab:scale}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}>{\raggedleft\arraybackslash}p{0.077\textwidth}>{\raggedleft\arraybackslash}p{0.077\textwidth}>{\raggedleft\arraybackslash}p{0.100\textwidth}>{\raggedleft\arraybackslash}p{0.100\textwidth}>{\raggedleft\arraybackslash}p{0.100\textwidth}>{\raggedleft\arraybackslash}p{0.100\textwidth}>{\raggedleft\arraybackslash}p{0.115\textwidth}>{\raggedleft\arraybackslash}p{0.084\textwidth}>{\raggedleft\arraybackslash}p{0.092\textwidth}@{}}
 \toprule
 \textbf{Nodes} & \textbf{Links} & \textbf{Delivery at 5\% loss} & \textbf{Delivery at 20\% loss} & \textbf{Tx per delivered (5\%)} & \textbf{Tx per delivered (20\%)} & \textbf{Conv. max at 20\% (s)} & \textbf{CPU (s, 5\%)} & \textbf{Heap (MB, 5\%)} \\ \midrule
-10 & 13 & 100.0\,\% & 100.0\,\% & 5.2 & 7.8 & 10.2 & 3 & 1.1 \\
-21 & 32 & 100.0\,\% & 97.9\,\% & 7.7 & 15.7 & 15.2 & 12 & 2.3 \\
-31 & 50 & 100.0\,\% & 95.7\,\% & 10.2 & 23.4 & 10.2 & 29 & 4.0 \\
-43 & 72 & 100.0\,\% & 95.8\,\% & 12.7 & 24.6 & 15.2 & 52 & 6.9 \\
-50 & 85 & 100.0\,\% & 88.2\,\% & 14.4 & 33.3 & 10.2 & 69 & 8.5 \\
-65 & 113 & 98.9\,\% & 86.0\,\% & 20.8 & 39.3 & 15.2 & 126 & 12.9 \\
+10 & 13 & 100.0\,\% & 100.0\,\% & 5.0 & 8.9 & 15.2 & 3 & 0.7 \\
+21 & 32 & 100.0\,\% & 98.8\,\% & 7.4 & 16.1 & 15.2 & 13 & 1.7 \\
+31 & 50 & 100.0\,\% & 96.2\,\% & 10.6 & 26.5 & 15.2 & 43 & 3.0 \\
+43 & 72 & 100.0\,\% & 96.2\,\% & 12.2 & 24.8 & 20.2 & 91 & 5.3 \\
+50 & 85 & 100.0\,\% & 92.9\,\% & 14.2 & 31.9 & 15.2 & 110 & 6.5 \\
+65 & 113 & 98.0\,\% & 83.1\,\% & 20.6 & 39.4 & 15.2 & 188 & 9.8 \\
 \bottomrule
 \end{tabular}
 \par\smallskip\footnotesize Nodes and links include the gateway and rescue post added to the grid. Tx = hop-by-hop data transmissions. CPU and heap are for the whole simulated mesh in one process on a virtual clock, not the cost of one real device.

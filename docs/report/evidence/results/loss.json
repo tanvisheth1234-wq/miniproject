@@ -4,24 +4,24 @@
     "loss": 0.0,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
+    "runs": 10,
     "delivery_mean": 1.0,
     "delivery_min": 1.0,
     "convergence_mean_s": 5.25,
     "convergence_max_s": 5.25,
-    "cpu_s_mean": 12.671875,
-    "peak_mb_mean": 2.4915232499999997,
+    "cpu_s_mean": 16.4734375,
+    "peak_mb_mean": 1.7518041,
     "sent_per_run": 16.0,
-    "overhead_tx_per_delivered": 5.75,
-    "median_hops": 1.6875,
+    "overhead_tx_per_delivered": 5.8,
+    "median_hops": 1.7,
     "latency_ms": {
       "SOS": {
-        "median": 68.6875,
-        "p95": 114.10625
+        "median": 70.25,
+        "p95": 118.625
       },
       "NORMAL": {
-        "median": 54.0625,
-        "p95": 112.26875
+        "median": 52.95,
+        "p95": 110.575
       }
     }
   },
@@ -30,24 +30,24 @@
     "loss": 0.1,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
+    "runs": 10,
     "delivery_mean": 1.0,
     "delivery_min": 1.0,
     "convergence_mean_s": 5.25,
     "convergence_max_s": 5.25,
-    "cpu_s_mean": 11.6796875,
-    "peak_mb_mean": 2.22632175,
-    "sent_per_run": 15.25,
-    "overhead_tx_per_delivered": 10.794122023809523,
-    "median_hops": 2.0625,
+    "cpu_s_mean": 15.009375,
+    "peak_mb_mean": 1.695374,
+    "sent_per_run": 15.4,
+    "overhead_tx_per_delivered": 10.841547619047619,
+    "median_hops": 2.0,
     "latency_ms": {
       "SOS": {
-        "median": 1361.75,
-        "p95": 6542.5625
+        "median": 1516.7,
+        "p95": 7839.960000000001
       },
       "NORMAL": {
-        "median": 74.875,
-        "p95": 7855.3375
+        "median": 72.4,
+        "p95": 7527.24
       }
     }
   },
@@ -56,24 +56,24 @@
     "loss": 0.2,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
-    "delivery_mean": 0.984375,
+    "runs": 10,
+    "delivery_mean": 0.9875,
     "delivery_min": 0.9375,
-    "convergence_mean_s": 9.625,
+    "convergence_mean_s": 10.75,
     "convergence_max_s": 15.25,
-    "cpu_s_mean": 10.927734375,
-    "peak_mb_mean": 2.070744375,
-    "sent_per_run": 15.625,
-    "overhead_tx_per_delivered": 15.530505952380953,
-    "median_hops": 1.9375,
+    "cpu_s_mean": 9.3265625,
+    "peak_mb_mean": 1.5885638,
+    "sent_per_run": 15.7,
+    "overhead_tx_per_delivered": 16.076190476190476,
+    "median_hops": 2.0,
     "latency_ms": {
       "SOS": {
-        "median": 5177.875,
-        "p95": 12278.8625
+        "median": 6225.0,
+        "p95": 17190.45
       },
       "NORMAL": {
-        "median": 1660.1875,
-        "p95": 18300.775
+        "median": 1943.0,
+        "p95": 19798.379999999997
       }
     }
   },
@@ -82,24 +82,24 @@
     "loss": 0.3,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
-    "delivery_mean": 0.8925080128205128,
-    "delivery_min": 0.7692307692307693,
-    "convergence_mean_s": 15.9626919292467,
+    "runs": 10,
+    "delivery_mean": 0.8688690476190477,
+    "delivery_min": 0.6875,
+    "convergence_mean_s": 15.2487603894141,
     "convergence_max_s": 20.25,
-    "cpu_s_mean": 9.123046875,
-    "peak_mb_mean": 1.93730075,
-    "sent_per_run": 15.5,
-    "overhead_tx_per_delivered": 19.92886904761905,
-    "median_hops": 1.8125,
+    "cpu_s_mean": 8.2546875,
+    "peak_mb_mean": 1.5078232999999999,
+    "sent_per_run": 15.4,
+    "overhead_tx_per_delivered": 20.2620183982684,
+    "median_hops": 1.9,
     "latency_ms": {
       "SOS": {
-        "median": 8243.375,
-        "p95": 23014.84375
+        "median": 12308.45,
+        "p95": 24533.65
       },
       "NORMAL": {
-        "median": 4430.25,
-        "p95": 32532.69375
+        "median": 3388.8,
+        "p95": 28804.415
       }
     }
   },
@@ -108,24 +108,24 @@
     "loss": 0.4,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
-    "delivery_mean": 0.7644230769230769,
-    "delivery_min": 0.6923076923076923,
-    "convergence_mean_s": 20.242889191944414,
-    "convergence_max_s": 25.23703651580763,
-    "cpu_s_mean": 7.4921875,
-    "peak_mb_mean": 1.844767625,
-    "sent_per_run": 14.25,
-    "overhead_tx_per_delivered": 24.957891414141415,
-    "median_hops": 1.5,
+    "runs": 10,
+    "delivery_mean": 0.7698809523809523,
+    "delivery_min": 0.6666666666666666,
+    "convergence_mean_s": 21.49466689395831,
+    "convergence_max_s": 25.25,
+    "cpu_s_mean": 7.4796875,
+    "peak_mb_mean": 1.4453179999999999,
+    "sent_per_run": 14.5,
+    "overhead_tx_per_delivered": 26.50340714840715,
+    "median_hops": 1.45,
     "latency_ms": {
       "SOS": {
-        "median": 14725.8125,
-        "p95": 20920.45625
+        "median": 16558.944444444445,
+        "p95": 24438.994444444445
       },
       "NORMAL": {
-        "median": 3197.6875,
-        "p95": 36096.86875
+        "median": 4837.7,
+        "p95": 27591.945
       }
     }
   },
@@ -134,24 +134,24 @@
     "loss": 0.5,
     "nodes": 21,
     "links": 32,
-    "runs": 8,
-    "delivery_mean": 0.6137534340659341,
-    "delivery_min": 0.4166666666666667,
+    "runs": 10,
+    "delivery_mean": 0.713929403929404,
+    "delivery_min": 0.5714285714285714,
     "convergence_mean_s": null,
     "convergence_max_s": null,
-    "cpu_s_mean": 5.494140625,
-    "peak_mb_mean": 1.77796475,
-    "sent_per_run": 14.375,
-    "overhead_tx_per_delivered": 29.515264249639248,
-    "median_hops": 1.0625,
+    "cpu_s_mean": 5.2625,
+    "peak_mb_mean": 1.3891893,
+    "sent_per_run": 13.5,
+    "overhead_tx_per_delivered": 29.22952741702742,
+    "median_hops": 0.95,
     "latency_ms": {
       "SOS": {
-        "median": 22407.75,
-        "p95": 28386.3375
+        "median": 11091.95,
+        "p95": 20946.004999999997
       },
       "NORMAL": {
-        "median": 8235.9375,
-        "p95": 29249.95625
+        "median": 8963.7,
+        "p95": 32823.04
       }
     }
   }

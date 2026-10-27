@@ -47,7 +47,7 @@
         },
         "retries_per_run": 3.85,
         "dedup_drop_ratio": 0.03198279827166081,
-        "wall_s": 19.590000000000003,
+        "wall_s": 4.41,
         "raw": [
           {
             "seed": 1,
@@ -802,38 +802,38 @@
       "weighted": {
         "runs": 50,
         "delivery_ratio": {
-          "mean": 0.9263883253400494,
-          "min": 0.7586206896551724,
+          "mean": 0.9259713415575485,
+          "min": 0.7857142857142857,
           "max": 1.0,
-          "stdev": 0.048833257465286294,
+          "stdev": 0.05090648235704503,
           "n": 50
         },
-        "median_hops": 4.0,
-        "mean_hops": 3.8837920489296636,
+        "median_hops": 4,
+        "mean_hops": 3.9009826152683296,
         "hop_histogram": {
           "0": 105,
           "1": 155,
-          "2": 173,
-          "3": 162,
-          "4": 189,
-          "5": 172,
-          "6": 155,
-          "7": 89,
-          "8": 59,
-          "9": 38,
-          "10": 11
+          "2": 182,
+          "3": 165,
+          "4": 185,
+          "5": 168,
+          "6": 153,
+          "7": 94,
+          "8": 65,
+          "9": 39,
+          "10": 12
         },
         "latency_ms": {
-          "SOS": 29608.25,
-          "NORMAL": 4251.25,
+          "SOS": 28075.5,
+          "NORMAL": 4211.0,
           "STATUS": null
         },
         "sos_latency_advantage": null,
         "recovery_s": {
-          "mean": 8.116601257966067,
+          "mean": 8.11172943331043,
           "min": 0.25,
           "max": 10.25,
-          "stdev": 3.0559241038004354,
+          "stdev": 3.052758553096325,
           "n": 50
         },
         "convergence_s": {
@@ -844,20 +844,20 @@
           "n": 50
         },
         "store_forward": {
-          "queued": 3187,
-          "flushed": 2959,
-          "flush_ratio": 0.9284593661750863
+          "queued": 3117,
+          "flushed": 2919,
+          "flush_ratio": 0.9364773820981713
         },
-        "retries_per_run": 136.68,
-        "dedup_drop_ratio": 0.037917065796999036,
-        "wall_s": 1601.8999999999999,
+        "retries_per_run": 135.24,
+        "dedup_drop_ratio": 0.03693824561804872,
+        "wall_s": 687.97,
         "raw": [
           {
             "seed": 1,
-            "delivery": 0.8888888888888888,
+            "delivery": 0.9259259259259259,
             "sent": 27,
-            "delivered": 24,
-            "median_hops": 4.0,
+            "delivered": 25,
+            "median_hops": 4,
             "convergence_s": 5.25,
             "recovery_s": 10.232331424609583,
             "by_priority": {
@@ -870,10 +870,10 @@
               },
               "NORMAL": {
                 "sent": 22,
-                "delivered": 19,
-                "median_latency_ms": 4384,
-                "mean_latency_ms": 7601.578947368421,
-                "p95_latency_ms": 23294.4
+                "delivered": 20,
+                "median_latency_ms": 6329.0,
+                "mean_latency_ms": 11340.35,
+                "p95_latency_ms": 29868.6
               },
               "STATUS": {
                 "sent": 0,
@@ -883,8 +883,8 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 874,
-            "retries": 123,
+            "transmissions": 912,
+            "retries": 124,
             "sf_queued": 60,
             "sf_flushed": 51,
             "virtual_s": 157.2
@@ -920,34 +920,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 739,
+            "transmissions": 758,
             "retries": 107,
-            "sf_queued": 46,
-            "sf_flushed": 46,
+            "sf_queued": 47,
+            "sf_flushed": 47,
             "virtual_s": 160.6
           },
           {
             "seed": 3,
-            "delivery": 0.7586206896551724,
-            "sent": 29,
-            "delivered": 22,
+            "delivery": 0.9333333333333333,
+            "sent": 30,
+            "delivered": 28,
             "median_hops": 3.0,
             "convergence_s": 10.25,
             "recovery_s": 5.25,
             "by_priority": {
               "SOS": {
                 "sent": 7,
-                "delivered": 5,
-                "median_latency_ms": 28491,
-                "mean_latency_ms": 27298.6,
-                "p95_latency_ms": 37991.2
+                "delivered": 7,
+                "median_latency_ms": 32555,
+                "mean_latency_ms": 38262.42857142857,
+                "p95_latency_ms": 64923.8
               },
               "NORMAL": {
-                "sent": 22,
-                "delivered": 17,
-                "median_latency_ms": 4175,
-                "mean_latency_ms": 11633.117647058823,
-                "p95_latency_ms": 45966.0
+                "sent": 23,
+                "delivered": 21,
+                "median_latency_ms": 8475,
+                "mean_latency_ms": 14939.0,
+                "p95_latency_ms": 41254.0
               },
               "STATUS": {
                 "sent": 0,
@@ -957,34 +957,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1029,
-            "retries": 156,
-            "sf_queued": 70,
-            "sf_flushed": 70,
+            "transmissions": 936,
+            "retries": 126,
+            "sf_queued": 56,
+            "sf_flushed": 56,
             "virtual_s": 160.7
           },
           {
             "seed": 4,
-            "delivery": 0.8518518518518519,
+            "delivery": 0.9629629629629629,
             "sent": 27,
-            "delivered": 23,
-            "median_hops": 3,
+            "delivered": 26,
+            "median_hops": 3.0,
             "convergence_s": 10.25,
             "recovery_s": 0.25,
             "by_priority": {
               "SOS": {
                 "sent": 11,
-                "delivered": 9,
-                "median_latency_ms": 33604,
-                "mean_latency_ms": 34576.444444444445,
-                "p95_latency_ms": 70045.4
+                "delivered": 11,
+                "median_latency_ms": 21084,
+                "mean_latency_ms": 28186.363636363636,
+                "p95_latency_ms": 59181.5
               },
               "NORMAL": {
                 "sent": 16,
-                "delivered": 14,
-                "median_latency_ms": 4475.5,
-                "mean_latency_ms": 8375.214285714286,
-                "p95_latency_ms": 27824.5
+                "delivered": 15,
+                "median_latency_ms": 138,
+                "mean_latency_ms": 9793.733333333334,
+                "p95_latency_ms": 44085.5
               },
               "STATUS": {
                 "sent": 0,
@@ -994,34 +994,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 934,
-            "retries": 134,
-            "sf_queued": 63,
-            "sf_flushed": 56,
+            "transmissions": 954,
+            "retries": 131,
+            "sf_queued": 64,
+            "sf_flushed": 55,
             "virtual_s": 155.9
           },
           {
             "seed": 5,
-            "delivery": 0.8888888888888888,
-            "sent": 27,
-            "delivered": 24,
-            "median_hops": 4.0,
+            "delivery": 0.9655172413793104,
+            "sent": 29,
+            "delivered": 28,
+            "median_hops": 5.0,
             "convergence_s": 10.25,
             "recovery_s": 5.24105388760654,
             "by_priority": {
               "SOS": {
-                "sent": 12,
+                "sent": 11,
                 "delivered": 11,
-                "median_latency_ms": 29469,
-                "mean_latency_ms": 35035.09090909091,
-                "p95_latency_ms": 75699.5
+                "median_latency_ms": 33461,
+                "mean_latency_ms": 37864.818181818184,
+                "p95_latency_ms": 77351.5
               },
               "NORMAL": {
-                "sent": 15,
-                "delivered": 13,
-                "median_latency_ms": 168,
-                "mean_latency_ms": 9373.923076923076,
-                "p95_latency_ms": 38560.8
+                "sent": 18,
+                "delivered": 17,
+                "median_latency_ms": 116,
+                "mean_latency_ms": 5879.35294117647,
+                "p95_latency_ms": 21230.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1031,9 +1031,9 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 968,
-            "retries": 141,
-            "sf_queued": 66,
+            "transmissions": 1032,
+            "retries": 137,
+            "sf_queued": 64,
             "sf_flushed": 60,
             "virtual_s": 157.0
           },
@@ -1048,17 +1048,17 @@
             "by_priority": {
               "SOS": {
                 "sent": 11,
-                "delivered": 10,
-                "median_latency_ms": 20128.5,
-                "mean_latency_ms": 24961.0,
-                "p95_latency_ms": 49526.8
+                "delivered": 9,
+                "median_latency_ms": 26600,
+                "mean_latency_ms": 31342.333333333332,
+                "p95_latency_ms": 63005.0
               },
               "NORMAL": {
                 "sent": 18,
-                "delivered": 17,
-                "median_latency_ms": 129,
-                "mean_latency_ms": 7596.588235294118,
-                "p95_latency_ms": 30460.2
+                "delivered": 18,
+                "median_latency_ms": 164.5,
+                "mean_latency_ms": 10291.555555555555,
+                "p95_latency_ms": 50097.1
               },
               "STATUS": {
                 "sent": 0,
@@ -1068,34 +1068,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 891,
-            "retries": 120,
-            "sf_queued": 53,
-            "sf_flushed": 53,
+            "transmissions": 834,
+            "retries": 110,
+            "sf_queued": 50,
+            "sf_flushed": 50,
             "virtual_s": 150.1
           },
           {
             "seed": 7,
-            "delivery": 0.9333333333333333,
+            "delivery": 0.9,
             "sent": 30,
-            "delivered": 28,
-            "median_hops": 4.0,
+            "delivered": 27,
+            "median_hops": 3,
             "convergence_s": 10.25,
             "recovery_s": 7.25,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 32399,
-                "mean_latency_ms": 41379.8,
-                "p95_latency_ms": 90992.0
+                "delivered": 4,
+                "median_latency_ms": 36730.0,
+                "mean_latency_ms": 32644.5,
+                "p95_latency_ms": 55706.9
               },
               "NORMAL": {
                 "sent": 24,
                 "delivered": 23,
-                "median_latency_ms": 8051,
-                "mean_latency_ms": 18280.782608695652,
-                "p95_latency_ms": 49210.9
+                "median_latency_ms": 4463,
+                "mean_latency_ms": 19389.521739130436,
+                "p95_latency_ms": 63602.8
               },
               "STATUS": {
                 "sent": 0,
@@ -1105,34 +1105,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1103,
-            "retries": 176,
-            "sf_queued": 77,
-            "sf_flushed": 71,
+            "transmissions": 1070,
+            "retries": 166,
+            "sf_queued": 71,
+            "sf_flushed": 68,
             "virtual_s": 159.3
           },
           {
             "seed": 8,
-            "delivery": 0.9642857142857143,
-            "sent": 28,
-            "delivered": 27,
+            "delivery": 1.0,
+            "sent": 29,
+            "delivered": 29,
             "median_hops": 4,
             "convergence_s": 15.25,
             "recovery_s": 10.2101705446712,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 8,
-                "median_latency_ms": 4124.5,
-                "mean_latency_ms": 12017.0,
-                "p95_latency_ms": 42385.6
+                "delivered": 9,
+                "median_latency_ms": 8261,
+                "mean_latency_ms": 18292.666666666668,
+                "p95_latency_ms": 54900.6
               },
               "NORMAL": {
-                "sent": 19,
-                "delivered": 19,
-                "median_latency_ms": 4170,
-                "mean_latency_ms": 13507.473684210527,
-                "p95_latency_ms": 66420.0
+                "sent": 20,
+                "delivered": 20,
+                "median_latency_ms": 4225.0,
+                "mean_latency_ms": 15144.8,
+                "p95_latency_ms": 62135.95
               },
               "STATUS": {
                 "sent": 0,
@@ -1142,34 +1142,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1084,
-            "retries": 150,
-            "sf_queued": 72,
-            "sf_flushed": 72,
+            "transmissions": 1105,
+            "retries": 161,
+            "sf_queued": 74,
+            "sf_flushed": 74,
             "virtual_s": 160.9
           },
           {
             "seed": 9,
-            "delivery": 0.9666666666666667,
-            "sent": 30,
-            "delivered": 29,
-            "median_hops": 4,
+            "delivery": 0.9655172413793104,
+            "sent": 29,
+            "delivered": 28,
+            "median_hops": 3.5,
             "convergence_s": 10.239855127489136,
             "recovery_s": 0.25,
             "by_priority": {
               "SOS": {
-                "sent": 10,
-                "delivered": 10,
-                "median_latency_ms": 34061.0,
-                "mean_latency_ms": 37553.8,
-                "p95_latency_ms": 77086.75
+                "sent": 9,
+                "delivered": 8,
+                "median_latency_ms": 24825.0,
+                "mean_latency_ms": 34451.625,
+                "p95_latency_ms": 86243.5
               },
               "NORMAL": {
                 "sent": 20,
-                "delivered": 19,
-                "median_latency_ms": 8475,
-                "mean_latency_ms": 12373.421052631578,
-                "p95_latency_ms": 28927.5
+                "delivered": 20,
+                "median_latency_ms": 4378.5,
+                "mean_latency_ms": 7959.6,
+                "p95_latency_ms": 26432.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1179,10 +1179,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1040,
-            "retries": 144,
-            "sf_queued": 69,
-            "sf_flushed": 61,
+            "transmissions": 1068,
+            "retries": 133,
+            "sf_queued": 64,
+            "sf_flushed": 55,
             "virtual_s": 155.7
           },
           {
@@ -1224,26 +1224,26 @@
           },
           {
             "seed": 11,
-            "delivery": 0.9642857142857143,
-            "sent": 28,
-            "delivered": 27,
-            "median_hops": 4,
+            "delivery": 0.8275862068965517,
+            "sent": 29,
+            "delivered": 24,
+            "median_hops": 4.0,
             "convergence_s": 10.25,
             "recovery_s": 8.233172379003008,
             "by_priority": {
               "SOS": {
-                "sent": 12,
-                "delivered": 12,
-                "median_latency_ms": 38303.5,
-                "mean_latency_ms": 36326.333333333336,
-                "p95_latency_ms": 74153.3
+                "sent": 13,
+                "delivered": 10,
+                "median_latency_ms": 30141.5,
+                "mean_latency_ms": 29003.0,
+                "p95_latency_ms": 66089.35
               },
               "NORMAL": {
                 "sent": 16,
-                "delivered": 15,
-                "median_latency_ms": 131,
-                "mean_latency_ms": 3504.5333333333333,
-                "p95_latency_ms": 14218.7
+                "delivered": 14,
+                "median_latency_ms": 193.0,
+                "mean_latency_ms": 14920.42857142857,
+                "p95_latency_ms": 58720.75
               },
               "STATUS": {
                 "sent": 0,
@@ -1253,34 +1253,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1053,
-            "retries": 137,
+            "transmissions": 986,
+            "retries": 140,
             "sf_queued": 68,
-            "sf_flushed": 57,
+            "sf_flushed": 60,
             "virtual_s": 159.8
           },
           {
             "seed": 12,
-            "delivery": 0.896551724137931,
-            "sent": 29,
+            "delivery": 0.8666666666666667,
+            "sent": 30,
             "delivered": 26,
             "median_hops": 3.0,
             "convergence_s": 10.25,
             "recovery_s": 10.25,
             "by_priority": {
               "SOS": {
-                "sent": 10,
+                "sent": 11,
                 "delivered": 9,
-                "median_latency_ms": 44774,
-                "mean_latency_ms": 46490.77777777778,
-                "p95_latency_ms": 90282.0
+                "median_latency_ms": 44788,
+                "mean_latency_ms": 47077.77777777778,
+                "p95_latency_ms": 81641.8
               },
               "NORMAL": {
                 "sent": 19,
                 "delivered": 17,
-                "median_latency_ms": 47,
-                "mean_latency_ms": 2133.1176470588234,
-                "p95_latency_ms": 8163.8
+                "median_latency_ms": 4197,
+                "mean_latency_ms": 10467.0,
+                "p95_latency_ms": 39917.4
               },
               "STATUS": {
                 "sent": 0,
@@ -1290,34 +1290,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 669,
-            "retries": 95,
-            "sf_queued": 49,
-            "sf_flushed": 48,
+            "transmissions": 798,
+            "retries": 118,
+            "sf_queued": 56,
+            "sf_flushed": 55,
             "virtual_s": 160.1
           },
           {
             "seed": 13,
-            "delivery": 0.8928571428571429,
-            "sent": 28,
-            "delivered": 25,
-            "median_hops": 4,
+            "delivery": 0.8666666666666667,
+            "sent": 30,
+            "delivered": 26,
+            "median_hops": 3.5,
             "convergence_s": 10.24191245620932,
             "recovery_s": 10.243897445796392,
             "by_priority": {
               "SOS": {
-                "sent": 12,
-                "delivered": 9,
-                "median_latency_ms": 21483,
-                "mean_latency_ms": 34862.444444444445,
-                "p95_latency_ms": 73943.4
+                "sent": 14,
+                "delivered": 10,
+                "median_latency_ms": 23241.5,
+                "mean_latency_ms": 30151.0,
+                "p95_latency_ms": 67013.6
               },
               "NORMAL": {
                 "sent": 16,
                 "delivered": 16,
-                "median_latency_ms": 4179.5,
-                "mean_latency_ms": 10799.0,
-                "p95_latency_ms": 38437.25
+                "median_latency_ms": 107.5,
+                "mean_latency_ms": 6273.0625,
+                "p95_latency_ms": 23127.5
               },
               "STATUS": {
                 "sent": 0,
@@ -1327,10 +1327,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 852,
-            "retries": 129,
-            "sf_queued": 68,
-            "sf_flushed": 59,
+            "transmissions": 874,
+            "retries": 120,
+            "sf_queued": 61,
+            "sf_flushed": 53,
             "virtual_s": 157.5
           },
           {
@@ -1372,26 +1372,26 @@
           },
           {
             "seed": 15,
-            "delivery": 0.896551724137931,
+            "delivery": 0.8275862068965517,
             "sent": 29,
-            "delivered": 26,
+            "delivered": 24,
             "median_hops": 4.0,
             "convergence_s": 5.236558696768043,
             "recovery_s": 10.236304718069732,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 76297,
-                "mean_latency_ms": 61825.6,
-                "p95_latency_ms": 115587.0
+                "delivered": 3,
+                "median_latency_ms": 25367,
+                "mean_latency_ms": 35235.0,
+                "p95_latency_ms": 74809.4
               },
               "NORMAL": {
                 "sent": 23,
                 "delivered": 21,
                 "median_latency_ms": 4172,
-                "mean_latency_ms": 17570.714285714286,
-                "p95_latency_ms": 57521.0
+                "mean_latency_ms": 12428.142857142857,
+                "p95_latency_ms": 41571.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1401,27 +1401,27 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1114,
-            "retries": 161,
-            "sf_queued": 75,
-            "sf_flushed": 74,
+            "transmissions": 1112,
+            "retries": 164,
+            "sf_queued": 77,
+            "sf_flushed": 76,
             "virtual_s": 161.0
           },
           {
             "seed": 16,
-            "delivery": 0.9285714285714286,
+            "delivery": 0.8928571428571429,
             "sent": 28,
-            "delivered": 26,
-            "median_hops": 4.0,
+            "delivered": 25,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 5.2434475103091245,
             "by_priority": {
               "SOS": {
                 "sent": 8,
-                "delivered": 8,
-                "median_latency_ms": 25784.5,
-                "mean_latency_ms": 38484.625,
-                "p95_latency_ms": 79656.95
+                "delivered": 7,
+                "median_latency_ms": 25216,
+                "mean_latency_ms": 34686.142857142855,
+                "p95_latency_ms": 80677.5
               },
               "NORMAL": {
                 "sent": 20,
@@ -1438,34 +1438,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 883,
-            "retries": 135,
-            "sf_queued": 64,
-            "sf_flushed": 54,
+            "transmissions": 888,
+            "retries": 136,
+            "sf_queued": 63,
+            "sf_flushed": 55,
             "virtual_s": 157.9
           },
           {
             "seed": 17,
-            "delivery": 0.8928571428571429,
+            "delivery": 1.0,
             "sent": 28,
-            "delivered": 25,
-            "median_hops": 4,
+            "delivered": 28,
+            "median_hops": 4.0,
             "convergence_s": 5.25,
             "recovery_s": 4.25,
             "by_priority": {
               "SOS": {
                 "sent": 8,
-                "delivered": 7,
-                "median_latency_ms": 13778,
-                "mean_latency_ms": 14264.0,
-                "p95_latency_ms": 37725.6
+                "delivered": 8,
+                "median_latency_ms": 14583.5,
+                "mean_latency_ms": 19213.125,
+                "p95_latency_ms": 50528.2
               },
               "NORMAL": {
                 "sent": 20,
-                "delivered": 18,
-                "median_latency_ms": 10533.0,
-                "mean_latency_ms": 11465.111111111111,
-                "p95_latency_ms": 24213.5
+                "delivered": 20,
+                "median_latency_ms": 13249.0,
+                "mean_latency_ms": 13290.0,
+                "p95_latency_ms": 27504.5
               },
               "STATUS": {
                 "sent": 0,
@@ -1475,18 +1475,18 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 992,
-            "retries": 142,
-            "sf_queued": 67,
-            "sf_flushed": 67,
+            "transmissions": 1010,
+            "retries": 149,
+            "sf_queued": 66,
+            "sf_flushed": 66,
             "virtual_s": 160.9
           },
           {
             "seed": 18,
-            "delivery": 0.88,
-            "sent": 25,
-            "delivered": 22,
-            "median_hops": 3.0,
+            "delivery": 0.8846153846153846,
+            "sent": 26,
+            "delivered": 23,
+            "median_hops": 3,
             "convergence_s": 5.25,
             "recovery_s": 10.225455810015774,
             "by_priority": {
@@ -1498,11 +1498,11 @@
                 "p95_latency_ms": 48395.55
               },
               "NORMAL": {
-                "sent": 20,
-                "delivered": 18,
-                "median_latency_ms": 6257.0,
-                "mean_latency_ms": 16013.944444444445,
-                "p95_latency_ms": 43131.6
+                "sent": 21,
+                "delivered": 19,
+                "median_latency_ms": 4295,
+                "mean_latency_ms": 15762.78947368421,
+                "p95_latency_ms": 44778.7
               },
               "STATUS": {
                 "sent": 0,
@@ -1512,34 +1512,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 923,
-            "retries": 135,
-            "sf_queued": 60,
-            "sf_flushed": 50,
+            "transmissions": 932,
+            "retries": 136,
+            "sf_queued": 58,
+            "sf_flushed": 52,
             "virtual_s": 159.3
           },
           {
             "seed": 19,
-            "delivery": 0.9333333333333333,
+            "delivery": 0.9,
             "sent": 30,
-            "delivered": 28,
-            "median_hops": 4.0,
+            "delivered": 27,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 9.964978879776027,
             "by_priority": {
               "SOS": {
                 "sent": 10,
-                "delivered": 9,
-                "median_latency_ms": 29216,
-                "mean_latency_ms": 30476.222222222223,
-                "p95_latency_ms": 82426.2
+                "delivered": 8,
+                "median_latency_ms": 29551.0,
+                "mean_latency_ms": 35826.5,
+                "p95_latency_ms": 85955.85
               },
               "NORMAL": {
                 "sent": 20,
                 "delivered": 19,
-                "median_latency_ms": 158,
-                "mean_latency_ms": 5217.0,
-                "p95_latency_ms": 24679.8
+                "median_latency_ms": 4186,
+                "mean_latency_ms": 6942.421052631579,
+                "p95_latency_ms": 24134.8
               },
               "STATUS": {
                 "sent": 0,
@@ -1549,33 +1549,33 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1056,
-            "retries": 132,
-            "sf_queued": 62,
-            "sf_flushed": 62,
+            "transmissions": 968,
+            "retries": 133,
+            "sf_queued": 60,
+            "sf_flushed": 60,
             "virtual_s": 160.8
           },
           {
             "seed": 20,
-            "delivery": 0.896551724137931,
+            "delivery": 0.9310344827586207,
             "sent": 29,
-            "delivered": 26,
-            "median_hops": 4.0,
+            "delivered": 27,
+            "median_hops": 4,
             "convergence_s": 10.242710000266015,
             "recovery_s": 10.233598094890112,
             "by_priority": {
               "SOS": {
                 "sent": 10,
-                "delivered": 9,
-                "median_latency_ms": 28857,
-                "mean_latency_ms": 28174.555555555555,
-                "p95_latency_ms": 59598.2
+                "delivered": 10,
+                "median_latency_ms": 33003.0,
+                "mean_latency_ms": 31164.6,
+                "p95_latency_ms": 64673.05
               },
               "NORMAL": {
                 "sent": 19,
                 "delivered": 17,
-                "median_latency_ms": 191,
-                "mean_latency_ms": 5679.529411764706,
+                "median_latency_ms": 4182,
+                "mean_latency_ms": 5921.470588235294,
                 "p95_latency_ms": 20699.4
               },
               "STATUS": {
@@ -1586,34 +1586,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 861,
-            "retries": 120,
-            "sf_queued": 58,
-            "sf_flushed": 57,
+            "transmissions": 859,
+            "retries": 114,
+            "sf_queued": 53,
+            "sf_flushed": 52,
             "virtual_s": 160.6
           },
           {
             "seed": 21,
-            "delivery": 0.9655172413793104,
-            "sent": 29,
-            "delivered": 28,
-            "median_hops": 4.5,
+            "delivery": 0.9,
+            "sent": 30,
+            "delivered": 27,
+            "median_hops": 3,
             "convergence_s": 10.24021668138812,
             "recovery_s": 10.23492948099738,
             "by_priority": {
               "SOS": {
-                "sent": 9,
-                "delivered": 8,
-                "median_latency_ms": 43362.0,
-                "mean_latency_ms": 40496.0,
-                "p95_latency_ms": 69040.7
+                "sent": 10,
+                "delivered": 9,
+                "median_latency_ms": 47220,
+                "mean_latency_ms": 39432.333333333336,
+                "p95_latency_ms": 79654.2
               },
               "NORMAL": {
                 "sent": 20,
-                "delivered": 20,
-                "median_latency_ms": 4315.0,
-                "mean_latency_ms": 12337.25,
-                "p95_latency_ms": 61853.3
+                "delivered": 18,
+                "median_latency_ms": 4173.5,
+                "mean_latency_ms": 4365.666666666667,
+                "p95_latency_ms": 10691.8
               },
               "STATUS": {
                 "sent": 0,
@@ -1623,34 +1623,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1117,
-            "retries": 151,
-            "sf_queued": 70,
-            "sf_flushed": 70,
+            "transmissions": 866,
+            "retries": 106,
+            "sf_queued": 50,
+            "sf_flushed": 50,
             "virtual_s": 160.8
           },
           {
             "seed": 22,
-            "delivery": 0.8571428571428571,
-            "sent": 28,
-            "delivered": 24,
-            "median_hops": 5.0,
+            "delivery": 0.8846153846153846,
+            "sent": 26,
+            "delivered": 23,
+            "median_hops": 5,
             "convergence_s": 10.241627345638335,
             "recovery_s": 4.25,
             "by_priority": {
               "SOS": {
                 "sent": 12,
-                "delivered": 10,
-                "median_latency_ms": 22293.0,
-                "mean_latency_ms": 29427.4,
-                "p95_latency_ms": 73670.25
+                "delivered": 11,
+                "median_latency_ms": 20191,
+                "mean_latency_ms": 21475.363636363636,
+                "p95_latency_ms": 56727.0
               },
               "NORMAL": {
-                "sent": 16,
-                "delivered": 14,
-                "median_latency_ms": 6421.5,
-                "mean_latency_ms": 12844.142857142857,
-                "p95_latency_ms": 44538.65
+                "sent": 14,
+                "delivered": 12,
+                "median_latency_ms": 6753.5,
+                "mean_latency_ms": 15834.0,
+                "p95_latency_ms": 53209.05
               },
               "STATUS": {
                 "sent": 0,
@@ -1660,34 +1660,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 964,
-            "retries": 132,
-            "sf_queued": 64,
-            "sf_flushed": 63,
+            "transmissions": 1128,
+            "retries": 163,
+            "sf_queued": 77,
+            "sf_flushed": 76,
             "virtual_s": 160.9
           },
           {
             "seed": 23,
-            "delivery": 0.9285714285714286,
-            "sent": 28,
+            "delivery": 0.896551724137931,
+            "sent": 29,
             "delivered": 26,
             "median_hops": 4.0,
             "convergence_s": 10.25,
             "recovery_s": 10.229805410644985,
             "by_priority": {
               "SOS": {
-                "sent": 7,
-                "delivered": 7,
-                "median_latency_ms": 33103,
-                "mean_latency_ms": 36274.42857142857,
-                "p95_latency_ms": 65848.6
+                "sent": 8,
+                "delivered": 6,
+                "median_latency_ms": 32522.5,
+                "mean_latency_ms": 34652.166666666664,
+                "p95_latency_ms": 59010.5
               },
               "NORMAL": {
                 "sent": 21,
-                "delivered": 19,
-                "median_latency_ms": 4254,
-                "mean_latency_ms": 13116.78947368421,
-                "p95_latency_ms": 43129.5
+                "delivered": 20,
+                "median_latency_ms": 4288.0,
+                "mean_latency_ms": 16520.4,
+                "p95_latency_ms": 44853.6
               },
               "STATUS": {
                 "sent": 0,
@@ -1697,34 +1697,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1034,
-            "retries": 151,
-            "sf_queued": 73,
-            "sf_flushed": 65,
+            "transmissions": 1055,
+            "retries": 153,
+            "sf_queued": 72,
+            "sf_flushed": 66,
             "virtual_s": 159.0
           },
           {
             "seed": 24,
-            "delivery": 0.9666666666666667,
-            "sent": 30,
-            "delivered": 29,
-            "median_hops": 4,
+            "delivery": 0.9655172413793104,
+            "sent": 29,
+            "delivered": 28,
+            "median_hops": 3.5,
             "convergence_s": 10.25,
             "recovery_s": 10.214612355328427,
             "by_priority": {
               "SOS": {
                 "sent": 5,
                 "delivered": 5,
-                "median_latency_ms": 18306,
-                "mean_latency_ms": 16007.8,
-                "p95_latency_ms": 31116.2
+                "median_latency_ms": 14382,
+                "mean_latency_ms": 13532.6,
+                "p95_latency_ms": 29426.4
               },
               "NORMAL": {
-                "sent": 25,
-                "delivered": 24,
-                "median_latency_ms": 151.0,
-                "mean_latency_ms": 5152.25,
-                "p95_latency_ms": 22574.9
+                "sent": 24,
+                "delivered": 23,
+                "median_latency_ms": 131,
+                "mean_latency_ms": 5025.217391304348,
+                "p95_latency_ms": 22466.1
               },
               "STATUS": {
                 "sent": 0,
@@ -1734,34 +1734,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 809,
-            "retries": 113,
-            "sf_queued": 51,
-            "sf_flushed": 50,
+            "transmissions": 866,
+            "retries": 110,
+            "sf_queued": 50,
+            "sf_flushed": 49,
             "virtual_s": 160.9
           },
           {
             "seed": 25,
-            "delivery": 1.0,
+            "delivery": 0.9666666666666667,
             "sent": 30,
-            "delivered": 30,
-            "median_hops": 4.0,
+            "delivered": 29,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 7.233203896643317,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 28274,
-                "mean_latency_ms": 36547.444444444445,
-                "p95_latency_ms": 81194.0
+                "delivered": 8,
+                "median_latency_ms": 36410.0,
+                "mean_latency_ms": 32145.875,
+                "p95_latency_ms": 64446.9
               },
               "NORMAL": {
                 "sent": 21,
                 "delivered": 21,
-                "median_latency_ms": 4346,
-                "mean_latency_ms": 8615.380952380952,
-                "p95_latency_ms": 40172.0
+                "median_latency_ms": 4358,
+                "mean_latency_ms": 13281.809523809523,
+                "p95_latency_ms": 64224.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1771,34 +1771,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 810,
-            "retries": 107,
-            "sf_queued": 44,
-            "sf_flushed": 39,
+            "transmissions": 832,
+            "retries": 121,
+            "sf_queued": 48,
+            "sf_flushed": 44,
             "virtual_s": 159.1
           },
           {
             "seed": 26,
-            "delivery": 0.9333333333333333,
+            "delivery": 1.0,
             "sent": 30,
-            "delivered": 28,
+            "delivered": 30,
             "median_hops": 4.0,
             "convergence_s": 10.25,
             "recovery_s": 10.240763916714059,
             "by_priority": {
               "SOS": {
                 "sent": 7,
-                "delivered": 5,
-                "median_latency_ms": 14706,
-                "mean_latency_ms": 23759.2,
-                "p95_latency_ms": 60259.6
+                "delivered": 7,
+                "median_latency_ms": 8390,
+                "mean_latency_ms": 20524.14285714286,
+                "p95_latency_ms": 45627.3
               },
               "NORMAL": {
                 "sent": 23,
                 "delivered": 23,
-                "median_latency_ms": 4249,
-                "mean_latency_ms": 8573.565217391304,
-                "p95_latency_ms": 43899.6
+                "median_latency_ms": 112,
+                "mean_latency_ms": 5389.739130434783,
+                "p95_latency_ms": 24902.4
               },
               "STATUS": {
                 "sent": 0,
@@ -1808,34 +1808,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 955,
-            "retries": 136,
-            "sf_queued": 63,
-            "sf_flushed": 62,
+            "transmissions": 997,
+            "retries": 128,
+            "sf_queued": 55,
+            "sf_flushed": 54,
             "virtual_s": 160.1
           },
           {
             "seed": 27,
-            "delivery": 1.0,
-            "sent": 29,
-            "delivered": 29,
-            "median_hops": 5,
+            "delivery": 0.9642857142857143,
+            "sent": 28,
+            "delivered": 27,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 7.244565986969974,
             "by_priority": {
               "SOS": {
-                "sent": 10,
-                "delivered": 10,
-                "median_latency_ms": 39220.0,
-                "mean_latency_ms": 35739.8,
-                "p95_latency_ms": 67691.05
+                "sent": 9,
+                "delivered": 9,
+                "median_latency_ms": 15471,
+                "mean_latency_ms": 27780.11111111111,
+                "p95_latency_ms": 61537.8
               },
               "NORMAL": {
                 "sent": 19,
-                "delivered": 19,
-                "median_latency_ms": 4361,
-                "mean_latency_ms": 14120.526315789473,
-                "p95_latency_ms": 65059.9
+                "delivered": 18,
+                "median_latency_ms": 4328.5,
+                "mean_latency_ms": 12224.555555555555,
+                "p95_latency_ms": 66674.25
               },
               "STATUS": {
                 "sent": 0,
@@ -1845,34 +1845,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1051,
-            "retries": 139,
-            "sf_queued": 66,
-            "sf_flushed": 66,
+            "transmissions": 1088,
+            "retries": 157,
+            "sf_queued": 70,
+            "sf_flushed": 70,
             "virtual_s": 160.5
           },
           {
             "seed": 28,
-            "delivery": 0.9629629629629629,
-            "sent": 27,
+            "delivery": 0.8666666666666667,
+            "sent": 30,
             "delivered": 26,
             "median_hops": 5.0,
             "convergence_s": 10.25,
             "recovery_s": 10.224056625816957,
             "by_priority": {
               "SOS": {
-                "sent": 10,
-                "delivered": 10,
-                "median_latency_ms": 10937.0,
-                "mean_latency_ms": 21772.4,
-                "p95_latency_ms": 59600.2
+                "sent": 11,
+                "delivered": 8,
+                "median_latency_ms": 18140.0,
+                "mean_latency_ms": 29453.75,
+                "p95_latency_ms": 84312.5
               },
               "NORMAL": {
-                "sent": 17,
-                "delivered": 16,
-                "median_latency_ms": 8951.0,
-                "mean_latency_ms": 19844.4375,
-                "p95_latency_ms": 65250.25
+                "sent": 19,
+                "delivered": 18,
+                "median_latency_ms": 6820.0,
+                "mean_latency_ms": 14586.888888888889,
+                "p95_latency_ms": 41288.7
               },
               "STATUS": {
                 "sent": 0,
@@ -1882,10 +1882,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1252,
-            "retries": 174,
-            "sf_queued": 85,
-            "sf_flushed": 84,
+            "transmissions": 1063,
+            "retries": 146,
+            "sf_queued": 69,
+            "sf_flushed": 68,
             "virtual_s": 160.2
           },
           {
@@ -1893,23 +1893,23 @@
             "delivery": 0.9,
             "sent": 30,
             "delivered": 27,
-            "median_hops": 5,
+            "median_hops": 4,
             "convergence_s": 10.244095506752274,
             "recovery_s": 9.986529649906515,
             "by_priority": {
               "SOS": {
                 "sent": 8,
                 "delivered": 6,
-                "median_latency_ms": 49276.5,
-                "mean_latency_ms": 47975.666666666664,
-                "p95_latency_ms": 76231.75
+                "median_latency_ms": 45016.5,
+                "mean_latency_ms": 45045.0,
+                "p95_latency_ms": 75242.5
               },
               "NORMAL": {
                 "sent": 22,
                 "delivered": 21,
-                "median_latency_ms": 4422,
-                "mean_latency_ms": 13278.095238095239,
-                "p95_latency_ms": 38025.0
+                "median_latency_ms": 4640,
+                "mean_latency_ms": 11463.857142857143,
+                "p95_latency_ms": 43221.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1919,34 +1919,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 938,
-            "retries": 129,
-            "sf_queued": 58,
-            "sf_flushed": 57,
+            "transmissions": 986,
+            "retries": 133,
+            "sf_queued": 60,
+            "sf_flushed": 59,
             "virtual_s": 160.9
           },
           {
             "seed": 30,
-            "delivery": 0.8888888888888888,
+            "delivery": 1.0,
             "sent": 27,
-            "delivered": 24,
-            "median_hops": 3.0,
+            "delivered": 27,
+            "median_hops": 5,
             "convergence_s": 10.237461406341026,
             "recovery_s": 10.23728749014117,
             "by_priority": {
               "SOS": {
                 "sent": 7,
-                "delivered": 5,
-                "median_latency_ms": 23759,
-                "mean_latency_ms": 19094.6,
-                "p95_latency_ms": 31128.4
+                "delivered": 7,
+                "median_latency_ms": 25649,
+                "mean_latency_ms": 25009.285714285714,
+                "p95_latency_ms": 57004.1
               },
               "NORMAL": {
                 "sent": 20,
-                "delivered": 19,
-                "median_latency_ms": 4298,
-                "mean_latency_ms": 11725.78947368421,
-                "p95_latency_ms": 45859.0
+                "delivered": 20,
+                "median_latency_ms": 4501.5,
+                "mean_latency_ms": 14304.9,
+                "p95_latency_ms": 63430.65
               },
               "STATUS": {
                 "sent": 0,
@@ -1956,34 +1956,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1176,
-            "retries": 157,
-            "sf_queued": 73,
-            "sf_flushed": 73,
+            "transmissions": 1141,
+            "retries": 165,
+            "sf_queued": 69,
+            "sf_flushed": 69,
             "virtual_s": 160.5
           },
           {
             "seed": 31,
-            "delivery": 0.9285714285714286,
-            "sent": 28,
+            "delivery": 0.896551724137931,
+            "sent": 29,
             "delivered": 26,
-            "median_hops": 4.0,
+            "median_hops": 3.5,
             "convergence_s": 10.25,
             "recovery_s": 10.222161729136133,
             "by_priority": {
               "SOS": {
                 "sent": 10,
-                "delivered": 10,
-                "median_latency_ms": 27441.5,
-                "mean_latency_ms": 28928.4,
-                "p95_latency_ms": 63344.5
+                "delivered": 9,
+                "median_latency_ms": 11978,
+                "mean_latency_ms": 25890.666666666668,
+                "p95_latency_ms": 76939.4
               },
               "NORMAL": {
-                "sent": 18,
-                "delivered": 16,
-                "median_latency_ms": 4349.0,
-                "mean_latency_ms": 11451.875,
-                "p95_latency_ms": 41747.75
+                "sent": 19,
+                "delivered": 17,
+                "median_latency_ms": 4320,
+                "mean_latency_ms": 8163.941176470588,
+                "p95_latency_ms": 31440.0
               },
               "STATUS": {
                 "sent": 0,
@@ -1993,10 +1993,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1058,
-            "retries": 142,
-            "sf_queued": 68,
-            "sf_flushed": 66,
+            "transmissions": 1001,
+            "retries": 127,
+            "sf_queued": 60,
+            "sf_flushed": 58,
             "virtual_s": 160.7
           },
           {
@@ -2030,34 +2030,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 904,
+            "transmissions": 907,
             "retries": 119,
             "sf_queued": 55,
-            "sf_flushed": 48,
+            "sf_flushed": 50,
             "virtual_s": 159.4
           },
           {
             "seed": 33,
-            "delivery": 1.0,
-            "sent": 28,
-            "delivered": 28,
-            "median_hops": 4.0,
+            "delivery": 0.9629629629629629,
+            "sent": 27,
+            "delivered": 26,
+            "median_hops": 2.5,
             "convergence_s": 15.25,
             "recovery_s": 0.25,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 6,
-                "median_latency_ms": 40161.5,
-                "mean_latency_ms": 38373.666666666664,
-                "p95_latency_ms": 77109.25
+                "delivered": 5,
+                "median_latency_ms": 30472,
+                "mean_latency_ms": 26435.4,
+                "p95_latency_ms": 51832.2
               },
               "NORMAL": {
-                "sent": 22,
-                "delivered": 22,
-                "median_latency_ms": 4172.0,
-                "mean_latency_ms": 6432.227272727273,
-                "p95_latency_ms": 25280.95
+                "sent": 21,
+                "delivered": 21,
+                "median_latency_ms": 4158,
+                "mean_latency_ms": 5496.571428571428,
+                "p95_latency_ms": 25461.0
               },
               "STATUS": {
                 "sent": 0,
@@ -2067,34 +2067,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 769,
-            "retries": 94,
-            "sf_queued": 46,
-            "sf_flushed": 42,
+            "transmissions": 834,
+            "retries": 108,
+            "sf_queued": 49,
+            "sf_flushed": 46,
             "virtual_s": 159.6
           },
           {
             "seed": 34,
-            "delivery": 1.0,
+            "delivery": 0.9,
             "sent": 30,
-            "delivered": 30,
-            "median_hops": 4.0,
+            "delivered": 27,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 10.25,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 28031,
-                "mean_latency_ms": 29751.777777777777,
-                "p95_latency_ms": 59234.2
+                "delivered": 7,
+                "median_latency_ms": 32095,
+                "mean_latency_ms": 37748.42857142857,
+                "p95_latency_ms": 79048.9
               },
               "NORMAL": {
                 "sent": 21,
-                "delivered": 21,
-                "median_latency_ms": 4505,
-                "mean_latency_ms": 15339.714285714286,
-                "p95_latency_ms": 42352.0
+                "delivered": 20,
+                "median_latency_ms": 4381.5,
+                "mean_latency_ms": 11627.55,
+                "p95_latency_ms": 42116.0
               },
               "STATUS": {
                 "sent": 0,
@@ -2104,34 +2104,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 979,
-            "retries": 140,
-            "sf_queued": 67,
-            "sf_flushed": 62,
+            "transmissions": 1082,
+            "retries": 161,
+            "sf_queued": 80,
+            "sf_flushed": 74,
             "virtual_s": 157.4
           },
           {
             "seed": 35,
-            "delivery": 0.8275862068965517,
-            "sent": 29,
-            "delivered": 24,
-            "median_hops": 2.5,
+            "delivery": 0.8214285714285714,
+            "sent": 28,
+            "delivered": 23,
+            "median_hops": 3,
             "convergence_s": 10.2442311866198,
             "recovery_s": 9.98998342127561,
             "by_priority": {
               "SOS": {
-                "sent": 6,
-                "delivered": 4,
-                "median_latency_ms": 38237.5,
-                "mean_latency_ms": 36138.75,
-                "p95_latency_ms": 64656.75
+                "sent": 5,
+                "delivered": 3,
+                "median_latency_ms": 30609,
+                "mean_latency_ms": 47586.0,
+                "p95_latency_ms": 103905.0
               },
               "NORMAL": {
                 "sent": 23,
                 "delivered": 20,
-                "median_latency_ms": 90.5,
-                "mean_latency_ms": 2132.15,
-                "p95_latency_ms": 8208.0
+                "median_latency_ms": 92.5,
+                "mean_latency_ms": 4539.95,
+                "p95_latency_ms": 24068.3
               },
               "STATUS": {
                 "sent": 0,
@@ -2141,34 +2141,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 717,
-            "retries": 109,
-            "sf_queued": 49,
-            "sf_flushed": 41,
+            "transmissions": 724,
+            "retries": 108,
+            "sf_queued": 52,
+            "sf_flushed": 43,
             "virtual_s": 158.6
           },
           {
             "seed": 36,
-            "delivery": 0.9333333333333333,
+            "delivery": 0.9666666666666667,
             "sent": 30,
-            "delivered": 28,
-            "median_hops": 3.0,
+            "delivered": 29,
+            "median_hops": 3,
             "convergence_s": 5.25,
             "recovery_s": 7.238310278100471,
             "by_priority": {
               "SOS": {
                 "sent": 10,
-                "delivered": 8,
-                "median_latency_ms": 38010.5,
-                "mean_latency_ms": 34595.625,
-                "p95_latency_ms": 54681.15
+                "delivered": 9,
+                "median_latency_ms": 45630,
+                "mean_latency_ms": 39581.0,
+                "p95_latency_ms": 66974.8
               },
               "NORMAL": {
                 "sent": 20,
                 "delivered": 20,
                 "median_latency_ms": 118.5,
-                "mean_latency_ms": 4018.35,
-                "p95_latency_ms": 20235.1
+                "mean_latency_ms": 5018.65,
+                "p95_latency_ms": 22407.2
               },
               "STATUS": {
                 "sent": 0,
@@ -2178,34 +2178,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 655,
+            "transmissions": 683,
             "retries": 93,
-            "sf_queued": 45,
-            "sf_flushed": 40,
+            "sf_queued": 47,
+            "sf_flushed": 41,
             "virtual_s": 159.8
           },
           {
             "seed": 37,
-            "delivery": 0.9310344827586207,
-            "sent": 29,
-            "delivered": 27,
-            "median_hops": 5,
+            "delivery": 0.8888888888888888,
+            "sent": 27,
+            "delivered": 24,
+            "median_hops": 4.5,
             "convergence_s": 10.237588085690732,
             "recovery_s": 10.234396638297767,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 32320,
-                "mean_latency_ms": 37153.333333333336,
-                "p95_latency_ms": 77782.4
+                "delivered": 7,
+                "median_latency_ms": 23702,
+                "mean_latency_ms": 23036.0,
+                "p95_latency_ms": 43895.2
               },
               "NORMAL": {
-                "sent": 20,
-                "delivered": 18,
-                "median_latency_ms": 2220.5,
-                "mean_latency_ms": 9760.666666666666,
-                "p95_latency_ms": 41139.35
+                "sent": 18,
+                "delivered": 17,
+                "median_latency_ms": 4125,
+                "mean_latency_ms": 9355.882352941177,
+                "p95_latency_ms": 30146.4
               },
               "STATUS": {
                 "sent": 0,
@@ -2215,10 +2215,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 995,
-            "retries": 148,
-            "sf_queued": 67,
-            "sf_flushed": 61,
+            "transmissions": 1009,
+            "retries": 135,
+            "sf_queued": 62,
+            "sf_flushed": 58,
             "virtual_s": 159.0
           },
           {
@@ -2260,26 +2260,26 @@
           },
           {
             "seed": 39,
-            "delivery": 0.9642857142857143,
-            "sent": 28,
-            "delivered": 27,
-            "median_hops": 3,
+            "delivery": 0.9666666666666667,
+            "sent": 30,
+            "delivered": 29,
+            "median_hops": 4,
             "convergence_s": 10.25,
             "recovery_s": 10.239931556609008,
             "by_priority": {
               "SOS": {
-                "sent": 9,
-                "delivered": 8,
-                "median_latency_ms": 4454.0,
-                "mean_latency_ms": 18485.0,
-                "p95_latency_ms": 63931.5
+                "sent": 11,
+                "delivered": 10,
+                "median_latency_ms": 22573.5,
+                "mean_latency_ms": 28521.2,
+                "p95_latency_ms": 67873.95
               },
               "NORMAL": {
                 "sent": 19,
                 "delivered": 19,
-                "median_latency_ms": 138,
-                "mean_latency_ms": 6488.9473684210525,
-                "p95_latency_ms": 31292.1
+                "median_latency_ms": 120,
+                "mean_latency_ms": 5314.736842105263,
+                "p95_latency_ms": 19580.8
               },
               "STATUS": {
                 "sent": 0,
@@ -2289,34 +2289,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 777,
-            "retries": 114,
-            "sf_queued": 54,
-            "sf_flushed": 45,
+            "transmissions": 826,
+            "retries": 113,
+            "sf_queued": 55,
+            "sf_flushed": 48,
             "virtual_s": 152.8
           },
           {
             "seed": 40,
-            "delivery": 0.9545454545454546,
-            "sent": 22,
-            "delivered": 21,
-            "median_hops": 4,
+            "delivery": 0.9629629629629629,
+            "sent": 27,
+            "delivered": 26,
+            "median_hops": 4.0,
             "convergence_s": 10.24917648327937,
             "recovery_s": 5.25,
             "by_priority": {
               "SOS": {
-                "sent": 9,
-                "delivered": 8,
-                "median_latency_ms": 19183.0,
-                "mean_latency_ms": 24096.125,
-                "p95_latency_ms": 57299.4
+                "sent": 10,
+                "delivered": 9,
+                "median_latency_ms": 30777,
+                "mean_latency_ms": 29551.0,
+                "p95_latency_ms": 61361.6
               },
               "NORMAL": {
-                "sent": 13,
-                "delivered": 13,
-                "median_latency_ms": 4249,
-                "mean_latency_ms": 8111.615384615385,
-                "p95_latency_ms": 35513.0
+                "sent": 17,
+                "delivered": 17,
+                "median_latency_ms": 4313,
+                "mean_latency_ms": 11469.64705882353,
+                "p95_latency_ms": 37674.6
               },
               "STATUS": {
                 "sent": 0,
@@ -2326,34 +2326,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 995,
-            "retries": 148,
-            "sf_queued": 70,
-            "sf_flushed": 64,
+            "transmissions": 1026,
+            "retries": 146,
+            "sf_queued": 67,
+            "sf_flushed": 63,
             "virtual_s": 158.6
           },
           {
             "seed": 41,
-            "delivery": 1.0,
-            "sent": 27,
-            "delivered": 27,
-            "median_hops": 4,
+            "delivery": 0.9285714285714286,
+            "sent": 28,
+            "delivered": 26,
+            "median_hops": 4.0,
             "convergence_s": 5.25,
             "recovery_s": 10.19746902620318,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 30300,
-                "mean_latency_ms": 27472.222222222223,
-                "p95_latency_ms": 56300.2
+                "delivered": 7,
+                "median_latency_ms": 14175,
+                "mean_latency_ms": 22401.85714285714,
+                "p95_latency_ms": 56551.3
               },
               "NORMAL": {
-                "sent": 18,
-                "delivered": 18,
-                "median_latency_ms": 123.0,
-                "mean_latency_ms": 10805.5,
-                "p95_latency_ms": 42158.2
+                "sent": 19,
+                "delivered": 19,
+                "median_latency_ms": 137,
+                "mean_latency_ms": 7284.8421052631575,
+                "p95_latency_ms": 21664.9
               },
               "STATUS": {
                 "sent": 0,
@@ -2363,34 +2363,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 968,
-            "retries": 134,
-            "sf_queued": 63,
-            "sf_flushed": 55,
+            "transmissions": 908,
+            "retries": 133,
+            "sf_queued": 62,
+            "sf_flushed": 59,
             "virtual_s": 155.0
           },
           {
             "seed": 42,
-            "delivery": 0.9,
-            "sent": 30,
-            "delivered": 27,
-            "median_hops": 5,
+            "delivery": 0.9655172413793104,
+            "sent": 29,
+            "delivered": 28,
+            "median_hops": 4.0,
             "convergence_s": 10.235275911521967,
-            "recovery_s": 10.22057104680971,
+            "recovery_s": 9.9769798140278,
             "by_priority": {
               "SOS": {
                 "sent": 10,
-                "delivered": 9,
-                "median_latency_ms": 37614,
-                "mean_latency_ms": 39078.666666666664,
-                "p95_latency_ms": 72637.6
+                "delivered": 10,
+                "median_latency_ms": 24960.5,
+                "mean_latency_ms": 32176.2,
+                "p95_latency_ms": 87360.65
               },
               "NORMAL": {
-                "sent": 20,
+                "sent": 19,
                 "delivered": 18,
-                "median_latency_ms": 6550.5,
-                "mean_latency_ms": 17489.777777777777,
-                "p95_latency_ms": 48331.8
+                "median_latency_ms": 4136.5,
+                "mean_latency_ms": 11836.944444444445,
+                "p95_latency_ms": 43949.95
               },
               "STATUS": {
                 "sent": 0,
@@ -2400,18 +2400,18 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1088,
-            "retries": 160,
-            "sf_queued": 75,
-            "sf_flushed": 67,
+            "transmissions": 1192,
+            "retries": 169,
+            "sf_queued": 83,
+            "sf_flushed": 74,
             "virtual_s": 158.0
           },
           {
             "seed": 43,
-            "delivery": 0.9230769230769231,
+            "delivery": 0.9615384615384616,
             "sent": 26,
-            "delivered": 24,
-            "median_hops": 4.0,
+            "delivered": 25,
+            "median_hops": 4,
             "convergence_s": 10.242917387819034,
             "recovery_s": 10.25,
             "by_priority": {
@@ -2419,15 +2419,15 @@
                 "sent": 5,
                 "delivered": 5,
                 "median_latency_ms": 42718,
-                "mean_latency_ms": 39703.4,
-                "p95_latency_ms": 77177.6
+                "mean_latency_ms": 38890.6,
+                "p95_latency_ms": 73926.4
               },
               "NORMAL": {
                 "sent": 21,
-                "delivered": 19,
-                "median_latency_ms": 4488,
-                "mean_latency_ms": 13915.263157894737,
-                "p95_latency_ms": 37477.9
+                "delivered": 20,
+                "median_latency_ms": 4524.0,
+                "mean_latency_ms": 16691.1,
+                "p95_latency_ms": 45675.35
               },
               "STATUS": {
                 "sent": 0,
@@ -2437,34 +2437,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1140,
-            "retries": 160,
-            "sf_queued": 74,
-            "sf_flushed": 67,
+            "transmissions": 1144,
+            "retries": 164,
+            "sf_queued": 76,
+            "sf_flushed": 69,
             "virtual_s": 156.9
           },
           {
             "seed": 44,
-            "delivery": 0.9615384615384616,
-            "sent": 26,
-            "delivered": 25,
-            "median_hops": 3,
+            "delivery": 1.0,
+            "sent": 28,
+            "delivered": 28,
+            "median_hops": 4.0,
             "convergence_s": 10.25,
             "recovery_s": 10.237172341689075,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 35639,
-                "mean_latency_ms": 35800.6,
-                "p95_latency_ms": 60755.6
+                "delivered": 6,
+                "median_latency_ms": 47625.5,
+                "mean_latency_ms": 46991.5,
+                "p95_latency_ms": 80668.0
               },
               "NORMAL": {
-                "sent": 20,
-                "delivered": 20,
-                "median_latency_ms": 8208.0,
-                "mean_latency_ms": 12557.3,
-                "p95_latency_ms": 36608.8
+                "sent": 22,
+                "delivered": 22,
+                "median_latency_ms": 4348.0,
+                "mean_latency_ms": 6953.590909090909,
+                "p95_latency_ms": 19313.7
               },
               "STATUS": {
                 "sent": 0,
@@ -2474,34 +2474,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 953,
-            "retries": 134,
-            "sf_queued": 63,
-            "sf_flushed": 63,
+            "transmissions": 1001,
+            "retries": 138,
+            "sf_queued": 60,
+            "sf_flushed": 60,
             "virtual_s": 160.3
           },
           {
             "seed": 45,
-            "delivery": 0.8928571428571429,
-            "sent": 28,
-            "delivered": 25,
-            "median_hops": 3,
+            "delivery": 0.9310344827586207,
+            "sent": 29,
+            "delivered": 27,
+            "median_hops": 2,
             "convergence_s": 10.25,
             "recovery_s": 10.22439176408625,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 16392,
-                "mean_latency_ms": 25163.8,
-                "p95_latency_ms": 46539.2
+                "delivered": 6,
+                "median_latency_ms": 13615.5,
+                "mean_latency_ms": 22655.0,
+                "p95_latency_ms": 47673.0
               },
               "NORMAL": {
-                "sent": 22,
-                "delivered": 20,
-                "median_latency_ms": 4393.0,
-                "mean_latency_ms": 19379.4,
-                "p95_latency_ms": 82510.7
+                "sent": 23,
+                "delivered": 21,
+                "median_latency_ms": 4376,
+                "mean_latency_ms": 18668.380952380954,
+                "p95_latency_ms": 82987.0
               },
               "STATUS": {
                 "sent": 0,
@@ -2511,34 +2511,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 981,
-            "retries": 158,
-            "sf_queued": 73,
-            "sf_flushed": 67,
+            "transmissions": 911,
+            "retries": 127,
+            "sf_queued": 60,
+            "sf_flushed": 57,
             "virtual_s": 158.4
           },
           {
             "seed": 46,
             "delivery": 1.0,
-            "sent": 28,
-            "delivered": 28,
-            "median_hops": 3.0,
+            "sent": 30,
+            "delivered": 30,
+            "median_hops": 3.5,
             "convergence_s": 5.245160721480715,
             "recovery_s": 10.247744235521168,
             "by_priority": {
               "SOS": {
                 "sent": 7,
                 "delivered": 7,
-                "median_latency_ms": 10031,
-                "mean_latency_ms": 24551.85714285714,
-                "p95_latency_ms": 60491.7
+                "median_latency_ms": 54078,
+                "mean_latency_ms": 44582.42857142857,
+                "p95_latency_ms": 80310.7
               },
               "NORMAL": {
-                "sent": 21,
-                "delivered": 21,
-                "median_latency_ms": 188,
-                "mean_latency_ms": 7367.476190476191,
-                "p95_latency_ms": 26826.0
+                "sent": 23,
+                "delivered": 23,
+                "median_latency_ms": 4168,
+                "mean_latency_ms": 7790.347826086957,
+                "p95_latency_ms": 36716.2
               },
               "STATUS": {
                 "sent": 0,
@@ -2548,34 +2548,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 899,
-            "retries": 124,
-            "sf_queued": 53,
-            "sf_flushed": 48,
+            "transmissions": 906,
+            "retries": 116,
+            "sf_queued": 50,
+            "sf_flushed": 47,
             "virtual_s": 159.2
           },
           {
             "seed": 47,
-            "delivery": 0.9285714285714286,
-            "sent": 28,
-            "delivered": 26,
-            "median_hops": 4.0,
+            "delivery": 0.9310344827586207,
+            "sent": 29,
+            "delivered": 27,
+            "median_hops": 5,
             "convergence_s": 5.25,
             "recovery_s": 5.2404397630725725,
             "by_priority": {
               "SOS": {
-                "sent": 7,
-                "delivered": 6,
-                "median_latency_ms": 32103.5,
-                "mean_latency_ms": 29287.833333333332,
-                "p95_latency_ms": 46125.0
+                "sent": 8,
+                "delivered": 7,
+                "median_latency_ms": 20888,
+                "mean_latency_ms": 27568.428571428572,
+                "p95_latency_ms": 60120.8
               },
               "NORMAL": {
                 "sent": 21,
                 "delivered": 20,
                 "median_latency_ms": 2144.0,
-                "mean_latency_ms": 13327.8,
-                "p95_latency_ms": 47530.5
+                "mean_latency_ms": 9791.2,
+                "p95_latency_ms": 39228.55
               },
               "STATUS": {
                 "sent": 0,
@@ -2585,34 +2585,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1147,
-            "retries": 150,
-            "sf_queued": 68,
+            "transmissions": 1049,
+            "retries": 149,
+            "sf_queued": 67,
             "sf_flushed": 61,
             "virtual_s": 158.6
           },
           {
             "seed": 48,
-            "delivery": 0.9642857142857143,
+            "delivery": 0.9285714285714286,
             "sent": 28,
-            "delivered": 27,
-            "median_hops": 4,
+            "delivered": 26,
+            "median_hops": 4.0,
             "convergence_s": 10.25,
             "recovery_s": 1.2379678888573835,
             "by_priority": {
               "SOS": {
-                "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 48239,
-                "mean_latency_ms": 34899.2,
-                "p95_latency_ms": 66321.0
+                "sent": 7,
+                "delivered": 6,
+                "median_latency_ms": 49063.5,
+                "mean_latency_ms": 47387.333333333336,
+                "p95_latency_ms": 97350.25
               },
               "NORMAL": {
-                "sent": 22,
-                "delivered": 22,
-                "median_latency_ms": 8586.0,
-                "mean_latency_ms": 15098.363636363636,
-                "p95_latency_ms": 40426.1
+                "sent": 21,
+                "delivered": 20,
+                "median_latency_ms": 8278.5,
+                "mean_latency_ms": 12861.55,
+                "p95_latency_ms": 36121.8
               },
               "STATUS": {
                 "sent": 0,
@@ -2622,10 +2622,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1083,
-            "retries": 152,
-            "sf_queued": 70,
-            "sf_flushed": 64,
+            "transmissions": 1106,
+            "retries": 146,
+            "sf_queued": 68,
+            "sf_flushed": 61,
             "virtual_s": 158.6
           },
           {
@@ -2641,15 +2641,15 @@
                 "sent": 8,
                 "delivered": 8,
                 "median_latency_ms": 42958.5,
-                "mean_latency_ms": 50391.125,
-                "p95_latency_ms": 90992.85
+                "mean_latency_ms": 49892.375,
+                "p95_latency_ms": 88399.35
               },
               "NORMAL": {
                 "sent": 20,
                 "delivered": 19,
                 "median_latency_ms": 4092,
-                "mean_latency_ms": 9894.21052631579,
-                "p95_latency_ms": 37035.4
+                "mean_latency_ms": 11176.947368421053,
+                "p95_latency_ms": 39472.6
               },
               "STATUS": {
                 "sent": 0,
@@ -2659,34 +2659,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 919,
-            "retries": 136,
+            "transmissions": 911,
+            "retries": 133,
             "sf_queued": 61,
-            "sf_flushed": 56,
+            "sf_flushed": 55,
             "virtual_s": 157.2
           },
           {
             "seed": 50,
-            "delivery": 0.8666666666666667,
-            "sent": 30,
-            "delivered": 26,
-            "median_hops": 5.0,
+            "delivery": 0.7857142857142857,
+            "sent": 28,
+            "delivered": 22,
+            "median_hops": 4.5,
             "convergence_s": 10.25,
             "recovery_s": 10.216862762727033,
             "by_priority": {
               "SOS": {
-                "sent": 11,
-                "delivered": 8,
-                "median_latency_ms": 20809.0,
-                "mean_latency_ms": 17633.625,
-                "p95_latency_ms": 35332.5
+                "sent": 9,
+                "delivered": 5,
+                "median_latency_ms": 4166,
+                "mean_latency_ms": 14886.2,
+                "p95_latency_ms": 35598.0
               },
               "NORMAL": {
                 "sent": 19,
-                "delivered": 18,
-                "median_latency_ms": 4204.5,
-                "mean_latency_ms": 6267.833333333333,
-                "p95_latency_ms": 27275.3
+                "delivered": 17,
+                "median_latency_ms": 4179,
+                "mean_latency_ms": 4882.0,
+                "p95_latency_ms": 12271.4
               },
               "STATUS": {
                 "sent": 0,
@@ -2696,9 +2696,9 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 1071,
-            "retries": 153,
-            "sf_queued": 69,
+            "transmissions": 1021,
+            "retries": 150,
+            "sf_queued": 68,
             "sf_flushed": 59,
             "virtual_s": 159.6
           }
@@ -2721,18 +2721,18 @@
           "stdev": 0.0,
           "n": 20
         },
-        "median_hops": 2,
-        "mean_hops": 2.16751269035533,
+        "median_hops": 2.0,
+        "mean_hops": 2.1818181818181817,
         "hop_histogram": {
           "0": 13,
-          "1": 45,
+          "1": 46,
           "2": 63,
-          "3": 51,
+          "3": 49,
           "4": 22,
-          "5": 3
+          "5": 5
         },
         "latency_ms": {
-          "SOS": 43009.0,
+          "SOS": 42833.75,
           "NORMAL": null,
           "STATUS": null
         },
@@ -2746,13 +2746,13 @@
           "n": 20
         },
         "store_forward": {
-          "queued": 201,
-          "flushed": 201,
+          "queued": 207,
+          "flushed": 207,
           "flush_ratio": 1.0
         },
-        "retries_per_run": 2.3,
-        "dedup_drop_ratio": 0.013115997847390742,
-        "wall_s": 46.080000000000005,
+        "retries_per_run": 2.5,
+        "dedup_drop_ratio": 0.016454133243729897,
+        "wall_s": 19.92,
         "raw": [
           {
             "seed": 1,
@@ -2766,9 +2766,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 44611.0,
-                "mean_latency_ms": 44954.2,
-                "p95_latency_ms": 57358.25
+                "median_latency_ms": 42173.5,
+                "mean_latency_ms": 44462.9,
+                "p95_latency_ms": 57341.1
               },
               "NORMAL": {
                 "sent": 0,
@@ -2787,8 +2787,8 @@
             },
             "transmissions": 48,
             "retries": 1,
-            "sf_queued": 10,
-            "sf_flushed": 10,
+            "sf_queued": 11,
+            "sf_flushed": 11,
             "virtual_s": 135.0
           },
           {
@@ -2803,9 +2803,9 @@
               "SOS": {
                 "sent": 9,
                 "delivered": 9,
-                "median_latency_ms": 39059,
-                "mean_latency_ms": 41554.11111111111,
-                "p95_latency_ms": 53879.8
+                "median_latency_ms": 39033,
+                "mean_latency_ms": 40109.77777777778,
+                "p95_latency_ms": 53874.8
               },
               "NORMAL": {
                 "sent": 0,
@@ -2822,8 +2822,8 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 56,
-            "retries": 4,
+            "transmissions": 52,
+            "retries": 2,
             "sf_queued": 10,
             "sf_flushed": 10,
             "virtual_s": 135.0
@@ -2877,9 +2877,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 49628.0,
-                "mean_latency_ms": 46309.7,
-                "p95_latency_ms": 57849.8
+                "median_latency_ms": 49573.0,
+                "mean_latency_ms": 45416.0,
+                "p95_latency_ms": 56626.3
               },
               "NORMAL": {
                 "sent": 0,
@@ -2896,10 +2896,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 59,
-            "retries": 1,
-            "sf_queued": 10,
-            "sf_flushed": 10,
+            "transmissions": 58,
+            "retries": 0,
+            "sf_queued": 11,
+            "sf_flushed": 11,
             "virtual_s": 135.0
           },
           {
@@ -2951,9 +2951,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 40398.0,
-                "mean_latency_ms": 40891.3,
-                "p95_latency_ms": 50249.2
+                "median_latency_ms": 40242.5,
+                "mean_latency_ms": 39920.2,
+                "p95_latency_ms": 49762.3
               },
               "NORMAL": {
                 "sent": 0,
@@ -3062,83 +3062,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 43300.5,
-                "mean_latency_ms": 44414.1,
-                "p95_latency_ms": 59899.75
-              },
-              "NORMAL": {
-                "sent": 0,
-                "delivered": 0,
-                "median_latency_ms": null,
-                "mean_latency_ms": null,
-                "p95_latency_ms": null
-              },
-              "STATUS": {
-                "sent": 0,
-                "delivered": 0,
-                "median_latency_ms": null,
-                "mean_latency_ms": null,
-                "p95_latency_ms": null
-              }
-            },
-            "transmissions": 80,
-            "retries": 3,
-            "sf_queued": 10,
-            "sf_flushed": 10,
-            "virtual_s": 135.0
-          },
-          {
-            "seed": 10,
-            "delivery": 1.0,
-            "sent": 10,
-            "delivered": 10,
-            "median_hops": 2.0,
-            "convergence_s": 5.25,
-            "recovery_s": null,
-            "by_priority": {
-              "SOS": {
-                "sent": 10,
-                "delivered": 10,
-                "median_latency_ms": 42717.5,
-                "mean_latency_ms": 42648.5,
-                "p95_latency_ms": 58064.05
-              },
-              "NORMAL": {
-                "sent": 0,
-                "delivered": 0,
-                "median_latency_ms": null,
-                "mean_latency_ms": null,
-                "p95_latency_ms": null
-              },
-              "STATUS": {
-                "sent": 0,
-                "delivered": 0,
-                "median_latency_ms": null,
-                "mean_latency_ms": null,
-                "p95_latency_ms": null
-              }
-            },
-            "transmissions": 65,
-            "retries": 3,
-            "sf_queued": 10,
-            "sf_flushed": 10,
-            "virtual_s": 135.0
-          },
-          {
-            "seed": 11,
-            "delivery": 1.0,
-            "sent": 9,
-            "delivered": 9,
-            "median_hops": 3,
-            "convergence_s": 5.25,
-            "recovery_s": null,
-            "by_priority": {
-              "SOS": {
-                "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 42323,
-                "mean_latency_ms": 41437.0,
-                "p95_latency_ms": 50345.2
+                "median_latency_ms": 44409.5,
+                "mean_latency_ms": 43031.5,
+                "p95_latency_ms": 57941.5
               },
               "NORMAL": {
                 "sent": 0,
@@ -3156,6 +3082,80 @@
               }
             },
             "transmissions": 84,
+            "retries": 3,
+            "sf_queued": 12,
+            "sf_flushed": 12,
+            "virtual_s": 135.0
+          },
+          {
+            "seed": 10,
+            "delivery": 1.0,
+            "sent": 10,
+            "delivered": 10,
+            "median_hops": 2.0,
+            "convergence_s": 5.25,
+            "recovery_s": null,
+            "by_priority": {
+              "SOS": {
+                "sent": 10,
+                "delivered": 10,
+                "median_latency_ms": 43494.0,
+                "mean_latency_ms": 41666.1,
+                "p95_latency_ms": 55858.1
+              },
+              "NORMAL": {
+                "sent": 0,
+                "delivered": 0,
+                "median_latency_ms": null,
+                "mean_latency_ms": null,
+                "p95_latency_ms": null
+              },
+              "STATUS": {
+                "sent": 0,
+                "delivered": 0,
+                "median_latency_ms": null,
+                "mean_latency_ms": null,
+                "p95_latency_ms": null
+              }
+            },
+            "transmissions": 82,
+            "retries": 6,
+            "sf_queued": 11,
+            "sf_flushed": 11,
+            "virtual_s": 135.0
+          },
+          {
+            "seed": 11,
+            "delivery": 1.0,
+            "sent": 9,
+            "delivered": 9,
+            "median_hops": 3,
+            "convergence_s": 5.25,
+            "recovery_s": null,
+            "by_priority": {
+              "SOS": {
+                "sent": 9,
+                "delivered": 9,
+                "median_latency_ms": 41467,
+                "mean_latency_ms": 40875.0,
+                "p95_latency_ms": 51815.8
+              },
+              "NORMAL": {
+                "sent": 0,
+                "delivered": 0,
+                "median_latency_ms": null,
+                "mean_latency_ms": null,
+                "p95_latency_ms": null
+              },
+              "STATUS": {
+                "sent": 0,
+                "delivered": 0,
+                "median_latency_ms": null,
+                "mean_latency_ms": null,
+                "p95_latency_ms": null
+              }
+            },
+            "transmissions": 83,
             "retries": 5,
             "sf_queued": 10,
             "sf_flushed": 10,
@@ -3173,9 +3173,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 42114.5,
-                "mean_latency_ms": 44779.8,
-                "p95_latency_ms": 59167.35
+                "median_latency_ms": 42076.5,
+                "mean_latency_ms": 43893.1,
+                "p95_latency_ms": 56996.85
               },
               "NORMAL": {
                 "sent": 0,
@@ -3192,10 +3192,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 68,
-            "retries": 3,
-            "sf_queued": 10,
-            "sf_flushed": 10,
+            "transmissions": 69,
+            "retries": 2,
+            "sf_queued": 11,
+            "sf_flushed": 11,
             "virtual_s": 135.0
           },
           {
@@ -3321,9 +3321,9 @@
               "SOS": {
                 "sent": 10,
                 "delivered": 10,
-                "median_latency_ms": 46142.5,
-                "mean_latency_ms": 46169.4,
-                "p95_latency_ms": 55433.65
+                "median_latency_ms": 46158.5,
+                "mean_latency_ms": 46085.0,
+                "p95_latency_ms": 55856.7
               },
               "NORMAL": {
                 "sent": 0,
@@ -3340,8 +3340,8 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 68,
-            "retries": 0,
+            "transmissions": 76,
+            "retries": 2,
             "sf_queued": 10,
             "sf_flushed": 10,
             "virtual_s": 135.0
@@ -3386,18 +3386,18 @@
           {
             "seed": 18,
             "delivery": 1.0,
-            "sent": 9,
-            "delivered": 9,
-            "median_hops": 2,
+            "sent": 10,
+            "delivered": 10,
+            "median_hops": 2.5,
             "convergence_s": 5.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 9,
-                "delivered": 9,
-                "median_latency_ms": 49018,
-                "mean_latency_ms": 46915.22222222222,
-                "p95_latency_ms": 53465.4
+                "sent": 10,
+                "delivered": 10,
+                "median_latency_ms": 48938.0,
+                "mean_latency_ms": 46976.4,
+                "p95_latency_ms": 54517.65
               },
               "NORMAL": {
                 "sent": 0,
@@ -3414,8 +3414,8 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 68,
-            "retries": 2,
+            "transmissions": 88,
+            "retries": 5,
             "sf_queued": 10,
             "sf_flushed": 10,
             "virtual_s": 135.0
@@ -3507,28 +3507,27 @@
       "weighted": {
         "runs": 20,
         "delivery_ratio": {
-          "mean": 0.8909693205345379,
-          "min": 0.782608695652174,
+          "mean": 0.8926899140142848,
+          "min": 0.7391304347826086,
           "max": 1.0,
-          "stdev": 0.05952647520904143,
+          "stdev": 0.06755921180821436,
           "n": 20
         },
         "median_hops": 2,
-        "mean_hops": 1.9643765903307888,
+        "mean_hops": 1.9569620253164557,
         "hop_histogram": {
           "0": 85,
-          "1": 89,
-          "2": 88,
-          "3": 58,
-          "4": 46,
+          "1": 90,
+          "2": 84,
+          "3": 65,
+          "4": 45,
           "5": 18,
           "6": 6,
-          "7": 2,
-          "9": 1
+          "7": 2
         },
         "latency_ms": {
-          "SOS": 4523.0,
-          "NORMAL": 4363.0,
+          "SOS": 4366.25,
+          "NORMAL": 4372.5,
           "STATUS": null
         },
         "sos_latency_advantage": null,
@@ -3541,36 +3540,36 @@
           "n": 18
         },
         "store_forward": {
-          "queued": 1048,
-          "flushed": 1007,
-          "flush_ratio": 0.9608778625954199
+          "queued": 1076,
+          "flushed": 1045,
+          "flush_ratio": 0.9711895910780669
         },
-        "retries_per_run": 124.2,
-        "dedup_drop_ratio": 0.07005186056524823,
-        "wall_s": 115.3,
+        "retries_per_run": 126.0,
+        "dedup_drop_ratio": 0.06869418154358539,
+        "wall_s": 51.42,
         "raw": [
           {
             "seed": 1,
-            "delivery": 0.9,
-            "sent": 20,
-            "delivered": 18,
+            "delivery": 0.8695652173913043,
+            "sent": 23,
+            "delivered": 20,
             "median_hops": 2.0,
             "convergence_s": 25.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 4,
-                "delivered": 4,
-                "median_latency_ms": 4347.5,
-                "mean_latency_ms": 4262.75,
-                "p95_latency_ms": 7734.7
+                "sent": 6,
+                "delivered": 6,
+                "median_latency_ms": 6333.5,
+                "mean_latency_ms": 9585.5,
+                "p95_latency_ms": 22799.75
               },
               "NORMAL": {
-                "sent": 16,
+                "sent": 17,
                 "delivered": 14,
-                "median_latency_ms": 4422.0,
-                "mean_latency_ms": 9830.92857142857,
-                "p95_latency_ms": 25180.9
+                "median_latency_ms": 4290.5,
+                "mean_latency_ms": 6257.0,
+                "p95_latency_ms": 24381.3
               },
               "STATUS": {
                 "sent": 0,
@@ -3580,10 +3579,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 524,
-            "retries": 129,
-            "sf_queued": 49,
-            "sf_flushed": 44,
+            "transmissions": 491,
+            "retries": 126,
+            "sf_queued": 51,
+            "sf_flushed": 47,
             "virtual_s": 128.8
           },
           {
@@ -3596,18 +3595,18 @@
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 6,
-                "delivered": 5,
-                "median_latency_ms": 94,
-                "mean_latency_ms": 1739.8,
-                "p95_latency_ms": 4275.6
+                "sent": 5,
+                "delivered": 4,
+                "median_latency_ms": 2142.0,
+                "mean_latency_ms": 2161.0,
+                "p95_latency_ms": 4280.95
               },
               "NORMAL": {
-                "sent": 16,
-                "delivered": 14,
-                "median_latency_ms": 4181.5,
-                "mean_latency_ms": 10616.0,
-                "p95_latency_ms": 49570.95
+                "sent": 17,
+                "delivered": 15,
+                "median_latency_ms": 4265,
+                "mean_latency_ms": 9557.466666666667,
+                "p95_latency_ms": 32695.1
               },
               "STATUS": {
                 "sent": 0,
@@ -3617,34 +3616,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 415,
-            "retries": 94,
-            "sf_queued": 39,
-            "sf_flushed": 39,
+            "transmissions": 451,
+            "retries": 110,
+            "sf_queued": 47,
+            "sf_flushed": 47,
             "virtual_s": 130.8
           },
           {
             "seed": 3,
-            "delivery": 1.0,
-            "sent": 22,
+            "delivery": 0.9565217391304348,
+            "sent": 23,
             "delivered": 22,
-            "median_hops": 2.0,
+            "median_hops": 2.5,
             "convergence_s": null,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 5,
-                "delivered": 5,
-                "median_latency_ms": 4456,
-                "mean_latency_ms": 6620.6,
-                "p95_latency_ms": 16635.2
+                "sent": 4,
+                "delivered": 4,
+                "median_latency_ms": 11849.5,
+                "mean_latency_ms": 14833.0,
+                "p95_latency_ms": 33174.2
               },
               "NORMAL": {
-                "sent": 17,
-                "delivered": 17,
-                "median_latency_ms": 22699,
-                "mean_latency_ms": 27143.882352941175,
-                "p95_latency_ms": 70208.2
+                "sent": 19,
+                "delivered": 18,
+                "median_latency_ms": 13125.0,
+                "mean_latency_ms": 19720.11111111111,
+                "p95_latency_ms": 51587.5
               },
               "STATUS": {
                 "sent": 0,
@@ -3654,34 +3653,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 663,
-            "retries": 159,
-            "sf_queued": 70,
-            "sf_flushed": 70,
+            "transmissions": 760,
+            "retries": 174,
+            "sf_queued": 78,
+            "sf_flushed": 78,
             "virtual_s": 130.8
           },
           {
             "seed": 4,
-            "delivery": 0.8260869565217391,
-            "sent": 23,
-            "delivered": 19,
-            "median_hops": 2,
+            "delivery": 0.9473684210526315,
+            "sent": 19,
+            "delivered": 18,
+            "median_hops": 2.5,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 15,
-                "delivered": 13,
-                "median_latency_ms": 8408,
-                "mean_latency_ms": 11332.23076923077,
-                "p95_latency_ms": 30977.4
+                "sent": 12,
+                "delivered": 11,
+                "median_latency_ms": 101,
+                "mean_latency_ms": 13164.181818181818,
+                "p95_latency_ms": 52850.5
               },
               "NORMAL": {
-                "sent": 8,
-                "delivered": 6,
-                "median_latency_ms": 6619.0,
-                "mean_latency_ms": 8919.833333333334,
-                "p95_latency_ms": 19507.5
+                "sent": 7,
+                "delivered": 7,
+                "median_latency_ms": 14904,
+                "mean_latency_ms": 15988.57142857143,
+                "p95_latency_ms": 31055.1
               },
               "STATUS": {
                 "sent": 0,
@@ -3691,34 +3690,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 548,
-            "retries": 137,
-            "sf_queued": 57,
-            "sf_flushed": 52,
+            "transmissions": 576,
+            "retries": 126,
+            "sf_queued": 53,
+            "sf_flushed": 49,
             "virtual_s": 128.1
           },
           {
             "seed": 5,
-            "delivery": 0.9565217391304348,
-            "sent": 23,
-            "delivered": 22,
-            "median_hops": 1.5,
+            "delivery": 0.9545454545454546,
+            "sent": 22,
+            "delivered": 21,
+            "median_hops": 1,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 7,
-                "delivered": 7,
-                "median_latency_ms": 4590,
-                "mean_latency_ms": 11072.142857142857,
-                "p95_latency_ms": 31206.9
+                "delivered": 6,
+                "median_latency_ms": 4384.5,
+                "mean_latency_ms": 5228.166666666667,
+                "p95_latency_ms": 12684.0
               },
               "NORMAL": {
-                "sent": 16,
+                "sent": 15,
                 "delivered": 15,
-                "median_latency_ms": 8090,
-                "mean_latency_ms": 13914.266666666666,
-                "p95_latency_ms": 43610.2
+                "median_latency_ms": 78,
+                "mean_latency_ms": 5744.4,
+                "p95_latency_ms": 26578.9
               },
               "STATUS": {
                 "sent": 0,
@@ -3728,34 +3727,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 512,
-            "retries": 124,
-            "sf_queued": 53,
-            "sf_flushed": 47,
+            "transmissions": 430,
+            "retries": 99,
+            "sf_queued": 39,
+            "sf_flushed": 37,
             "virtual_s": 128.7
           },
           {
             "seed": 6,
-            "delivery": 0.875,
-            "sent": 24,
-            "delivered": 21,
-            "median_hops": 1,
+            "delivery": 0.8571428571428571,
+            "sent": 21,
+            "delivered": 18,
+            "median_hops": 1.0,
             "convergence_s": 10.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 5,
-                "delivered": 4,
-                "median_latency_ms": 12726.0,
-                "mean_latency_ms": 20952.5,
-                "p95_latency_ms": 52702.45
+                "delivered": 3,
+                "median_latency_ms": 4163,
+                "mean_latency_ms": 13848.0,
+                "p95_latency_ms": 33958.4
               },
               "NORMAL": {
-                "sent": 19,
-                "delivered": 17,
-                "median_latency_ms": 4308,
-                "mean_latency_ms": 7624.0,
-                "p95_latency_ms": 23542.6
+                "sent": 16,
+                "delivered": 15,
+                "median_latency_ms": 4377,
+                "mean_latency_ms": 7729.733333333334,
+                "p95_latency_ms": 23759.4
               },
               "STATUS": {
                 "sent": 0,
@@ -3765,16 +3764,16 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 533,
-            "retries": 121,
+            "transmissions": 502,
+            "retries": 125,
             "sf_queued": 56,
-            "sf_flushed": 51,
+            "sf_flushed": 52,
             "virtual_s": 124.8
           },
           {
             "seed": 7,
-            "delivery": 0.95,
-            "sent": 20,
+            "delivery": 0.9047619047619048,
+            "sent": 21,
             "delivered": 19,
             "median_hops": 2,
             "convergence_s": 25.246289836402866,
@@ -3782,17 +3781,17 @@
             "by_priority": {
               "SOS": {
                 "sent": 4,
-                "delivered": 4,
-                "median_latency_ms": 8390.0,
-                "mean_latency_ms": 7479.0,
-                "p95_latency_ms": 8605.6
+                "delivered": 3,
+                "median_latency_ms": 17016,
+                "mean_latency_ms": 23793.666666666668,
+                "p95_latency_ms": 43190.7
               },
               "NORMAL": {
-                "sent": 16,
-                "delivered": 15,
-                "median_latency_ms": 4432,
-                "mean_latency_ms": 14837.0,
-                "p95_latency_ms": 46597.9
+                "sent": 17,
+                "delivered": 16,
+                "median_latency_ms": 4485.5,
+                "mean_latency_ms": 16711.9375,
+                "p95_latency_ms": 56223.5
               },
               "STATUS": {
                 "sent": 0,
@@ -3802,17 +3801,17 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 575,
-            "retries": 124,
-            "sf_queued": 52,
-            "sf_flushed": 52,
+            "transmissions": 650,
+            "retries": 153,
+            "sf_queued": 68,
+            "sf_flushed": 68,
             "virtual_s": 130.0
           },
           {
             "seed": 8,
-            "delivery": 0.9545454545454546,
-            "sent": 22,
-            "delivered": 21,
+            "delivery": 0.9583333333333334,
+            "sent": 24,
+            "delivered": 23,
             "median_hops": 2,
             "convergence_s": 10.25,
             "recovery_s": null,
@@ -3820,16 +3819,16 @@
               "SOS": {
                 "sent": 4,
                 "delivered": 4,
-                "median_latency_ms": 15923.0,
-                "mean_latency_ms": 28900.25,
-                "p95_latency_ms": 75255.05
+                "median_latency_ms": 6425.5,
+                "mean_latency_ms": 10182.5,
+                "p95_latency_ms": 24911.2
               },
               "NORMAL": {
-                "sent": 18,
-                "delivered": 17,
+                "sent": 20,
+                "delivered": 19,
                 "median_latency_ms": 4407,
-                "mean_latency_ms": 5706.588235294118,
-                "p95_latency_ms": 20368.2
+                "mean_latency_ms": 8887.0,
+                "p95_latency_ms": 24563.3
               },
               "STATUS": {
                 "sent": 0,
@@ -3839,18 +3838,18 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 523,
-            "retries": 120,
-            "sf_queued": 51,
-            "sf_flushed": 51,
+            "transmissions": 486,
+            "retries": 124,
+            "sf_queued": 54,
+            "sf_flushed": 54,
             "virtual_s": 131.0
           },
           {
             "seed": 9,
-            "delivery": 0.9166666666666666,
+            "delivery": 0.9583333333333334,
             "sent": 24,
-            "delivered": 22,
-            "median_hops": 1.0,
+            "delivered": 23,
+            "median_hops": 1,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
@@ -3863,10 +3862,10 @@
               },
               "NORMAL": {
                 "sent": 15,
-                "delivered": 14,
-                "median_latency_ms": 4235.0,
-                "mean_latency_ms": 8648.92857142857,
-                "p95_latency_ms": 30291.95
+                "delivered": 15,
+                "median_latency_ms": 4255,
+                "mean_latency_ms": 10478.4,
+                "p95_latency_ms": 34512.6
               },
               "STATUS": {
                 "sent": 0,
@@ -3876,18 +3875,18 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 421,
-            "retries": 94,
-            "sf_queued": 38,
-            "sf_flushed": 35,
+            "transmissions": 471,
+            "retries": 96,
+            "sf_queued": 42,
+            "sf_flushed": 40,
             "virtual_s": 128.0
           },
           {
             "seed": 10,
-            "delivery": 0.782608695652174,
+            "delivery": 0.7391304347826086,
             "sent": 23,
-            "delivered": 18,
-            "median_hops": 2.0,
+            "delivered": 17,
+            "median_hops": 2,
             "convergence_s": 20.25,
             "recovery_s": null,
             "by_priority": {
@@ -3895,15 +3894,15 @@
                 "sent": 9,
                 "delivered": 5,
                 "median_latency_ms": 8109,
-                "mean_latency_ms": 20093.6,
-                "p95_latency_ms": 53995.8
+                "mean_latency_ms": 17837.2,
+                "p95_latency_ms": 43589.6
               },
               "NORMAL": {
                 "sent": 14,
-                "delivered": 13,
-                "median_latency_ms": 8082,
-                "mean_latency_ms": 12130.0,
-                "p95_latency_ms": 44777.0
+                "delivered": 12,
+                "median_latency_ms": 6254.5,
+                "mean_latency_ms": 6389.5,
+                "p95_latency_ms": 16891.5
               },
               "STATUS": {
                 "sent": 0,
@@ -3913,34 +3912,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 559,
-            "retries": 133,
-            "sf_queued": 57,
-            "sf_flushed": 57,
+            "transmissions": 604,
+            "retries": 148,
+            "sf_queued": 65,
+            "sf_flushed": 65,
             "virtual_s": 130.9
           },
           {
             "seed": 11,
-            "delivery": 0.9,
-            "sent": 20,
-            "delivered": 18,
-            "median_hops": 2.5,
+            "delivery": 0.875,
+            "sent": 24,
+            "delivered": 21,
+            "median_hops": 2,
             "convergence_s": 20.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 8,
-                "delivered": 7,
-                "median_latency_ms": 4027,
-                "mean_latency_ms": 4373.714285714285,
-                "p95_latency_ms": 12124.1
+                "sent": 11,
+                "delivered": 10,
+                "median_latency_ms": 2280.0,
+                "mean_latency_ms": 6053.0,
+                "p95_latency_ms": 21991.3
               },
               "NORMAL": {
-                "sent": 12,
+                "sent": 13,
                 "delivered": 11,
-                "median_latency_ms": 155,
-                "mean_latency_ms": 10300.454545454546,
-                "p95_latency_ms": 45483.0
+                "median_latency_ms": 4437,
+                "mean_latency_ms": 11922.90909090909,
+                "p95_latency_ms": 50364.0
               },
               "STATUS": {
                 "sent": 0,
@@ -3950,34 +3949,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 558,
-            "retries": 124,
-            "sf_queued": 52,
-            "sf_flushed": 52,
+            "transmissions": 595,
+            "retries": 133,
+            "sf_queued": 55,
+            "sf_flushed": 55,
             "virtual_s": 130.3
           },
           {
             "seed": 12,
-            "delivery": 0.8095238095238095,
-            "sent": 21,
-            "delivered": 17,
-            "median_hops": 2,
+            "delivery": 1.0,
+            "sent": 20,
+            "delivered": 20,
+            "median_hops": 1.5,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 10,
-                "delivered": 8,
-                "median_latency_ms": 3139.5,
-                "mean_latency_ms": 8274.0,
-                "p95_latency_ms": 21778.7
+                "sent": 9,
+                "delivered": 9,
+                "median_latency_ms": 4348,
+                "mean_latency_ms": 12660.666666666666,
+                "p95_latency_ms": 34072.2
               },
               "NORMAL": {
                 "sent": 11,
-                "delivered": 9,
-                "median_latency_ms": 4107,
-                "mean_latency_ms": 24727.333333333332,
-                "p95_latency_ms": 71372.0
+                "delivered": 11,
+                "median_latency_ms": 15306,
+                "mean_latency_ms": 14842.181818181818,
+                "p95_latency_ms": 38422.0
               },
               "STATUS": {
                 "sent": 0,
@@ -3987,34 +3986,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 451,
-            "retries": 122,
-            "sf_queued": 58,
-            "sf_flushed": 51,
+            "transmissions": 553,
+            "retries": 126,
+            "sf_queued": 59,
+            "sf_flushed": 56,
             "virtual_s": 127.2
           },
           {
             "seed": 13,
-            "delivery": 0.9583333333333334,
-            "sent": 24,
-            "delivered": 23,
-            "median_hops": 2,
+            "delivery": 0.8695652173913043,
+            "sent": 23,
+            "delivered": 20,
+            "median_hops": 1.0,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 7,
-                "delivered": 7,
+                "sent": 6,
+                "delivered": 5,
                 "median_latency_ms": 101,
-                "mean_latency_ms": 9934.857142857143,
-                "p95_latency_ms": 36359.8
+                "mean_latency_ms": 5683.2,
+                "p95_latency_ms": 20046.4
               },
               "NORMAL": {
                 "sent": 17,
-                "delivered": 16,
-                "median_latency_ms": 4272.5,
-                "mean_latency_ms": 10324.5,
-                "p95_latency_ms": 36573.25
+                "delivered": 15,
+                "median_latency_ms": 4368,
+                "mean_latency_ms": 14196.733333333334,
+                "p95_latency_ms": 45489.2
               },
               "STATUS": {
                 "sent": 0,
@@ -4025,33 +4024,33 @@
               }
             },
             "transmissions": 490,
-            "retries": 114,
-            "sf_queued": 49,
-            "sf_flushed": 48,
+            "retries": 121,
+            "sf_queued": 54,
+            "sf_flushed": 50,
             "virtual_s": 125.9
           },
           {
             "seed": 14,
-            "delivery": 0.8333333333333334,
-            "sent": 24,
-            "delivered": 20,
+            "delivery": 0.9565217391304348,
+            "sent": 23,
+            "delivered": 22,
             "median_hops": 2.0,
             "convergence_s": 20.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 9,
-                "delivered": 6,
-                "median_latency_ms": 6279.0,
-                "mean_latency_ms": 13995.5,
-                "p95_latency_ms": 36349.75
+                "sent": 8,
+                "delivered": 8,
+                "median_latency_ms": 21350.5,
+                "mean_latency_ms": 24131.625,
+                "p95_latency_ms": 54350.05
               },
               "NORMAL": {
                 "sent": 15,
                 "delivered": 14,
                 "median_latency_ms": 4413.5,
-                "mean_latency_ms": 17934.5,
-                "p95_latency_ms": 59994.6
+                "mean_latency_ms": 12886.0,
+                "p95_latency_ms": 41038.6
               },
               "STATUS": {
                 "sent": 0,
@@ -4061,34 +4060,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 567,
-            "retries": 135,
-            "sf_queued": 58,
-            "sf_flushed": 54,
+            "transmissions": 681,
+            "retries": 155,
+            "sf_queued": 65,
+            "sf_flushed": 62,
             "virtual_s": 128.6
           },
           {
             "seed": 15,
-            "delivery": 0.9047619047619048,
-            "sent": 21,
-            "delivered": 19,
+            "delivery": 0.8947368421052632,
+            "sent": 19,
+            "delivered": 17,
             "median_hops": 1,
             "convergence_s": null,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 6,
-                "delivered": 6,
-                "median_latency_ms": 4136.5,
-                "mean_latency_ms": 13387.333333333334,
-                "p95_latency_ms": 40220.5
+                "delivered": 5,
+                "median_latency_ms": 4042,
+                "mean_latency_ms": 11162.2,
+                "p95_latency_ms": 38749.4
               },
               "NORMAL": {
-                "sent": 15,
-                "delivered": 13,
-                "median_latency_ms": 4376,
-                "mean_latency_ms": 10131.384615384615,
-                "p95_latency_ms": 29118.8
+                "sent": 13,
+                "delivered": 12,
+                "median_latency_ms": 4336.5,
+                "mean_latency_ms": 9231.916666666666,
+                "p95_latency_ms": 34624.7
               },
               "STATUS": {
                 "sent": 0,
@@ -4098,34 +4097,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 538,
-            "retries": 130,
-            "sf_queued": 53,
-            "sf_flushed": 53,
+            "transmissions": 520,
+            "retries": 128,
+            "sf_queued": 52,
+            "sf_flushed": 52,
             "virtual_s": 131.0
           },
           {
             "seed": 16,
-            "delivery": 0.8636363636363636,
-            "sent": 22,
-            "delivered": 19,
-            "median_hops": 1,
+            "delivery": 0.8695652173913043,
+            "sent": 23,
+            "delivered": 20,
+            "median_hops": 1.0,
             "convergence_s": 20.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 4,
-                "delivered": 3,
-                "median_latency_ms": 65,
-                "mean_latency_ms": 2770.0,
-                "p95_latency_ms": 7413.5
+                "delivered": 2,
+                "median_latency_ms": 4113.0,
+                "mean_latency_ms": 4113.0,
+                "p95_latency_ms": 7801.2
               },
               "NORMAL": {
-                "sent": 18,
-                "delivered": 16,
-                "median_latency_ms": 2261.0,
-                "mean_latency_ms": 7587.5625,
-                "p95_latency_ms": 26655.75
+                "sent": 19,
+                "delivered": 18,
+                "median_latency_ms": 2120.0,
+                "mean_latency_ms": 6115.166666666667,
+                "p95_latency_ms": 20934.9
               },
               "STATUS": {
                 "sent": 0,
@@ -4135,34 +4134,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 478,
-            "retries": 119,
-            "sf_queued": 49,
-            "sf_flushed": 45,
+            "transmissions": 363,
+            "retries": 88,
+            "sf_queued": 34,
+            "sf_flushed": 32,
             "virtual_s": 129.2
           },
           {
             "seed": 17,
-            "delivery": 0.9130434782608695,
+            "delivery": 0.8260869565217391,
             "sent": 23,
-            "delivered": 21,
+            "delivered": 19,
             "median_hops": 2,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 9,
-                "delivered": 8,
-                "median_latency_ms": 18873.0,
-                "mean_latency_ms": 19050.125,
-                "p95_latency_ms": 45807.4
+                "delivered": 7,
+                "median_latency_ms": 25260,
+                "mean_latency_ms": 18571.14285714286,
+                "p95_latency_ms": 35482.3
               },
               "NORMAL": {
                 "sent": 14,
-                "delivered": 13,
-                "median_latency_ms": 4142,
-                "mean_latency_ms": 11348.538461538461,
-                "p95_latency_ms": 45770.6
+                "delivered": 12,
+                "median_latency_ms": 4231.5,
+                "mean_latency_ms": 7832.5,
+                "p95_latency_ms": 26514.9
               },
               "STATUS": {
                 "sent": 0,
@@ -4172,34 +4171,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 485,
-            "retries": 113,
-            "sf_queued": 47,
-            "sf_flushed": 47,
+            "transmissions": 553,
+            "retries": 131,
+            "sf_queued": 57,
+            "sf_flushed": 57,
             "virtual_s": 130.9
           },
           {
             "seed": 18,
-            "delivery": 0.9545454545454546,
+            "delivery": 0.9090909090909091,
             "sent": 22,
-            "delivered": 21,
-            "median_hops": 1,
+            "delivered": 20,
+            "median_hops": 1.0,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
                 "sent": 5,
-                "delivered": 5,
-                "median_latency_ms": 29,
-                "mean_latency_ms": 11964.6,
-                "p95_latency_ms": 45330.4
+                "delivered": 4,
+                "median_latency_ms": 2137.5,
+                "mean_latency_ms": 9991.25,
+                "p95_latency_ms": 30953.85
               },
               "NORMAL": {
                 "sent": 17,
                 "delivered": 16,
-                "median_latency_ms": 55.5,
-                "mean_latency_ms": 9549.8125,
-                "p95_latency_ms": 45410.25
+                "median_latency_ms": 50.0,
+                "mean_latency_ms": 4723.4375,
+                "p95_latency_ms": 16913.75
               },
               "STATUS": {
                 "sent": 0,
@@ -4209,34 +4208,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 394,
-            "retries": 98,
-            "sf_queued": 39,
-            "sf_flushed": 38,
+            "transmissions": 351,
+            "retries": 82,
+            "sf_queued": 36,
+            "sf_flushed": 33,
             "virtual_s": 128.8
           },
           {
             "seed": 19,
-            "delivery": 0.8,
-            "sent": 20,
-            "delivered": 16,
-            "median_hops": 2.0,
+            "delivery": 0.7391304347826086,
+            "sent": 23,
+            "delivered": 17,
+            "median_hops": 3,
             "convergence_s": 15.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 6,
-                "delivered": 4,
-                "median_latency_ms": 6322.5,
-                "mean_latency_ms": 14520.0,
-                "p95_latency_ms": 39861.25
+                "sent": 7,
+                "delivered": 5,
+                "median_latency_ms": 17653,
+                "mean_latency_ms": 28910.2,
+                "p95_latency_ms": 60296.4
               },
               "NORMAL": {
-                "sent": 14,
+                "sent": 16,
                 "delivered": 12,
                 "median_latency_ms": 10721.0,
-                "mean_latency_ms": 15040.083333333334,
-                "p95_latency_ms": 44013.85
+                "mean_latency_ms": 13860.583333333334,
+                "p95_latency_ms": 38622.5
               },
               "STATUS": {
                 "sent": 0,
@@ -4246,34 +4245,34 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 634,
-            "retries": 144,
-            "sf_queued": 59,
-            "sf_flushed": 59,
+            "transmissions": 640,
+            "retries": 155,
+            "sf_queued": 65,
+            "sf_flushed": 65,
             "virtual_s": 130.9
           },
           {
             "seed": 20,
-            "delivery": 0.8571428571428571,
+            "delivery": 0.9047619047619048,
             "sent": 21,
-            "delivered": 18,
-            "median_hops": 2.0,
+            "delivered": 19,
+            "median_hops": 2,
             "convergence_s": 20.25,
             "recovery_s": null,
             "by_priority": {
               "SOS": {
-                "sent": 7,
+                "sent": 8,
                 "delivered": 7,
-                "median_latency_ms": 21928,
-                "mean_latency_ms": 30709.14285714286,
-                "p95_latency_ms": 57958.5
+                "median_latency_ms": 12520,
+                "mean_latency_ms": 32076.714285714286,
+                "p95_latency_ms": 73030.5
               },
               "NORMAL": {
-                "sent": 14,
-                "delivered": 11,
-                "median_latency_ms": 4350,
-                "mean_latency_ms": 10965.181818181818,
-                "p95_latency_ms": 29619.5
+                "sent": 13,
+                "delivered": 12,
+                "median_latency_ms": 4332.0,
+                "mean_latency_ms": 11968.833333333334,
+                "p95_latency_ms": 39712.1
               },
               "STATUS": {
                 "sent": 0,
@@ -4283,10 +4282,10 @@
                 "p95_latency_ms": null
               }
             },
-            "transmissions": 629,
-            "retries": 150,
-            "sf_queued": 62,
-            "sf_flushed": 62,
+            "transmissions": 516,
+            "retries": 120,
+            "sf_queued": 46,
+            "sf_flushed": 46,
             "virtual_s": 130.8
           }
         ]
@@ -4334,7 +4333,7 @@
         },
         "retries_per_run": 17.8,
         "dedup_drop_ratio": 0.01861340425618893,
-        "wall_s": 26.109999999999996,
+        "wall_s": 12.389999999999997,
         "raw": [
           {
             "seed": 1,
@@ -5122,7 +5121,7 @@
         },
         "retries_per_run": 0.0,
         "dedup_drop_ratio": 0.0,
-        "wall_s": 12.58,
+        "wall_s": 4.3100000000000005,
         "raw": [
           {
             "seed": 1,
@@ -5902,7 +5901,7 @@
         },
         "retries_per_run": 0.0,
         "dedup_drop_ratio": 0.002261904761904762,
-        "wall_s": 12.42,
+        "wall_s": 4.620000000000001,
         "raw": [
           {
             "seed": 1,
@@ -6694,7 +6693,7 @@
         },
         "retries_per_run": 188.05,
         "dedup_drop_ratio": 0.16800641946976108,
-        "wall_s": 136.10000000000002,
+        "wall_s": 47.629999999999995,
         "raw": [
           {
             "seed": 1,
