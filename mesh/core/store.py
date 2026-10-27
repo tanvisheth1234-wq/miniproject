@@ -218,6 +218,16 @@ class Store:
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def events_after(self, since_ms: int = 0, limit: int = 200) -> list[dict]:
+        """The newest ``limit`` events with ``ts_ms > since_ms``, returned oldest
+        first. A screen polling for "what happened since I last asked" passes
+        the ``now_ms`` it was given last time."""
+        rows = self._conn.execute(
+            "SELECT * FROM (SELECT * FROM events WHERE ts_ms > ? ORDER BY id DESC LIMIT ?) ORDER BY id ASC",
+            (since_ms, limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
     def count_events(self, kind: str) -> int:
         row = self._conn.execute("SELECT COUNT(*) AS n FROM events WHERE kind = ?", (kind,)).fetchone()
         return row["n"]

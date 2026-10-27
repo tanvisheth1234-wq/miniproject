@@ -205,3 +205,19 @@ def test_events_since_returns_only_newer_events_in_order():
         assert [e["kind"] for e in store.events_since(first)] == ["ack", "recv"]
         assert store.events_since(0, limit=2)[0]["id"] == first
         assert len(store.events_since(0, limit=2)) == 2
+
+
+def test_events_after_returns_only_newer_events_oldest_first(store):
+    store.record_event("peer_up", peer="B", ts_ms=1000)
+    store.record_event("sent", msg_id="m1", peer="B", ts_ms=2000)
+    store.record_event("ack", msg_id="m1", ts_ms=3000)
+    assert [e["kind"] for e in store.events_after(0)] == ["peer_up", "sent", "ack"]
+    assert [e["kind"] for e in store.events_after(2000)] == ["ack"]
+    assert store.events_after(3000) == []
+
+
+def test_events_after_limit_keeps_the_newest(store):
+    for t in range(1, 11):
+        store.record_event("peer_up", peer=f"N{t}", ts_ms=t * 100)
+    newest = store.events_after(0, limit=3)
+    assert [e["peer"] for e in newest] == ["N8", "N9", "N10"]
