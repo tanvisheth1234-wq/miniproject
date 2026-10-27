@@ -117,6 +117,11 @@
   .m-node text.n { fill: var(--text); font-size: 21px; font-weight: 600; text-anchor: middle; }
   .m-node text.s { fill: var(--text-2); font-size: 16px; text-anchor: middle; }
   .legend { color: var(--text-3); font-size: .8rem; margin-top: 6px; }
+  /* ---------- activity feed ---------- */
+  .feed li { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--border); font-size: var(--fs-sm); }
+  .feed li:first-child { border-top: 0; padding-top: 0; }
+  .feed time { color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
   .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--raised); color: var(--text); border: 1px solid var(--text-3); padding: 12px 18px; border-radius: 8px; font-weight: 600; z-index: 9; max-width: 90vw; }
 </style>
 </head>
@@ -157,6 +162,7 @@
 
   <section class="card"><div class="card-head"><h2>Path to the rescue team</h2></div><div id="pRoute"></div></section>
   <section class="card"><div class="card-head"><h2>Phones near you</h2></div><ul id="pNear"></ul></section>
+  <section class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="pActivity" class="feed"></ul></section>
   <section class="card" id="pHelping"><div class="card-head"><h2>Passing messages for others</h2></div><p id="pHelpingText" class="small muted" style="margin-bottom:8px"></p><ul id="pFwd"></ul></section>
   <section class="card"><div class="card-head"><h2>Messages</h2></div><ul id="pMsgs"></ul></section>
   <details class="card"><summary class="muted">Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power or its radio failing.</p><button class="btn sm powerBtn"></button></details>
@@ -178,6 +184,7 @@
       <div class="card"><div class="card-head"><h2>Network map</h2></div><svg id="cMap" class="map" viewBox="0 0 1000 440"></svg>
         <div class="legend">Circle: phone &nbsp; Square: gateway &nbsp; Diamond: rescue team. Dashed outline: no contact.</div></div>
       <div class="card"><div class="card-head"><h2>Devices</h2></div><ul id="cDevs"></ul></div>
+      <div class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="cActivity" class="feed"></ul></div>
       <details class="card"><summary class="muted">Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power.</p><button class="btn sm powerBtn"></button></details>
     </section>
   </div>
@@ -247,6 +254,16 @@ function renderBar() {
     : '<span class="dot bad"></span>Switched off';
 }
 
+/* ------------------------------- activity feed ------------------------------- */
+// The device's own event log, already worded in plain English by the server.
+function renderActivity(id) {
+  const clock = (ms) => new Date(ms).toLocaleTimeString([], { hour12: false });
+  const rows = (data.log || []).slice(0, 12);
+  setHTML($(id), rows.length
+    ? rows.map((e) => `<li><time>${clock(e.t)}</time><span>${esc(e.text)}</span></li>`).join('')
+    : '<li class="muted" style="display:block">Nothing yet. Events appear here as this device meets its neighbours.</li>');
+}
+
 /* ------------------------------- survivor phone ------------------------------- */
 function renderPhone() {
   const d = data, isGw = d.role === 'GATEWAY';
@@ -284,6 +301,7 @@ function renderPhone() {
       ${m.retries > 0 ? `<p class="muted small" style="margin:6px 0 0">A link failed ${m.retries} time${m.retries > 1 ? 's' : ''}; your phone re-routed automatically.</p>` : ''}`);
   }
 
+  renderActivity('pActivity');
   setHTML($('pRoute'), d.route.length > 1 ? chips(d.route) : '<span class="muted">No path right now.</span>');
   setHTML($('pNear'), near.length
     ? near.map((n) => `<li class="row"><span>${esc(lbl(n.id))} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span>${sig(n.link_quality)}</li>`).join('')
@@ -344,6 +362,7 @@ function renderConsole() {
   }).join('') : `<div class="card empty"><b>No messages yet</b><br>Listening for requests from the network.</div>`);
 
   mapSvg($('cMap'));
+  renderActivity('cActivity');
   setHTML($('cDevs'), d.nodes.filter((n) => !n.me).map((n) =>
     `<li class="row"><span>${esc(n.label)} <span class="muted">&middot; ${ROLE[n.role] || 'phone'}</span></span><span class="small muted"><span class="dot ${n.known ? '' : 'bad'}" style="margin-right:6px"></span>${n.known ? 'reachable' : 'no contact'}</span></li>`).join(''));
 }
