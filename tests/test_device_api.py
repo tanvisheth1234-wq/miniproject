@@ -148,3 +148,30 @@ async def test_send_rejects_bad_requests(fast_timers):
     assert to_self.status_code == 400
     assert bad_priority.status_code == 400
     assert switched_off.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_history_filters_by_priority_and_direction(fast_timers):
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        sos = (await dev["A"].post("/api/sos", json={"text": "trapped"})).json()["msg_id"]
+        note = (await dev["A"].post("/api/send", json={"dst": "C", "text": "hello"})).json()["msg_id"]
+
+        async def both_received():
+            got = (await dev["C"].get("/api/history", params={"direction": "received"})).json()["messages"]
+            return got if {m["msg_id"] for m in got} == {sos, note} else None
+
+        received = await wait_for(both_received)
+        only_sos = (await dev["C"].get("/api/history", params={"kind": "SOS"})).json()["messages"]
+        relay = (await dev["B"].get("/api/history", params={"direction": "forwarded"})).json()["messages"]
+        sent_normal = (await dev["A"].get("/api/history", params={"kind": "normal", "direction": "sent"})).json()["messages"]
+        bad_kind = await dev["A"].get("/api/history", params={"kind": "URGENT"})
+        bad_direction = await dev["A"].get("/api/history", params={"direction": "sideways"})
+
+    assert [m["msg_id"] for m in received] == [note, sos]          # newest first
+    assert [m["msg_id"] for m in only_sos] == [sos]
+    assert {m["msg_id"] for m in relay} == {sos, note}
+    assert all(m["body"] is None for m in relay)                    # a relay keeps no message text
+    assert [m["msg_id"] for m in sent_normal] == [note]
+    assert bad_kind.status_code == 400 and bad_direction.status_code == 400
