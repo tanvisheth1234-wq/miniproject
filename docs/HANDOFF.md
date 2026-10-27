@@ -2,6 +2,8 @@
 
 Single status document for the team (Twissha, Tanvi, Miti) and for anyone picking this repo up cold. Branch: `develop_5` (Phase 5; Phase 4 is finished on `develop_4`). Repo: https://github.com/tanvisheth1234-wq/miniproject
 
+**Remaining work, who does what and in which order: see `docs/WORK_PLAN.md`.**
+
 ## 1. What the project is
 
 EcoMesh is a peer-to-peer messaging system for disasters. When an earthquake, fire or building collapse takes down towers, internet and SMS, people are still within reach of each other's devices. In EcoMesh every device is both an endpoint and a relay: an SOS hops from device to device until it reaches a rescue team or a gateway to the outside. No server, no internet.
