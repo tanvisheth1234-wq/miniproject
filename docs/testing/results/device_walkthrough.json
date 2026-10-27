@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-27T19:25:09.786Z",
+  "devices": "python -m story.local (5 processes)",
+  "checks": [
+    {
+      "id": "DT-01",
+      "name": "Survivor screen loads and the app bar names the device",
+      "passed": true,
+      "detail": "Trapped person / PHONE"
+    },
+    {
+      "id": "DT-02",
+      "name": "Rescue device shows the console, with its name in the app bar",
+      "passed": true,
+      "detail": "Rescue team / RESCUE TEAM"
+    },
+    {
+      "id": "DT-03",
+      "name": "The mesh organises itself: the survivor is connected to the rescue team through phones in between",
+      "passed": true,
+      "detail": "Trapped person→Phone 2→Gateway→Rescue team"
+    },
+    {
+      "id": "DT-04",
+      "name": "Releasing the SOS button after 0.4 s sends nothing",
+      "passed": true,
+      "detail": "sent messages 0 -> 0"
+    },
+    {
+      "id": "DT-05",
+      "name": "A held SOS with need and location reaches the rescue console with the route it took",
+      "passed": true,
+      "detail": "Trapped person > Phone 2 > Gateway > Rescue team"
+    },
+    {
+      "id": "DT-06",
+      "name": "The survivor screen confirms \"The rescue team has your request\"",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "DT-07",
+      "name": "\"I am safe\" from another phone appears under Marked safe, not among the requests",
+      "passed": true,
+      "detail": "Phone 3 just now SAFE"
+    },
+    {
+      "id": "DT-08",
+      "name": "A typed message sent to the rescue team is delivered and listed on the console",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "DT-09",
+      "name": "Reply opens and a quick reply \"Help is on the way\" reaches the survivor",
+      "passed": true,
+      "detail": "MESSAGE FROM RESCUE TEAM Help is on the way just now"
+    },
+    {
+      "id": "DT-10",
+      "name": "A typed reply survives the 0.7 s refresh (text and focus kept) and reaches the survivor",
+      "passed": true,
+      "detail": "kept=\"Stay where you are, medics are...\" focused=true"
+    },
+    {
+      "id": "DT-11",
+      "name": "Console filters: SOS only, Messages only, and by need",
+      "passed": true,
+      "detail": "SOS=SOS; Messages=NORMAL; need=Trapped"
+    },
+    {
+      "id": "DT-12",
+      "name": "History filter shows only the chosen priority; the CSV button is shown and the export has a header and rows",
+      "passed": true,
+      "detail": "history=1 SOS rows; csv 200 text/csv; charset=utf-8; header: time,from,priority,need,where,hops,route,message; rows: 3"
+    },
+    {
+      "id": "DT-13",
+      "name": "The \"What this device is doing\" panel lists live events in plain language",
+      "passed": true,
+      "detail": "00:54:51Sent a message toward Phone 2 | 00:54:51A message arrived here | 00:54:47Sent a message toward Phone 2"
+    },
+    {
+      "id": "DT-14",
+      "name": "The gateway view says it is online and shows the messages it passed on",
+      "passed": true,
+      "detail": "Gateway online This device links the mesh to the rescue team and passe"
+    },
+    {
+      "id": "DT-15",
+      "name": "With the gateway off, an SOS shows \"Saved, waiting for a path\"",
+      "passed": true,
+      "detail": "lost route: true"
+    },
+    {
+      "id": "DT-16",
+      "name": "With the gateway back on, the held SOS is delivered and appears on the console",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "DT-17",
+      "name": "At 390 px and 320 px wide neither screen scrolls sideways",
+      "passed": true,
+      "detail": "8101@390:0, 8101@320:0, 8105@390:0, 8105@320:0"
+    },
+    {
+      "id": "DT-18",
+      "name": "No script errors or console errors on any device screen during the run",
+      "passed": true,
+      "detail": "none"
+    }
+  ]
+}
