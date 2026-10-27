@@ -55,6 +55,7 @@
   .reply { border-left: 4px solid var(--accent); }
   .reply .eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
   .reply .msgtext { font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; }
+  a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: inherit; }
   .btn.block { width: 100%; }
   .btn.sm { min-height: 34px; padding: 0 12px; font-size: var(--fs-sm); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #07162b; }
@@ -196,6 +197,7 @@
   <section class="card"><div class="card-head"><h2>What this device is doing</h2><span class="live"><span class="dot"></span>Live</span></div><ul id="pActivity" class="feed"></ul></section>
   <section class="card" id="pHelping"><div class="card-head"><h2>Passing messages for others</h2></div><p id="pHelpingText" class="small muted" style="margin-bottom:8px"></p><ul id="pFwd"></ul></section>
   <section class="card"><div class="card-head"><h2>Messages</h2></div><ul id="pMsgs"></ul></section>
+  <details class="card" id="pHistBox"><summary class="muted">Message history</summary><div id="pHist"></div></details>
   <details class="card"><summary class="muted">Demonstration controls</summary><p class="muted small" style="margin:8px 0">Simulate this device losing power or its radio failing.</p><button class="btn sm powerBtn"></button></details>
 </main>
 
@@ -203,7 +205,10 @@
 <main id="console" class="console" hidden>
   <div class="titlebar">
     <div><h1>Rescue console</h1><div class="muted small" id="cSub"></div></div>
-    <button class="btn sm" id="soundBtn">Alert sound: off</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn sm" id="csvBtn" href="/api/export.csv" download hidden>Export requests (CSV)</a>
+      <button class="btn sm" id="soundBtn">Alert sound: off</button>
+    </div>
   </div>
   <div class="kpis" id="kpis"></div>
   <div class="grid">
@@ -220,6 +225,7 @@
       </div>
       <div id="sosList"></div>
       <div class="card" style="margin-top:16px"><div class="card-head"><h2>Marked safe</h2><span class="small muted" id="safeCount"></span></div><ul id="cSafe"></ul></div>
+      <details class="card" id="cHistBox"><summary class="muted">Message history</summary><div id="cHist"></div></details>
     </section>
     <section>
       <div class="card"><div class="card-head"><h2>Network map</h2></div><svg id="cMap" class="map" viewBox="0 0 1000 440"></svg>
@@ -323,6 +329,29 @@ async function sendText(toId, textId) {
     await api('POST', '/api/send', { dst, text, priority: 'NORMAL' });
     $(textId).value = ''; toast('Message sent to ' + lbl(dst) + '.'); poll();
   } catch (e) { toast('Could not send: ' + e.message); }
+}
+
+/* ------------------------------- message history (LOG-5) ------------------------------- */
+// Filters are applied by the device itself through GET /api/history.
+function initHistory(p) {
+  $(p + 'Hist').innerHTML = `<div class="toolbar" style="margin-top:12px">
+      <select id="${p}HKind" class="text sm" aria-label="Priority"><option value="">All priorities</option><option value="SOS">SOS</option><option value="NORMAL">Messages</option><option value="STATUS">Check-ins</option></select>
+      <select id="${p}HDir" class="text sm" aria-label="Direction"><option value="">Sent and received</option><option value="received">Received</option><option value="sent">Sent</option><option value="forwarded">Passed on</option></select>
+    </div><ul id="${p}HList"></ul>`;
+  [p + 'HKind', p + 'HDir'].forEach((id) => $(id).addEventListener('change', () => loadHistory(p)));
+  $(p + 'HistBox').addEventListener('toggle', () => { if ($(p + 'HistBox').open) loadHistory(p); });
+}
+async function loadHistory(p) {
+  if (!data) return;
+  const q = new URLSearchParams({ limit: 50 });
+  if ($(p + 'HKind').value) q.set('kind', $(p + 'HKind').value);
+  if ($(p + 'HDir').value) q.set('direction', $(p + 'HDir').value);
+  try {
+    const { messages } = await api('GET', '/api/history?' + q);
+    const who = (m) => m.direction === 'sent' ? 'To ' + lbl(m.dst) : m.direction === 'forwarded' ? lbl(m.src) + ' to ' + lbl(m.dst) + ' (passed on)' : 'From ' + lbl(m.src);
+    setHTML($(p + 'HList'), messages.length ? messages.map((m) => `<li class="row msg"><div><b>${esc(asText(m))}</b><span>${esc(who(m))} &middot; ${esc(m.priority_name)} &middot; ${ago(m.created_ms)}</span></div></li>`).join('')
+      : '<li class="muted small">No messages match.</li>');
+  } catch (e) { /* the next poll retries */ }
 }
 
 /* ------------------------------- activity feed ------------------------------- */
@@ -445,6 +474,7 @@ function renderConsole() {
   const online = d.nodes.filter((n) => n.known).length, total = d.nodes.length;
   const avg = recv.length ? (recv.reduce((s, m) => s + m.relays.length + 1, 0) / recv.length) : null;
 
+  $('csvBtn').hidden = d.role !== 'RESCUE';
   $('cSub').textContent = 'Listening on the mesh network. No internet needed.';
   setHTML($('kpis'), `
     <div class="kpi"><div class="n">${sosCount}</div><div class="l">SOS received</div></div>
@@ -507,7 +537,7 @@ function render() {
 }
 
 async function poll() {
-  try { data = await api('GET', '/api/me'); render(); } catch (e) { /* keep last screen; next poll retries */ }
+  try { data = await api('GET', '/api/me'); render(); ['p', 'c'].forEach((p) => { if ($(p + 'HistBox').open) loadHistory(p); }); } catch (e) { /* keep last screen; next poll retries */ }
 }
 
 document.addEventListener('click', async (e) => {
@@ -576,6 +606,7 @@ async function sendSOS() {
   } catch (e) { toast('Could not send: ' + e.message); }
 }
 
+initHistory('p'); initHistory('c');
 poll(); setInterval(poll, 700);
 </script>
 </body>
