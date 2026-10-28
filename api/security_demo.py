@@ -144,10 +144,24 @@ async def attack_drill() -> dict:
             data = replace(pkt, payload=bytes(body)).pack()
         await real_send(node_id, data)
 
+    async def wait_for(condition, timeout: float = 5.0) -> bool:
+        """Poll instead of sleeping a fixed time, so a slow machine only makes the drill slower, never wrong."""
+        loop = asyncio.get_running_loop()
+        end = loop.time() + timeout
+        while loop.time() < end:
+            if condition():
+                return True
+            await asyncio.sleep(0.02)
+        return False
+
     async def run_step(title: str, what: str, action, expect_kind: Optional[str]) -> None:
         before_delivered, before = len(delivered), _counts(b.store)
         await action()
-        await asyncio.sleep(0.3)
+        if expect_kind is None:
+            await wait_for(lambda: len(delivered) > before_delivered)
+        else:
+            await wait_for(lambda: len(delivered) > before_delivered or _counts(b.store).get(expect_kind, 0) > before.get(expect_kind, 0))
+        await asyncio.sleep(0.15)  # a short settle, so an attack that did get through would show up too
         got = delivered[before_delivered:]
         delta = {k: v - before[k] for k, v in _counts(b.store).items() if v - before[k]}
         if expect_kind is None:
@@ -161,7 +175,9 @@ async def attack_drill() -> dict:
     try:
         for node in nodes:
             await node.start()
-        await asyncio.sleep(0.6)  # discovery + gossip converge; B learns Alice's public key via M's report
+        # discovery and gossip must converge, and B must know Alice's public key (learned from M's report),
+        # before the drill starts; otherwise a signed message is dropped as "unknown signer" instead
+        await wait_for(lambda: "A" in b._known_keys, timeout=15.0)
 
         await run_step("Honest relay", "M forwards A's message untouched.",
                        lambda: a.send("B", b"Honest message: four of us in room 302", Priority.NORMAL, needs_ack=True),
