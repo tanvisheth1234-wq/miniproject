@@ -230,3 +230,10 @@ def test_list_messages_filters_by_priority(store):
     assert [r["msg_id"] for r in store.list_messages(priority=0)] == ["m3", "m1"]
     assert [r["msg_id"] for r in store.list_messages(priority=0, direction="sent")] == ["m1"]
     assert [r["msg_id"] for r in store.list_messages(priority=2)] == []
+
+
+def test_messages_made_in_the_same_millisecond_list_newest_first(store):
+    """Regression for defect D7: ties on created_ms are broken by insertion order, newest first."""
+    for i in range(5):
+        store.record_message(f"m{i}", "A", "C", 1, "sent", "pending", body=str(i), created_ms=1000)
+    assert [r["msg_id"] for r in store.list_messages()] == ["m4", "m3", "m2", "m1", "m0"]

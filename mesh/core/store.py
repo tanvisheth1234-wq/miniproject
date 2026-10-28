@@ -155,7 +155,7 @@ class Store:
         sql = "SELECT * FROM messages"
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
-        sql += " ORDER BY created_ms DESC"
+        sql += " ORDER BY created_ms DESC, rowid DESC"   # rowid breaks ties between messages made in the same millisecond
         if limit is not None:
             sql += " LIMIT ?"
             params.append(limit)
