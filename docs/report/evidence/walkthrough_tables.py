@@ -52,7 +52,7 @@ def main() -> None:
 
     rows = [BS + "begin{table}[!htbp]",
             BS + "caption{Browser checks of the device screens (the one app), run against five live device processes}",
-            BS + "label{tab:devwalk}", BS + "footnotesize",
+            BS + "label{tab:devwalk}", BS + "scriptsize",
             BS + "begin{tabularx}{" + BS + "textwidth}{@{}p{1.0cm}X p{1.3cm}@{}}", BS + "toprule",
             BS + "textbf{ID} & " + BS + "textbf{Check} & " + BS + "textbf{Result}" + BS + BS + " " + BS + "midrule"]
     for c in dev:

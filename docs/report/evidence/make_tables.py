@@ -287,7 +287,7 @@ def kpi_table(S, scale, scale_lossy, live, tests, loss):
         ["K10 Security", "All hold", "relay cannot decrypt, forged signature rejected, tampered payload rejected: automated tests pass", "Met"],
     ]
     table("kpi_validation", "Validation of the key performance indicators of Table~" + BS + "ref{tab:kpi} against measured data", "tab:kpival",
-          f"@{{}}{C('2.5cm')}{C('3.0cm')}{X}{C('2.3cm')}@{{}}", ["KPI", "Target", "Measured", "Verdict"], rows, font="footnotesize")
+          f"@{{}}{C('2.5cm')}{C('3.0cm')}{X}{C('2.3cm')}@{{}}", ["KPI", "Target", "Measured", "Verdict"], rows, font="scriptsize")
 
 
 def combined_tables(scale, lossy, live, thr):
