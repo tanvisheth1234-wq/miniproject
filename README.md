@@ -23,7 +23,7 @@ radio is emulated.
 - **Simulation lab (Phase 4): done.** A FastAPI and WebSocket server (`api/`), a React website
   (`ui/`) and a virtual-time simulator (`sim/`) run many real nodes over a simulated radio. It is
   not part of the demonstration; it produced the experiment results in the report.
-- **Tests:** 331 automated tests (`python -m pytest -q`) plus scripted browser checks of the device
+- **Tests:** 332 automated tests (`python -m pytest -q`) plus scripted browser checks of the device
   screens (`docs/testing/device_walkthrough.cjs`) and of the lab website (`docs/testing/ui_walkthrough.cjs`).
 
 **Not built, stated openly:** a real radio (devices talk over TCP, but only to the neighbours a

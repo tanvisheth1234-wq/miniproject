@@ -61,6 +61,11 @@ GUIDE = "Prof. Anuj Tawari"
 
 # ------------------------------------------------------------------ data
 
+def clean_note(text: str) -> str:
+    """The notes are written for LaTeX; drop the LaTeX cross-reference so it does not show in this document."""
+    return re.sub("Table~" + chr(92) * 2 + "ref" + chr(92) + "{[^}]*" + chr(92) + "}", "the sample rows in report Section 4.6", text)
+
+
 def jload(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -72,6 +77,8 @@ def git(*args: str) -> str:
 REQ = jload(EVID / "requirements.json")
 TESTS_JSON = jload(RESULTS / "tests.json")
 LOSS = jload(RESULTS / "loss.json")
+SCEN = jload(RESULTS / "scenarios.json")["scenarios"]
+DEFECTS = jload(HERE / "defects.json")["defects"]
 SCALE = jload(RESULTS / "scale.json")
 SCALE20 = jload(RESULTS / "scale_lossy.json")
 SCEN = jload(RESULTS / "scenarios.json")["scenarios"]
@@ -356,7 +363,7 @@ def fr_rows():
             if ts:
                 shown = mono(ts[0]) + (f" <span class='muted'>(+{len(ts) - 1} more)</span>" if len(ts) > 1 else "")
             if rid in T.NOTES:
-                shown += ("<br>" if shown else "") + f"<span class='note'>{E(T.NOTES[rid])}</span>"
+                shown += ("<br>" if shown else "") + f"<span class='note'>{E(clean_note(T.NOTES[rid]))}</span>"
             rows.append([f"<b>{rid}</b>", E(REQ[rid]), kind_label[kind], shown, res])
         groups.append(rows)
     return [r for g in groups for r in g]
@@ -372,6 +379,9 @@ def sec_functional():
         feat.append([E(title), mono(pref), len(ids), verified, ks["P"], ks["I"] + ks["U"]])
     feat.append(["<b>Total</b>", "", f"<b>{sum(kinds.values())}</b>", f"<b>{kinds['A'] + kinds['M']}</b>", f"<b>{kinds['P']}</b>", f"<b>{kinds['I'] + kinds['U']}</b>"])
 
+    _c40 = SCEN["collapse_40"]["weighted"]
+    _rec = [r["recovery_s"] for r in _c40["raw"] if r["recovery_s"] is not None]
+    _rec_ok = sum(1 for r in _rec if r <= 10)
     tcs = [
         ["TC-01", "RTE-3, 4", "Short path over a lossy link; longer path over clean links", "Dijkstra takes the clean path", "As expected (test_dijkstra)", "Pass"],
         ["TC-02", "RTE-8", "A link-state report from a node two hops away", "Re-flooded; the graph is complete beyond the neighbour", "As expected (test_link_state)", "Pass"],
@@ -382,16 +392,18 @@ def sec_functional():
         ["TC-07", "SEC-5", "A packet with a forged signature", "Rejected and logged", "As expected (test_node)", "Pass"],
         ["TC-08", "FWD-6", "3,000 random byte strings and 1,000 bit-flipped packets", "Only parsed or PacketError; the node survives", "One defect found and fixed (D4); now passes (test_robustness)", "Pass"],
         ["TC-09", "DIS-7", "Three nodes over real TCP, neighbour-restricted", "Routes learned; message and ACK delivered", "As expected (test_lan_transport)", "Pass"],
-        ["TC-10", "K1", "40 nodes, 20% loss, relay and gateway failures, 50 seeds", "Delivery at least 90%", "92.6% mean, worst run 75.9%", "Pass"],
-        ["TC-11", "K3", "Kill the relay on the active path, 50 trials", "Re-route within 10 s", "Mean 8.1 s; 23 of 50 trials within 10 s; worst 10.25 s", "Partial"],
+        # figures below are read from the stored runs, so the table cannot disagree with Section 6
+        ["TC-10", "K1", "40 nodes, 20% loss, relay and gateway failures, 50 seeds", "Delivery at least 90%", f"{100 * _c40['delivery_ratio']['mean']:.1f}% mean, worst run {100 * _c40['delivery_ratio']['min']:.1f}%", "Pass"],
+        ["TC-11", "K3", "Kill the relay on the active path, 50 trials", "Re-route within 10 s", f"Mean {_c40['recovery_s']['mean']:.1f} s; {_rec_ok} of {len(_rec)} trials within 10 s; worst {max(_rec):.2f} s", "Partial"],
         ["TC-13", "SNF-3", "A message held for node C; C then appears", "Sent at once, not after the 10 s flush interval", "As expected (test_node); on devices: DT-15 and DT-16", "Pass"],
         ["TC-14", "LOG-5", "Message history filtered by priority and by direction", "Only matching messages are listed; the CSV export has a header and rows", "As expected (test_device_api); on screen: DT-12", "Pass"],
         ["TC-12", "K4, K6", "Congested radio; weighted vs hop-count on identical seeds", "SOS at least 3 times faster; weighted delivers more", "4.4 times; 99.2% vs 57.4%", "Pass"],
     ]
+    tcs.sort(key=lambda r: int(r[0].split("-")[1]))
     tcs_html = [[r[0], r[1], E(r[2]), E(r[3]), E(r[4]), verdict(r[5])] for r in tcs]
 
     def walk_rows(checks):
-        return [[f"<b>{c['id']}</b>", E(c["name"]), E(c["detail"]) if c["detail"] else "", verdict("Pass" if c["passed"] else "Fail")] for c in checks]
+        return [[f"<b>{c['id']}</b>", E(c["name"]), E(c["detail"]) if c["detail"] else "Confirmed on the page", verdict("Pass" if c["passed"] else "Fail")] for c in checks]
 
     dev_rows, ui_rows = walk_rows(DEV["checks"]), walk_rows(UI["checks"])
 
@@ -515,7 +527,7 @@ def sec_nonfunctional():
 [t["messages"], t["delivered"], t["acked"], f"{t['msgs_per_s']:.0f}", f"{t['ack_seconds']:.2f}"] for t in THR], widths=["20%", "16%", "18%", "22%", "24%"], cls="compact")}
 
 <h3>6.3 Reliability under packet loss</h3>
-<p>A 21-node mesh, eight seeded runs per row, with the stated loss on every link. Delivery stays at 100% up to 10% loss and degrades gracefully; the extra transmissions per delivered message show the cost of retrying.</p>
+<p>A 21-node mesh, {LOSS[0]["runs"]} seeded runs per row, with the stated loss on every link. Delivery stays at 100% up to 10% loss and degrades gracefully; the extra transmissions per delivered message show the cost of retrying.</p>
 <div class="two">
 <div>{table(["Loss per link", "Delivery (mean)", "Worst run", "Transmissions per delivered", "Runs"], loss_rows, widths=["18%", "22%", "18%", "28%", "14%"], cls="compact")}</div>
 <div>{loss_chart}<div class="caption">Figure 1. Delivery against injected loss.</div></div>
@@ -589,17 +601,7 @@ def drill_result():
 
 
 def sec_defects():
-    rows = [
-        ["D1", "Integration test of two components on one node", "Only one of discovery and relay received packets: one receive callback, the last registrant won", "A single dispatcher registered last; regression test added", "Closed"],
-        ["D2", "Phase IV integration", "Multi-hop ACK and retry failed: duplicate filtering keyed on the message id dropped every ACK at the first relay and swallowed retries", "Key on type, id and attempt; retransmission counter in the formerly reserved header byte; re-ACK duplicates; new tests that fail on the old code", "Closed"],
-        ["D3", "Phase IV integration", "Dead nodes stayed routable: a newer link-state report was merged with the old one, so edges to a dead node never disappeared", "A newer report replaces the origin's edges; tests added", "Closed"],
-        ["D4", "Fuzz test", "A non-ASCII byte in a node-id field made the parser raise UnicodeDecodeError instead of PacketError, so one damaged packet could raise inside the receive path", "Decode and encode failures now raise PacketError; both fuzz tests pass", "Closed"],
-        ["D5", "Repeated runs of the socket tests", "Node.stop() hung in about a quarter of runs on Windows: wait_for swallowed a cancellation, so a background loop survived", "Helper built on asyncio.wait; 15 of 15 test-file runs and 40 of 40 standalone iterations clean", "Closed"],
-        ["D6", "Repeated full-suite runs", "Two timing-sensitive tests (test_api node-view hop distance; test_ack_multihop) failed in 2 and 1 of 6 runs under load; both pass alone", "A wait_until polling helper replaces the fixed sleeps in both tests; the helpers have their own tests", "Closed"],
-        ["D7", "Repeated full-suite runs of the final suite", "test_history_filters_by_priority_and_direction fails intermittently: two messages created in the same millisecond have no defined order, and the test expects newest first. The history query sorts by creation time only", "Open: add a second sort key (the row id) to the history query, or compare as sets. The test belongs to the device server's owner", "Open"],
-        ["D8", "Lab website test, first navigation click", "The whole lab website went blank when a menu link was clicked: three React effects returned a value instead of nothing, which React then called as a cleanup function. Opening a page directly by URL did not show it", "The effects now return nothing; the browser test (UT-01) clicks through every page and now passes", "Closed"],
-        ["D9", "Phone-width check of the lab website", "The phone header's node selector ran past the right edge of the frame at 390 px width", "Selector capped at 46% of the header width; UT-15 passes", "Closed"],
-    ]
+    rows = [[d["id"], d["found_by"], d["defect"], d["fix"], d["status"]] for d in DEFECTS]
     pill = {"Closed": '<span class="pill ok">Closed</span>', "Open": '<span class="pill warn">Open</span>'}
     html_rows = [[f"<b>{r[0]}</b>", E(r[1]), E(r[2]), E(r[3]), pill[r[4]]] for r in rows]
     return f"""
@@ -609,7 +611,10 @@ def sec_defects():
 
 
 def sec_limits():
-    return """
+    open_d = [d["id"] for d in DEFECTS if d["status"] != "Closed"]
+    OPEN_DEFECTS_ITEM = (f"<li><b>Open defects ({', '.join(open_d)}).</b> See Section 7.</li>" if open_d else
+        "<li><b>No open defect.</b> The two intermittent tests found late (D7 and D10) were fixed at their cause and each passed 30 of 30 runs under CPU load.</li>")
+    return f"""
 <ul>
 <li><b>No radio hardware.</b> The "radio" is a neighbour-restricted LAN or an in-memory simulator, so radio effects such as interference and range are modelled, not measured.</li>
 <li><b>One machine.</b> All live-device timings were taken with five processes on one laptop. A two-laptop split worked over a phone hotspot, but it was not timed under the same protocol.</li>
@@ -617,7 +622,7 @@ def sec_limits():
 <li><b>Scale at high loss.</b> Delivery falls below 90% beyond about 43 nodes at 20% loss (K7).</li>
 <li><b>Browser checks are not part of the pytest suite.</b> The two browser scripts are separate commands that need Chrome; the device script starts its own devices.</li>
 <li><b>Untested:</b> a timed usability study, browsers other than Chrome, physical phones, installing the PWA.</li>
-<li><b>One open defect (D7):</b> one test is intermittently order-sensitive when two messages are created in the same millisecond.</li>
+{OPEN_DEFECTS_ITEM}
 <li><b>Security scope.</b> One pre-shared key for the mesh; signing is optional; an unsigned forgery is not caught.</li>
 </ul>
 """
@@ -629,13 +634,16 @@ def sec_conclusion():
     met, total_k, not_met = kpis.summary()
     kinds = Counter(k for _t, k in T.MAP.values())
     verified = kinds["A"] + kinds["M"]
+    _open = [d["id"] for d in DEFECTS if d["status"] != "Closed"]
+    _closed = len(DEFECTS) - len(_open)
+    _open_txt = (f", {len(_open)} open ({', '.join(_open)}) and explained" if _open else ", none open")
     return f"""
 <p>EcoMesh was tested at six levels, from single-module unit tests to five real processes exchanging messages over TCP.</p>
 <ul>
 <li><b>Functional:</b> {N_TESTS - N_FAIL} of {N_TESTS} automated tests passed in the latest run, {dev_pass} of {len(DEV['checks'])} browser checks of the device screens passed and {web_pass} of {len(UI['checks'])} of the simulation lab. {verified} of the {sum(kinds.values())} requirements are fully verified; {kinds['P']} are partial, {kinds['I']} were verified by inspection and {kinds['U']} by a manual check.</li>
 <li><b>Non-functional:</b> {met} of {total_k} target metrics are fully met. The {total_k - met} that are only partly met are {", ".join(r["id"] + " (" + r["name"].lower() + ")" for r in not_met)}.</li>
 <li><b>Design validated:</b> weighted routing delivered 99.2% against 57.4% for hop-count routing on identical seeds, SOS arrived 4.4 times faster under congestion, and every held message was flushed when a path returned.</li>
-<li><b>Defects:</b> nine found, eight closed, one open (D7) and explained.</li>
+<li><b>Defects:</b> {len(DEFECTS)} found, {_closed} closed{_open_txt}.</li>
 </ul>
 <p>The system is fit for its stated purpose, a software mesh demonstrated on LAN sockets and a simulator, with the limits in Section 8 stated openly.</p>
 

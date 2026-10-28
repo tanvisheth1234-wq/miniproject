@@ -10,6 +10,7 @@ and branches are all read from the repository.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from collections import Counter
@@ -38,7 +39,13 @@ def git(*args: str) -> str:
 
 
 def main() -> None:
-    log = [l.split("\x1f") for l in git("log", "--remotes=origin", "--format=%H\x1f%an\x1f%ae\x1f%s").splitlines() if l]
+    log = [l.split("\x1f") for l in git("log", "HEAD", "--remotes=origin", "--format=%H\x1f%an\x1f%ae\x1f%s").splitlines() if l]
+    # The commit that carries these numbers is not in the history yet. ECOMESH_EXTRA_COMMITS=1 counts it, under the
+    # current git identity, so the figures stay right once that commit exists.
+    extra = int(os.environ.get("ECOMESH_EXTRA_COMMITS", "0"))
+    if extra:
+        me = (git("config", "user.name").strip(), git("config", "user.email").strip())
+        log += [["pending", me[0], me[1], "docs: pending commit"] for _ in range(extra)]
     per_member = Counter(MEMBER.get(email, name) for _, name, email, _ in log)
     per_identity = Counter(f"{name} <{email}>" for _, name, email, _ in log)
     conv = [s for _, _, _, s in log if CONVENTIONAL.match(s)]

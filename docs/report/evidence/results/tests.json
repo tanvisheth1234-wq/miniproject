@@ -3,21 +3,21 @@
   "runs": [
     {
       "run": 1,
-      "wall_s": 27.8,
+      "wall_s": 26.8,
       "exit_code": 0,
-      "summary": "331 passed, 1 warning in 26.03s"
+      "summary": "332 passed, 1 warning in 25.79s"
     },
     {
       "run": 2,
-      "wall_s": 27.9,
+      "wall_s": 26.1,
       "exit_code": 0,
-      "summary": "331 passed, 1 warning in 26.03s"
+      "summary": "332 passed, 1 warning in 25.33s"
     },
     {
       "run": 3,
-      "wall_s": 27.5,
+      "wall_s": 26.4,
       "exit_code": 0,
-      "summary": "331 passed, 1 warning in 26.26s"
+      "summary": "332 passed, 1 warning in 25.72s"
     }
   ],
   "cases": [
@@ -30,7 +30,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.165
+      "time_s": 0.139
     },
     {
       "file": "test_ack_multihop",
@@ -41,7 +41,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.674
+      "time_s": 0.696
     },
     {
       "file": "test_ack_multihop",
@@ -52,7 +52,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.7
+      "time_s": 0.679
     },
     {
       "file": "test_ack_retry",
@@ -74,7 +74,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -85,7 +85,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -96,7 +96,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -107,7 +107,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -118,7 +118,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -140,7 +140,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -151,7 +151,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -162,7 +162,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -173,7 +173,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -184,7 +184,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.003
     },
     {
       "file": "test_ack_retry",
@@ -195,7 +195,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.002
     },
     {
       "file": "test_ack_retry",
@@ -206,7 +206,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.002
     },
     {
       "file": "test_ack_retry",
@@ -217,7 +217,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.002
     },
     {
       "file": "test_ack_retry",
@@ -228,7 +228,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.002
     },
     {
       "file": "test_ack_retry",
@@ -250,7 +250,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -261,7 +261,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_ack_retry",
@@ -272,7 +272,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_api",
@@ -283,7 +283,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.437
+      "time_s": 0.384
     },
     {
       "file": "test_api",
@@ -294,7 +294,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.004
+      "time_s": 0.007
     },
     {
       "file": "test_api",
@@ -305,7 +305,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.419
+      "time_s": 0.444
     },
     {
       "file": "test_api",
@@ -316,7 +316,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.005
     },
     {
       "file": "test_api",
@@ -327,7 +327,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_api",
@@ -338,7 +338,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.005
+      "time_s": 0.007
     },
     {
       "file": "test_api",
@@ -349,7 +349,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.353
+      "time_s": 1.23
     },
     {
       "file": "test_api",
@@ -360,7 +360,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.118
+      "time_s": 0.133
     },
     {
       "file": "test_api",
@@ -371,7 +371,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.008
+      "time_s": 0.015
     },
     {
       "file": "test_api",
@@ -382,7 +382,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.007
+      "time_s": 0.016
     },
     {
       "file": "test_api",
@@ -393,7 +393,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.805
+      "time_s": 0.807
     },
     {
       "file": "test_api",
@@ -404,7 +404,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.562
+      "time_s": 1.592
     },
     {
       "file": "test_conftest_helpers",
@@ -426,7 +426,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.053
+      "time_s": 0.068
     },
     {
       "file": "test_conftest_helpers",
@@ -437,7 +437,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.004
     },
     {
       "file": "test_crypto",
@@ -459,7 +459,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -470,7 +470,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -481,7 +481,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -492,7 +492,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -536,7 +536,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -558,7 +558,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -569,7 +569,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -580,7 +580,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_crypto",
@@ -591,7 +591,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_crypto",
@@ -657,7 +657,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.742
+      "time_s": 0.75
     },
     {
       "file": "test_device_api",
@@ -679,7 +679,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.136
+      "time_s": 0.168
     },
     {
       "file": "test_device_api",
@@ -690,7 +690,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.915
+      "time_s": 0.903
     },
     {
       "file": "test_device_api",
@@ -701,7 +701,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.019
+      "time_s": 0.033
     },
     {
       "file": "test_device_api",
@@ -712,7 +712,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.842
+      "time_s": 0.904
     },
     {
       "file": "test_device_api",
@@ -723,7 +723,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_device_api",
@@ -734,7 +734,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.79
+      "time_s": 0.901
     },
     {
       "file": "test_device_api",
@@ -745,7 +745,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.886
+      "time_s": 0.879
     },
     {
       "file": "test_device_api",
@@ -767,7 +767,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.878
+      "time_s": 0.861
     },
     {
       "file": "test_device_api",
@@ -778,7 +778,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.001
+      "time_s": 0.964
     },
     {
       "file": "test_dijkstra",
@@ -789,7 +789,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -800,7 +800,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -811,7 +811,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -844,7 +844,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_dijkstra",
@@ -888,7 +888,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -899,7 +899,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -910,7 +910,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_dijkstra",
@@ -921,7 +921,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_dijkstra",
@@ -976,7 +976,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.127
+      "time_s": 0.116
     },
     {
       "file": "test_discovery",
@@ -987,7 +987,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.13
+      "time_s": 0.134
     },
     {
       "file": "test_discovery",
@@ -998,7 +998,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.122
+      "time_s": 0.132
     },
     {
       "file": "test_discovery",
@@ -1020,7 +1020,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.184
+      "time_s": 0.173
     },
     {
       "file": "test_discovery",
@@ -1031,7 +1031,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.21
+      "time_s": 0.207
     },
     {
       "file": "test_discovery",
@@ -1042,7 +1042,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.003
     },
     {
       "file": "test_discovery",
@@ -1053,7 +1053,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.091
+      "time_s": 0.085
     },
     {
       "file": "test_discovery",
@@ -1064,7 +1064,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.064
+      "time_s": 0.067
     },
     {
       "file": "test_discovery",
@@ -1075,7 +1075,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.067
+      "time_s": 0.094
     },
     {
       "file": "test_discovery",
@@ -1086,7 +1086,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.004
     },
     {
       "file": "test_discovery",
@@ -1097,7 +1097,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.062
+      "time_s": 0.063
     },
     {
       "file": "test_lan_transport",
@@ -1108,7 +1108,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.109
+      "time_s": 0.118
     },
     {
       "file": "test_lan_transport",
@@ -1119,7 +1119,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.003
     },
     {
       "file": "test_lan_transport",
@@ -1130,7 +1130,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.215
+      "time_s": 0.262
     },
     {
       "file": "test_lan_transport",
@@ -1141,7 +1141,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.244
+      "time_s": 0.24
     },
     {
       "file": "test_lan_transport",
@@ -1152,7 +1152,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.516
+      "time_s": 1.529
     },
     {
       "file": "test_lan_transport",
@@ -1163,7 +1163,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.856
+      "time_s": 0.872
     },
     {
       "file": "test_link_quality",
@@ -1196,7 +1196,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_link_quality",
@@ -1229,7 +1229,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_quality",
@@ -1240,7 +1240,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_quality",
@@ -1350,7 +1350,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_link_state",
@@ -1383,7 +1383,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.024
     },
     {
       "file": "test_link_state",
@@ -1394,7 +1394,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.016
     },
     {
       "file": "test_link_state",
@@ -1405,7 +1405,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_link_state",
@@ -1449,7 +1449,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.015
     },
     {
       "file": "test_link_state",
@@ -1460,7 +1460,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_link_state",
@@ -1471,7 +1471,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.012
     },
     {
       "file": "test_link_state",
@@ -1482,7 +1482,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.026
     },
     {
       "file": "test_link_state",
@@ -1493,7 +1493,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.003
     },
     {
       "file": "test_link_state",
@@ -1504,7 +1504,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.014
     },
     {
       "file": "test_link_state",
@@ -1526,7 +1526,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.019
     },
     {
       "file": "test_link_state",
@@ -1537,7 +1537,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_state",
@@ -1548,7 +1548,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_state",
@@ -1570,7 +1570,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.017
     },
     {
       "file": "test_link_state",
@@ -1581,7 +1581,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.033
+      "time_s": 0.03
     },
     {
       "file": "test_link_state",
@@ -1592,7 +1592,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_state",
@@ -1603,7 +1603,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_link_state",
@@ -1614,7 +1614,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_link_state",
@@ -1625,7 +1625,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.027
     },
     {
       "file": "test_link_state",
@@ -1636,7 +1636,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_link_state",
@@ -1647,7 +1647,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.024
     },
     {
       "file": "test_link_state",
@@ -1658,7 +1658,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_node",
@@ -1669,7 +1669,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.094
+      "time_s": 0.093
     },
     {
       "file": "test_node",
@@ -1680,7 +1680,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.093
+      "time_s": 0.115
     },
     {
       "file": "test_node",
@@ -1691,7 +1691,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.094
+      "time_s": 0.117
     },
     {
       "file": "test_node",
@@ -1702,7 +1702,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.224
+      "time_s": 0.232
     },
     {
       "file": "test_node",
@@ -1713,7 +1713,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.075
+      "time_s": 0.065
     },
     {
       "file": "test_node",
@@ -1724,7 +1724,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.277
+      "time_s": 0.271
     },
     {
       "file": "test_node",
@@ -1735,7 +1735,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.372
+      "time_s": 0.38
     },
     {
       "file": "test_node",
@@ -1746,7 +1746,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.279
+      "time_s": 0.281
     },
     {
       "file": "test_node",
@@ -1757,7 +1757,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.004
     },
     {
       "file": "test_node",
@@ -1768,7 +1768,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.183
+      "time_s": 0.163
     },
     {
       "file": "test_node",
@@ -1779,7 +1779,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.185
+      "time_s": 0.166
     },
     {
       "file": "test_node",
@@ -1790,7 +1790,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.218
+      "time_s": 0.232
     },
     {
       "file": "test_node",
@@ -1801,7 +1801,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.231
+      "time_s": 0.211
     },
     {
       "file": "test_node",
@@ -1812,7 +1812,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.031
+      "time_s": 0.033
     },
     {
       "file": "test_node",
@@ -1823,7 +1823,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.186
+      "time_s": 0.183
     },
     {
       "file": "test_node",
@@ -1834,7 +1834,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.218
+      "time_s": 0.22
     },
     {
       "file": "test_node",
@@ -1856,7 +1856,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.172
+      "time_s": 0.167
     },
     {
       "file": "test_node",
@@ -1867,7 +1867,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.163
+      "time_s": 0.151
     },
     {
       "file": "test_node",
@@ -1878,7 +1878,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.155
+      "time_s": 0.167
     },
     {
       "file": "test_node",
@@ -1889,7 +1889,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.003
+      "time_s": 0.006
     },
     {
       "file": "test_node",
@@ -1900,7 +1900,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.003
     },
     {
       "file": "test_node",
@@ -1911,7 +1911,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.161
+      "time_s": 0.173
     },
     {
       "file": "test_node",
@@ -1922,7 +1922,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.185
+      "time_s": 0.167
     },
     {
       "file": "test_node",
@@ -1933,7 +1933,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.373
+      "time_s": 0.385
     },
     {
       "file": "test_node",
@@ -1944,7 +1944,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.146
+      "time_s": 0.143
     },
     {
       "file": "test_node",
@@ -1966,7 +1966,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.171
+      "time_s": 0.182
     },
     {
       "file": "test_packet",
@@ -1988,7 +1988,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -1999,7 +1999,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -2021,7 +2021,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -2120,7 +2120,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -2142,7 +2142,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_packet",
@@ -2296,7 +2296,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_packet",
@@ -2362,7 +2362,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -2373,7 +2373,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_packet",
@@ -2395,7 +2395,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_packet",
@@ -2494,7 +2494,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.015
     },
     {
       "file": "test_relay",
@@ -2505,7 +2505,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.009
     },
     {
       "file": "test_relay",
@@ -2516,7 +2516,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2527,7 +2527,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_relay",
@@ -2538,7 +2538,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2549,7 +2549,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2560,7 +2560,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2571,7 +2571,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2582,7 +2582,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_relay",
@@ -2604,7 +2604,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.012
     },
     {
       "file": "test_relay",
@@ -2615,7 +2615,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.017
     },
     {
       "file": "test_relay",
@@ -2626,7 +2626,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.015
     },
     {
       "file": "test_relay",
@@ -2637,7 +2637,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.014
     },
     {
       "file": "test_relay",
@@ -2648,7 +2648,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_relay",
@@ -2659,7 +2659,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_relay",
@@ -2670,7 +2670,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.021
     },
     {
       "file": "test_relay",
@@ -2681,7 +2681,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.008
     },
     {
       "file": "test_reliability",
@@ -2692,7 +2692,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_reliability",
@@ -2835,7 +2835,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_reliability",
@@ -2846,7 +2846,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.0
     },
     {
       "file": "test_reliability",
@@ -2890,7 +2890,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.089
+      "time_s": 0.158
     },
     {
       "file": "test_robustness",
@@ -2901,7 +2901,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.006
+      "time_s": 0.008
     },
     {
       "file": "test_robustness",
@@ -2923,7 +2923,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_robustness",
@@ -2945,7 +2945,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.206
+      "time_s": 0.208
     },
     {
       "file": "test_robustness",
@@ -2956,7 +2956,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.195
+      "time_s": 0.201
     },
     {
       "file": "test_robustness",
@@ -2967,7 +2967,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.094
+      "time_s": 0.097
     },
     {
       "file": "test_robustness",
@@ -2978,7 +2978,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.191
+      "time_s": 0.184
     },
     {
       "file": "test_robustness",
@@ -2989,7 +2989,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.704
+      "time_s": 1.754
     },
     {
       "file": "test_robustness",
@@ -3000,7 +3000,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 1.223
+      "time_s": 1.228
     },
     {
       "file": "test_routing",
@@ -3011,7 +3011,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3022,7 +3022,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3033,7 +3033,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3044,7 +3044,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3055,7 +3055,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3066,7 +3066,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3077,7 +3077,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3121,7 +3121,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3143,7 +3143,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_routing",
@@ -3165,7 +3165,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_sim_runner",
@@ -3176,7 +3176,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.0
+      "time_s": 0.001
     },
     {
       "file": "test_sim_runner",
@@ -3187,7 +3187,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.099
+      "time_s": 0.082
     },
     {
       "file": "test_sim_runner",
@@ -3198,7 +3198,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.095
+      "time_s": 0.096
     },
     {
       "file": "test_sim_runner",
@@ -3209,7 +3209,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.096
+      "time_s": 0.098
     },
     {
       "file": "test_store",
@@ -3220,7 +3220,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_store",
@@ -3231,7 +3231,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_store",
@@ -3242,7 +3242,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_store",
@@ -3498,6 +3498,17 @@
       "time_s": 0.001
     },
     {
+      "file": "test_store",
+      "name": "test_messages_made_in_the_same_millisecond_list_newest_first",
+      "status": "passed",
+      "results": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "time_s": 0.001
+    },
+    {
       "file": "test_transport_sim",
       "name": "test_link_config_rejects_loss_out_of_range",
       "status": "passed",
@@ -3550,7 +3561,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.0
     },
     {
       "file": "test_transport_sim",
@@ -3572,7 +3583,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.007
     },
     {
       "file": "test_transport_sim",
@@ -3583,7 +3594,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.014
     },
     {
       "file": "test_transport_sim",
@@ -3594,7 +3605,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.062
+      "time_s": 0.065
     },
     {
       "file": "test_transport_sim",
@@ -3605,7 +3616,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.002
+      "time_s": 0.003
     },
     {
       "file": "test_transport_sim",
@@ -3616,7 +3627,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_transport_sim",
@@ -3627,7 +3638,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_transport_sim",
@@ -3638,7 +3649,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.003
     },
     {
       "file": "test_transport_sim",
@@ -3649,7 +3660,7 @@
         "passed",
         "passed"
       ],
-      "time_s": 0.001
+      "time_s": 0.002
     },
     {
       "file": "test_transport_sim",

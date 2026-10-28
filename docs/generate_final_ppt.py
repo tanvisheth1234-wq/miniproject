@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -108,9 +109,12 @@ def facts(no_run: bool) -> dict:
     f["tests"] = run_pytest(no_run)
     g = jload(RESULTS / "git.json")
     f["git"] = g
-    f["commits"] = int(sh("git", "rev-list", "--count", "HEAD"))
+    extra = int(os.environ.get("ECOMESH_EXTRA_COMMITS", "0"))   # the commit that will carry this deck
+    f["commits"] = int(sh("git", "rev-list", "--count", "HEAD")) + extra
     branches = [("develop", "Phase 1"), ("develop_2", "Phase 2"), ("develop_3", "Phase 3"), ("develop_4", "Phase 4"), ("develop_5", "Phase 5"), ("develop_6", "Final")]
-    f["branches"] = [(b, label, int(sh("git", "rev-list", "--count", f"origin/{b}") or 0)) for b, label in branches]
+    here = sh("git", "branch", "--show-current")
+    f["branches"] = [(b, label, (int(sh("git", "rev-list", "--count", "HEAD")) + extra) if b == here
+                      else int(sh("git", "rev-list", "--count", f"origin/{b}") or 0)) for b, label in branches]
     f["trace"] = {k: sum(1 for _t, kind in T.MAP.values() if kind == k) for k in "AMPIU"}
     f["trace_total"] = len(T.MAP)
     f["kpi"] = kpis.evaluate()
@@ -310,6 +314,7 @@ def style_chart(chart, legend=False):
     chart.font.size = Pt(12)
     chart.font.color.rgb = LTEXT2
     chart.has_legend = legend
+    chart.has_title = False   # the card above each chart already carries its title
     va, ca = chart.value_axis, chart.category_axis
     va.major_gridlines.format.line.color.rgb = LLINE
     va.format.line.fill.background()
@@ -517,20 +522,27 @@ def build(f: dict) -> Presentation:
              "A phone is only a screen here: the engine runs on a laptop and the phone opens its page over the same Wi-Fi. The React website stays in the repository as the simulation lab that produced our measurements.")
 
     # ---------------------------------------------------------------- 8 defects
-    s = light_slide(prs, 8, "Phase IV  ·  P1 integration", "Integration found real defects", "Seven defects in the engine and tests. Six are closed with a regression test; one is open.")
-    rows = [
-        ("D1", "Discovery and relay shared one receive callback; the last registered won", "Single dispatcher registered last"),
-        ("D2", "Multi-hop ACK and retry failed: duplicate filter dropped ACKs and retries", "Key on type, id and attempt; retry counter in the header"),
-        ("D3", "Dead nodes stayed routable: new link-state reports merged with old ones", "A newer report replaces the old one"),
-        ("D4", "A non-ASCII byte made the parser raise the wrong exception (found by fuzzing)", "Raise the packet error; both fuzz tests pass"),
-        ("D5", "Node.stop() hung on Windows: a cancellation was swallowed", "Helper built on asyncio.wait; 40 of 40 clean"),
-        ("D6", "Two timing-sensitive tests failed under load", "Polling helper instead of fixed sleeps"),
-        ("D7", "History-order test fails now and then: same-millisecond messages have no order", "Add a second sort key; with the test's owner"),
-    ]
-    table(s, 0.6, 1.95, 12.13, [0.6, 6.3, 4.3, 0.95], ["ID", "DEFECT", "FIX", "STATUS"], [(a, b, c, "Open" if a == "D7" else "Closed") for a, b, c in rows], row_h=0.58, size=12.5)
-    notes(s, "Integration is where bugs hide that unit tests cannot see. These seven defects were found by wiring things together or by hammering them. D2 is the most important: multi-hop "
+    reg = [d for d in jload(HERE / "testing" / "defects.json")["defects"] if d["scope"] in ("engine", "test")]
+    SHORT = {
+        "D1": ("Discovery and relay shared one receive callback; the last registered won", "Single dispatcher registered last"),
+        "D2": ("Multi-hop ACK and retry failed: duplicate filter dropped ACKs and retries", "Key on type, id and attempt; retry counter in the header"),
+        "D3": ("Dead nodes stayed routable: new link-state reports merged with old ones", "A newer report replaces the old one"),
+        "D4": ("A non-ASCII byte made the parser raise the wrong exception (found by fuzzing)", "Raise the packet error; both fuzz tests pass"),
+        "D5": ("Node.stop() hung on Windows: a cancellation was swallowed", "Helper built on asyncio.wait; 40 of 40 clean"),
+        "D6": ("Two timing-sensitive tests failed under load", "Polling helper instead of fixed sleeps"),
+        "D7": ("History test failed now and then: same-millisecond messages had no order", "Ties broken by row id; regression test added"),
+        "D10": ("Attack-drill test failed under load: fixed waits gave a wrong verdict", "Drill polls for its conditions; 30 of 30 runs pass under load"),
+    }
+    open_ids = [d["id"] for d in reg if d["status"] != "Closed"]
+    sub = (f"{len(reg)} defects in the engine and tests, all closed and covered by a regression test." if not open_ids
+           else f"{len(reg)} defects in the engine and tests. {len(reg) - len(open_ids)} are closed; open: {', '.join(open_ids)}.")
+    s = light_slide(prs, 8, "Phase IV  ·  P1 integration", "Integration found real defects", sub)
+    rows = [(d["id"],) + SHORT[d["id"]] + (d["status"],) for d in reg]
+    table(s, 0.6, 1.95, 12.13, [0.6, 6.3, 4.3, 0.95], ["ID", "DEFECT", "FIX", "STATUS"], [(a_, b_, c_, st) for a_, b_, c_, st in rows], row_h=0.52, size=12)
+    notes(s, f"Integration is where bugs hide that unit tests cannot see. These {len(reg)} defects were found by wiring things together or by hammering them. D2 is the most important: multi-hop "
              "acknowledgements did not work at all, because the duplicate filter dropped every ACK at the first relay its data had crossed, and swallowed retries. D4 was found by fuzzing: random "
-             "bytes made the parser raise the wrong exception. D6, the two flaky tests, is closed. D7 is open, and we want to be transparent about it: a history test fails occasionally because two messages created in the same millisecond have no defined order. It is open and reported to its owner.")
+             "bytes made the parser raise the wrong exception. D6, D7 and D10 are tests that failed now and then under load. We fixed each at its cause, not by retrying: ties in the history are broken by row id, "
+             "and the attack drill now waits until the destination knows the sender's key instead of sleeping a fixed time. Each passed 30 of 30 runs while the CPU was kept busy.")
 
     # ---------------------------------------------------------------- 9 demo story
     s = light_slide(prs, 9, "Phase IV  ·  P1 integration", "The demo: an SOS that survives failures", "Five minutes, five devices, one app. The script is in docs/DEMO_SCRIPT.md.")

@@ -13,7 +13,7 @@ K5 Store-and-forward & 100\,\% flushed & 207/207 in the no-gateway scenario; 100
 K6 Weighted vs hop count & Weighted better & 99.2\,\% vs 57.4\,\% & Met \\
 K7 Scale & $\ge$ 50 nodes within the targets & 50 nodes at 5\,\% loss: 100.0\,\% delivery; 50 nodes at 20\,\% loss: 92.9\,\%; largest tested 65 nodes: 98.0\,\% (5\,\%) and 83.1\,\% (20\,\%) & Met \\
 K8 UI freshness & $\le$ 2\,s & API response median 16\,ms; screens poll every 0.7\,s & Met \\
-K9 Correctness & 100\,\% passed & 331/331 passed in all 3 runs; D7 (an intermittent test) is still open & Met except one flaky test \\
+K9 Correctness & 100\,\% passed & 332/332 passed in all 3 runs & Met \\
 K10 Security & All hold & relay cannot decrypt, forged signature rejected, tampered payload rejected: automated tests pass & Met \\
 \bottomrule
 \end{tabularx}
