@@ -237,7 +237,7 @@ def build_app(node_id: str, cfg: dict, secret: Optional[str], sign: bool) -> Fas
         node: Node = state["node"]
         if not state["transport"].enabled:
             raise HTTPException(409, "this device is switched off")
-        text = body.text or f"SOS from {labels.get(node_id, node_id)}: need help"
+        text = body.text or f"SOS from {labels.get(node_id, node_id)}: assistance needed"
         if body.need or body.where:
             text = structured_payload(text, body.need, body.where)
         # address the rescue team itself when the config has one, so the

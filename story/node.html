@@ -80,6 +80,9 @@
   .needs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
   .need { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px; text-align: left; font-weight: 600; min-height: 48px; }
   .need.on { border-color: var(--text); background: var(--raised); box-shadow: inset 0 0 0 1px var(--text); }
+  .need.wide { grid-column: 1 / -1; }
+  .inrow { display: flex; gap: 8px; align-items: stretch; } .inrow input { flex: 1; min-width: 0; }
+  .mic.on { background: var(--danger); border-color: var(--danger); color: #fff; }
   #sosBtn { position: relative; overflow: hidden; width: 100%; min-height: 104px; border: 0; border-radius: 12px; background: var(--danger); color: #fff;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: none; user-select: none; -webkit-user-select: none; }
   #sosBtn .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(0,0,0,.3); }
@@ -170,14 +173,21 @@
     <p class="lead">No internet is needed. Your request is passed from phone to phone until it reaches the rescue team.</p>
     <span class="field-label">What is happening?</span>
     <div class="needs" id="needs">
-      <button class="need on" data-need="Need help" aria-pressed="true">Need help</button>
-      <button class="need" data-need="Trapped" aria-pressed="false">Trapped</button>
+      <button class="need on" data-need="Medical emergency" aria-pressed="true">Medical emergency</button>
       <button class="need" data-need="Injured" aria-pressed="false">Injured</button>
+      <button class="need" data-need="Trapped" aria-pressed="false">Trapped</button>
       <button class="need" data-need="Fire or smoke" aria-pressed="false">Fire or smoke</button>
-      <button class="need" data-need="Need water or food" aria-pressed="false">Water or food</button>
+      <button class="need" data-need="Unsafe building" aria-pressed="false">Unsafe building</button>
+      <button class="need" data-need="Need water" aria-pressed="false">Need water</button>
+      <button class="need" data-need="Need food" aria-pressed="false">Need food</button>
+      <button class="need" data-need="Need medicine" aria-pressed="false">Need medicine</button>
+      <button class="need wide" data-need="Elderly or child needs help" aria-pressed="false">Elderly or child needs help</button>
     </div>
     <label class="field-label" for="where">Where are you?</label>
-    <input id="where" class="text" maxlength="120" placeholder="Floor, room or landmark" style="margin-bottom:16px">
+    <div class="inrow" style="margin-bottom:16px">
+      <input id="where" class="text" maxlength="120" placeholder="Floor, room or landmark">
+      <button type="button" class="btn sm mic" data-mic="where" aria-label="Speak your location">Speak</button>
+    </div>
     <button id="sosBtn" aria-label="Hold to send SOS"><span class="fill" id="sosFill"></span><span class="t1">SOS</span><span class="t2">Hold for one second to send</span></button>
     <p class="holdhint">Holding the button prevents sending by accident.</p>
     <div class="card">
@@ -193,7 +203,9 @@
       <label class="field-label" for="sendTo">To</label>
       <select id="sendTo" class="text" data-key="sendTo" style="margin-bottom:12px"></select>
       <label class="field-label" for="sendText">Message</label>
-      <textarea id="sendText" class="text" data-key="sendText" rows="3" maxlength="400" placeholder="Type your message" style="margin-bottom:12px"></textarea>
+      <textarea id="sendText" class="text" data-key="sendText" rows="3" maxlength="400" placeholder="Type your message" style="margin-bottom:8px"></textarea>
+      <button type="button" class="btn sm mic" data-mic="sendText" aria-label="Speak your message" style="margin-bottom:12px">Speak</button>
+      <p class="muted small" id="micNote" hidden style="margin-bottom:12px"></p>
       <button id="sendBtn" class="btn primary block">Send message</button>
     </div>
   </details>
@@ -257,7 +269,7 @@ const QUICK = ['Help is on the way', 'Stay where you are', 'Are you safe?', 'Mov
 const ROLE = { NORMAL: 'phone', GATEWAY: 'gateway', RESCUE: 'rescue team' };
 const drafts = {}, replyOpen = new Set();
 const filt = { kind: 'all', need: 'all', sort: 'priority' };
-let data = null, flash = null, seen = new Set(), first = true, soundOn = false, need = 'Need help';
+let data = null, flash = null, seen = new Set(), first = true, soundOn = false, need = 'Medical emergency';
 
 const lbl = (id) => ((data.nodes.find((n) => n.id === id)) || {}).label || id;
 const ago = (ms) => {
@@ -624,6 +636,41 @@ async function sendSOS() {
     toast('SOS sent. Nearby phones are passing it along.'); poll();
   } catch (e) { toast('Could not send: ' + e.message); }
 }
+
+// Voice to text. The browser's speech recognition (Chrome) sends the audio to a speech service, so it
+// needs internet, and the page must be served from localhost or https. Where it cannot work, the
+// button is disabled and says why. Typing always works.
+const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC_ERR = {
+  'not-allowed': 'Microphone is blocked. Allow it in the browser, or type instead.',
+  'service-not-allowed': 'Voice typing is not allowed on this page. Type instead.',
+  network: 'Voice typing needs an internet connection. Type instead.',
+  'no-speech': 'Nothing heard. Try again.',
+  'audio-capture': 'No microphone found. Type instead.',
+};
+function setupMic() {
+  const why = !Speech ? 'Voice typing is not supported in this browser.'
+    : !window.isSecureContext ? 'Voice typing needs this page to be opened on localhost or https.' : '';
+  document.querySelectorAll('[data-mic]').forEach((b) => {
+    if (why) { b.disabled = true; b.title = why; return; }
+    b.addEventListener('click', () => listen(b));
+  });
+  const note = $('micNote'); if (why && note) { note.textContent = why; note.hidden = false; }
+}
+function listen(b) {
+  if (b.classList.contains('on')) return;
+  const target = $(b.dataset.mic), rec = new Speech();
+  rec.lang = navigator.language || 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = (ev) => {
+    const said = [...ev.results].map((r) => r[0].transcript).join(' ').trim(); if (!said) return;
+    target.value = (target.value ? target.value.trimEnd() + ' ' : '') + said;
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  rec.onerror = (ev) => toast(MIC_ERR[ev.error] || 'Voice typing failed. Type instead.');
+  rec.onend = () => { b.classList.remove('on'); b.textContent = 'Speak'; };
+  try { rec.start(); b.classList.add('on'); b.textContent = 'Listening...'; } catch (e) { toast('Voice typing could not start.'); }
+}
+setupMic();
 
 initHistory('p'); initHistory('c');
 poll(); setInterval(poll, 700);

@@ -203,6 +203,42 @@ async def test_structured_sos_round_trip_and_plain_sos_still_works(fast_timers):
     assert {m["need"] for m in history} == {"Injured", ""}
 
 
+SOS_NEEDS = ["Medical emergency", "Injured", "Trapped", "Fire or smoke", "Unsafe building",
+             "Need water", "Need food", "Need medicine", "Elderly or child needs help"]
+
+
+def test_the_screen_offers_the_nine_sos_options_and_not_need_help():
+    import re
+    from pathlib import Path
+
+    html = (Path(device.__file__).parent / "node.html").read_text(encoding="utf-8")
+    offered = re.findall(r'class="need[^"]*" data-need="([^"]+)"', html)
+    assert offered == SOS_NEEDS
+    assert all(len(n) <= 40 for n in offered)                        # the server's limit on the need field
+    assert "Need help" not in html and "Water or food" not in html
+    assert "need = 'Medical emergency'" in html                       # the option selected by default
+
+
+@pytest.mark.asyncio
+async def test_every_sos_option_reaches_the_rescue_console_and_the_csv(fast_timers):
+    import csv
+    import io
+
+    cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
+    async with running(cfg) as dev:
+        await wait_for(lambda: route_to_rescue(dev["A"]))
+        ids = {}
+        for need in SOS_NEEDS:
+            ids[need] = (await dev["A"].post("/api/sos", json={"text": need, "need": need,
+                                                                "where": "Room 12"})).json()["msg_id"]
+        got = {need: await wait_for(lambda mid=mid: thread_entry(dev["C"], mid)) for need, mid in ids.items()}
+        history = (await dev["C"].get("/api/history", params={"kind": "SOS"})).json()["messages"]
+        rows = list(csv.reader(io.StringIO((await dev["C"].get("/api/export.csv")).text)))
+    assert {need: entry["need"] for need, entry in got.items()} == {n: n for n in SOS_NEEDS}
+    assert {m["need"] for m in history} == set(SOS_NEEDS)             # the console's filter list is built from these
+    assert {r[3] for r in rows[1:]} == set(SOS_NEEDS)
+
+
 @pytest.mark.asyncio
 async def test_safe_check_in_reaches_rescue_at_status_priority(fast_timers):
     cfg = line_config({"A": "NORMAL", "B": "GATEWAY", "C": "RESCUE"})
