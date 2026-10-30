@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-27T19:25:09.786Z",
+  "date": "2026-10-30T16:24:44.143Z",
   "devices": "python -m story.local (5 processes)",
   "checks": [
     {
@@ -78,7 +78,7 @@
       "id": "DT-13",
       "name": "The \"What this device is doing\" panel lists live events in plain language",
       "passed": true,
-      "detail": "00:54:51Sent a message toward Phone 2 | 00:54:51A message arrived here | 00:54:47Sent a message toward Phone 2"
+      "detail": "21:54:17Sent a message toward Phone 2 | 21:54:17A message arrived here | 21:54:13Sent a message toward Phone 2"
     },
     {
       "id": "DT-14",
@@ -109,6 +109,24 @@
       "name": "No script errors or console errors on any device screen during the run",
       "passed": true,
       "detail": "none"
+    },
+    {
+      "id": "DT-19",
+      "name": "The request screen offers the nine SOS options, no \"Need help\", and \"Medical emergency\" is selected by default",
+      "passed": true,
+      "detail": "9 options; selected: Medical emergency"
+    },
+    {
+      "id": "DT-20",
+      "name": "A new option (\"Unsafe building\") reaches the rescue console with its location and appears in the need filter",
+      "passed": true,
+      "detail": "console=true; in filter=true; filtered=Unsafe building"
+    },
+    {
+      "id": "DT-21",
+      "name": "Voice to text: the Speak buttons fill the location and message boxes, explain a network error, and are disabled where the browser has no speech recognition",
+      "passed": true,
+      "detail": "location=\"Block C ground floor\"; message=\"Block C ground floor\"; network message=true; disabled without support=true (stand-in recogniser, real speech not tested)"
     }
   ]
 }

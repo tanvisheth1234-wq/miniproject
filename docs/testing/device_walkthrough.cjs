@@ -127,7 +127,9 @@ async function main() {
   await phone3.click('#safeBtn')
   const safeShown = await until(async () => { const t = await text(rescue, '#cSafe'); return t.includes('Phone 3') && t.includes('SAFE') }, 30000)
   const reqText = await text(rescue, '#sosList')
-  record('DT-07', '"I am safe" from another phone appears under Marked safe, not among the requests', safeShown && !reqText.includes('Phone 3'), (await text(rescue, '#cSafe')).replace(/\s+/g, ' ').slice(0, 100))
+  // the check-in text is "<device> is safe"; do not test for the device name alone, because an SOS that
+  // was relayed through Phone 3 lists "Phone 3" in its route
+  record('DT-07', '"I am safe" from another phone appears under Marked safe, not among the requests', safeShown && !/is safe/i.test(reqText), (await text(rescue, '#cSafe')).replace(/\s+/g, ' ').slice(0, 100))
 
   // DT-08 a typed message is delivered
   await front(survivor)
@@ -213,6 +215,73 @@ async function main() {
   const stairs = await until(async () => (await text(rescue, '#sosList')).includes('Stairwell B'), 20000)
   record('DT-16', 'With the gateway back on, the held SOS is delivered and appears on the console', flushed && stairs)
 
+  // DT-19 the nine SOS options, "Need help" gone, "Medical emergency" selected by default
+  await front(survivor)
+  await survivor.setViewport({ width: 1000, height: 2200 })
+  await survivor.evaluate(() => window.scrollTo(0, 0))
+  const NEEDS = ['Medical emergency', 'Injured', 'Trapped', 'Fire or smoke', 'Unsafe building', 'Need water', 'Need food', 'Need medicine', 'Elderly or child needs help']
+  const fresh = await open(P.survivor) // a newly opened screen, before any option has been chosen
+  const offered = await fresh.evaluate(() => [...document.querySelectorAll('#needs .need')].map((b) => b.dataset.need))
+  const selected = await fresh.evaluate(() => [...document.querySelectorAll('#needs .need.on')].map((b) => b.dataset.need))
+  await fresh.close()
+  record('DT-19', 'The request screen offers the nine SOS options, no "Need help", and "Medical emergency" is selected by default',
+         JSON.stringify(offered) === JSON.stringify(NEEDS) && selected.length === 1 && selected[0] === 'Medical emergency', `${offered.length} options; selected: ${selected}`)
+
+  // DT-20 a new option goes through to the console and can be filtered
+  await clickText(survivor, '.need', 'Unsafe building')
+  await survivor.evaluate(() => { document.getElementById('where').value = '' })
+  await survivor.type('#where', 'Block C, ground floor')
+  await hold(survivor, 1500)
+  const unsafeShown = await until(async () => { const t = await text(rescue, '#sosList'); return t.includes('Unsafe building') && t.includes('Block C, ground floor') }, 30000)
+  await front(rescue)
+  const inFilter = await until(async () => rescue.evaluate(() => [...document.querySelectorAll('#fNeed option')].some((o) => o.value === 'Unsafe building')), 10000)
+  let byUnsafe = []
+  if (inFilter) {
+    await rescue.select('#fNeed', 'Unsafe building'); await wait(500)
+    byUnsafe = await rescue.evaluate(() => [...document.querySelectorAll('#sosList .req .body')].map((e) => e.textContent))
+    await rescue.select('#fNeed', 'all'); await wait(300)
+  }
+  record('DT-20', 'A new option ("Unsafe building") reaches the rescue console with its location and appears in the need filter',
+         unsafeShown && inFilter && byUnsafe.length > 0 && byUnsafe.every((t) => t === 'Unsafe building'), `console=${unsafeShown}; in filter=${inFilter}; filtered=${byUnsafe}`)
+
+  // DT-21 voice to text. Real speech cannot be scripted, so a stand-in recogniser is injected that
+  // reports "Block C ground floor": this checks the button, the wiring into the text boxes and the
+  // error and no-support paths, not the speech service itself (which needs internet and is untested here).
+  const speechPage = async (fake) => {
+    const p = await browser.newPage()
+    await p.setViewport({ width: 1000, height: 2200 })
+    await p.evaluateOnNewDocument((withFake) => {
+      delete window.SpeechRecognition; delete window.webkitSpeechRecognition
+      if (!withFake) return
+      window.__mode = 'ok'
+      window.SpeechRecognition = class {
+        start() { setTimeout(() => {
+          if (window.__mode === 'ok') this.onresult({ results: [[{ transcript: 'Block C ground floor' }]] })
+          else this.onerror({ error: window.__mode })
+          this.onend()
+        }, 50) }
+      }
+    }, fake)
+    await p.goto(URL(P.survivor), { waitUntil: 'domcontentloaded' })
+    await p.waitForSelector('#where')
+    return p
+  }
+  const withSpeech = await speechPage(true)
+  await withSpeech.click('[data-mic="where"]'); await wait(400)
+  const heard = await withSpeech.$eval('#where', (e) => e.value)
+  await withSpeech.evaluate(() => { window.__mode = 'network' }); await withSpeech.click('[data-mic="where"]'); await wait(600)
+  const netMsg = await withSpeech.evaluate(() => document.body.innerText.includes('needs an internet connection'))
+  await withSpeech.evaluate(() => document.getElementById('pSend').open = true)
+  await withSpeech.evaluate(() => { window.__mode = 'ok' }); await withSpeech.click('[data-mic="sendText"]'); await wait(400)
+  const heardMsg = await withSpeech.$eval('#sendText', (e) => e.value)
+  const micOn = await withSpeech.evaluate(() => [...document.querySelectorAll('[data-mic]')].every((b) => !b.disabled))
+  await withSpeech.close()
+  const noSpeech = await speechPage(false)
+  const micOff = await noSpeech.evaluate(() => [...document.querySelectorAll('[data-mic]')].every((b) => b.disabled && b.title.includes('not supported')))
+  await noSpeech.close()
+  record('DT-21', 'Voice to text: the Speak buttons fill the location and message boxes, explain a network error, and are disabled where the browser has no speech recognition',
+         micOn && heard === 'Block C ground floor' && heardMsg === 'Block C ground floor' && netMsg && micOff, `location="${heard}"; message="${heardMsg}"; network message=${netMsg}; disabled without support=${micOff} (stand-in recogniser, real speech not tested)`)
+
   // DT-17 narrow screens
   const narrow = []
   for (const [page, port] of [[survivor, P.survivor], [rescue, P.rescue]]) {
@@ -229,6 +298,7 @@ async function main() {
   await browser.close()
   stopDevices()
   fs.mkdirSync(path.dirname(OUT), { recursive: true })
+  checks.sort((a, b) => Number(a.id.slice(3)) - Number(b.id.slice(3)))
   fs.writeFileSync(OUT, JSON.stringify({ date: new Date().toISOString(), devices: 'python -m story.local (5 processes)', checks }, null, 2))
   const failed = checks.filter((c) => !c.passed).length
   console.log(`\n${checks.length - failed}/${checks.length} checks passed -> ${path.relative(process.cwd(), OUT)}`)
