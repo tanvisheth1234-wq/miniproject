@@ -1,4 +1,4 @@
-"""Builds the EcoMesh poster (A2, portrait, one page) as a PDF.
+"""Builds the EcoMesh poster (A2 and A3, portrait, one page each) as PDFs.
 
     python docs/poster/generate_poster.py
 
@@ -23,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 FIG = ROOT / "docs" / "report" / "latex" / "figures"
 OUT = HERE / "EcoMesh_Poster.pdf"
+OUT_A3 = HERE / "EcoMesh_Poster_A3.pdf"
 CHROME = os.environ.get("CHROME", "C:/Program Files/Google/Chrome/Application/chrome.exe")
 REPO_URL = "https://github.com/tanvisheth1234-wq/miniproject"
 
@@ -54,6 +55,11 @@ def build_html() -> str:
     tmp = Path(tempfile.mkdtemp(prefix="ecomesh_poster_"))
     arch = tmp / "arch.png"
     pymupdf.open(FIG / "fig_architecture.pdf")[0].get_pixmap(dpi=200).save(arch)
+    from PIL import Image, ImageChops
+    im = Image.open(arch).convert("RGB")
+    box = ImageChops.difference(im, Image.new("RGB", im.size, "white")).getbbox()  # trim the blank margin
+    if box:
+        im.crop((max(box[0] - 20, 0), max(box[1] - 20, 0), box[2] + 20, box[3] + 20)).save(arch)
     qr = qrcode.QRCode(border=2, box_size=12)
     qr.add_data(REPO_URL)
     qr.make(fit=True)
@@ -65,13 +71,13 @@ def build_html() -> str:
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, Arial, sans-serif; color: #14181D; background: #fff; }
 .poster { width: 420mm; height: 593mm; overflow: hidden; display: flex; flex-direction: column; }
-header { background: #0E1114; color: #EEF1F4; padding: 10mm 22mm 8mm; }
+header { background: #0E1114; color: #EEF1F4; padding: 8mm 22mm 6mm; }
 header .eyebrow { font-size: 15pt; letter-spacing: .12em; color: #A6AFB9; font-weight: 700; text-transform: uppercase; }
-header h1 { font-size: 80pt; line-height: 1; margin: 6mm 0 4mm; font-weight: 800; letter-spacing: -.02em; }
+header h1 { font-size: 68pt; line-height: 1; margin: 4mm 0 3mm; font-weight: 800; letter-spacing: -.02em; }
 header .tag { font-size: 28pt; color: #A6AFB9; max-width: 330mm; line-height: 1.2; }
-header .team { margin-top: 10mm; font-size: 22pt; color: #EEF1F4; }
+header .team { margin-top: 5mm; font-size: 22pt; color: #EEF1F4; }
 header .team span { color: #5B9CF0; font-weight: 700; }
-main { flex: 1; padding: 10mm 22mm 6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm 14mm; align-content: start; zoom: .93; }
+main { flex: 1; padding: 10mm 22mm 6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm 14mm; align-content: start; zoom: .85; }
 section h2 { font-size: 26pt; margin: 0 0 3mm; font-weight: 800; border-bottom: 2pt solid #14181D; padding-bottom: 2mm; }
 section p, section li { font-size: 16pt; line-height: 1.3; margin: 0 0 2.5mm; color: #14181D; }
 section ul { margin: 0; padding-left: 8mm; }
@@ -86,9 +92,10 @@ section ul { margin: 0; padding-left: 8mm; }
 .stat span { font-size: 13pt; color: #4D5864; line-height: 1.25; display: block; margin-top: 2mm; }
 .stat.sos b { color: #E0464C; }
 img { display: block; max-width: 100%; }
-.arch img { max-height: 76mm; width: auto; margin: 0 auto; }
-.shots { display: grid; grid-template-columns: 1fr 2.2fr 1.5fr; gap: 8mm; align-items: start; }
-.shots img { width: 100%; height: 70mm; object-fit: cover; object-position: top; }
+.archrow { display: grid; grid-template-columns: 1.45fr 1fr; gap: 12mm; align-items: start; }
+.arch img { width: 100%; max-height: 150mm; object-fit: contain; margin: 0 auto; }
+.shots { display: grid; grid-template-columns: 1.05fr .8fr 2fr 1.35fr; gap: 6mm; align-items: start; }
+.shots img { width: 100%; height: 74mm; object-fit: cover; object-position: top; }
 .lf h3 { font-size: 20pt; margin: 0 0 2mm; }
 .lf ul { margin: 0 0 5mm; padding-left: 6mm; }
 .lf li { font-size: 13pt !important; margin-bottom: 1.5mm !important; }
@@ -139,36 +146,39 @@ footer img { width: 38mm; height: 38mm; background: #fff; padding: 2mm; border-r
   <h2>The idea</h2>
   <p>Make every device both an endpoint and a relay. An SOS travels from phone to phone until it reaches a rescue team or a gateway to the outside. No tower, no internet, no central server.</p>
   <p>Messages are encrypted (AES-256-GCM), identities are signed (Ed25519), and a message with no route is held and sent the moment a path appears.</p>
+  <p>The survivor picks one of <b>nine request types</b> (Medical emergency, Injured, Trapped, Fire or smoke, Unsafe building, Need water, Need food, Need medicine, Elderly or child needs help) and can <b>speak</b> the location instead of typing it.</p>
+ </section>
+ <section class="full">
+  <h2>Architecture and how an SOS travels</h2>
+  <div class="archrow">
+   <div class="arch"><img src="{data_uri(arch)}" alt="EcoMesh architecture"><div class="cap">One node = one process on one event-loop thread. Every layer reaches the network only through the transport interface, so the same engine runs on a simulated radio, on TCP between processes, or on UDP.</div></div>
+   <div>
+    <ol class="steps">
+     <li><b>Route.</b> Dijkstra over a link-state graph that every node builds from its neighbours' reports.</li>
+     <li><b>Seal.</b> The payload is encrypted and the packet's identity is signed.</li>
+     <li><b>Relay.</b> Every hop sends SOS before routine traffic.</li>
+     <li><b>Confirm.</b> The receiver acknowledges; a missed ACK retries on a recomputed route.</li>
+     <li><b>Hold.</b> No route? The message is kept and sent when a path appears.</li>
+    </ol>
+    <div class="formula">cost = 1 + 5 (1 &minus; q) + 3 f</div>
+    <p style="font-size:15pt;color:#4D5864">q: share of recent beacons heard; f: recent ACK timeouts. A lossy link costs more than two clean hops, so routes avoid it.</p>
+   </div>
+  </div>
  </section>
  <section class="full">
   <h2>Measured results</h2>
   <div class="resrow"><div class="stats">{stats}</div><div class="chart">{chart}</div></div>
  </section>
- <section>
-  <h2>How an SOS travels</h2>
-  <ol class="steps">
-   <li><b>Route.</b> Dijkstra over a link-state graph that every node builds from its neighbours' reports.</li>
-   <li><b>Seal.</b> The payload is encrypted and the packet's identity is signed.</li>
-   <li><b>Relay.</b> Every hop sends SOS before routine traffic.</li>
-   <li><b>Confirm.</b> The receiver acknowledges; a missed ACK retries on a recomputed route.</li>
-   <li><b>Hold.</b> No route? The message is kept and sent when a path appears.</li>
-  </ol>
-  <div class="formula">cost = 1 + 5 (1 &minus; q) + 3 f</div>
-  <p style="font-size:15pt;color:#4D5864">q: share of recent beacons heard; f: recent ACK timeouts.</p>
- </section>
- <section>
-  <h2>Architecture</h2>
-  <div class="arch"><img src="{data_uri(arch)}" alt="EcoMesh architecture"></div>
-  <div class="cap">One node = one process. The transport is swappable: simulated radio, TCP between processes, or UDP.</div>
- </section>
  <section class="full">
   <h2>One app for the whole demonstration, and what it does not do</h2>
   <div class="shots">
+   <div><img src="{data_uri(FIG / 'story_survivor_request.png')}" alt="Request form"><div class="cap">Request form: nine request types and a Speak button for voice input</div></div>
    <div><img src="{data_uri(FIG / 'story_survivor_delivered.png')}" alt="Survivor screen"><div class="cap">Survivor phone: SOS delivered, rescue team's reply on top</div></div>
-   <div><img src="{data_uri(FIG / 'story_rescue_console.png')}" alt="Rescue console"><div class="cap">Rescue console: request with need, location and route; reply, filters, history, network map</div></div>
+   <div><img src="{data_uri(FIG / 'story_rescue_console.png')}" alt="Rescue console"><div class="cap">Rescue console: request with its type, location and route; reply, filters, history, network map</div></div>
    <div class="lf"><h3>Limits</h3><ul>
     <li>The radio is emulated: real packets over TCP, between configured neighbours only.</li>
     <li>No phone app: a phone opens a web page served by a laptop.</li>
+    <li>Voice input uses the browser's online speech service; typing always works.</li>
     <li>One shared key protects the mesh.</li>
     <li>Not fully met: {misses}.</li>
    </ul><h3>Future work</h3><ul>
@@ -187,15 +197,23 @@ footer img { width: 38mm; height: 38mm; background: #fff; padding: 2mm; border-r
     return html
 
 
-def main() -> None:
-    html = build_html()
-    tmp = HERE / "_poster.html"
-    tmp.write_text(html, encoding="utf-8")
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={OUT}", tmp.as_uri()], check=True, capture_output=True, timeout=180)
-    tmp.unlink(missing_ok=True)
+def print_pdf(html: str, out: Path, label: str) -> None:
     import pymupdf
 
-    print(f"wrote {OUT} ({len(pymupdf.open(OUT))} page, A2)")
+    tmp = HERE / "_poster.html"
+    tmp.write_text(html, encoding="utf-8")
+    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={out}", tmp.as_uri()], check=True, capture_output=True, timeout=180)
+    tmp.unlink(missing_ok=True)
+    print(f"wrote {out} ({len(pymupdf.open(out))} page, {label})")
+
+
+def main() -> None:
+    html = build_html()
+    print_pdf(html, OUT, "A2")
+    # A3 has the same proportions as A2 (1 : sqrt 2), so the same layout is printed at 1/sqrt(2) scale
+    a3 = html.replace("@page { size: 420mm 594mm; margin: 0; }", "@page { size: 297mm 420mm; margin: 0; }\nbody { zoom: 0.70711; }", 1)
+    assert a3 != html
+    print_pdf(a3, OUT_A3, "A3")
 
 
 if __name__ == "__main__":
