@@ -44,7 +44,7 @@ Build: `cd docs/report/latex && tectonic -X compile main.tex --outdir build` (or
 
 ## Honest limits stated in the report
 
-No radio hardware (LAN emulation); live timings on loopback; no usability study; no automated UI tests;
-SNF-3 (immediate flush on new neighbour) and LOG-5 (history filter) not fully implemented; scale tested to
+No radio hardware (LAN emulation); live timings on loopback; no usability study; browser checks run by
+hand, outside pytest; voice input tested with a stand-in recogniser only; scale tested to
 65 simulated nodes; delivery below 90 % above ~43 nodes at 20 % loss; recovery time just over the 10 s
 target in 27 of 50 trials (bounded by the heartbeat timeout).

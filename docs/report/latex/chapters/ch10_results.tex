@@ -2,65 +2,66 @@
 \label{ch:results}
 
 \subsection{Implemented Features}
-Table~\ref{tab:features} lists what was implemented, what is partial and what was not built, with the evidence for each.
+Table~\ref{tab:features} lists what was built and what was not, with evidence.
 \begin{table}[!htbp]
 \caption{Feature status}
 \label{tab:features}
 \footnotesize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{6.0cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{5.2cm}@{}}
 \toprule
 \textbf{Feature} & \textbf{Status} & \textbf{Evidence}\\ \midrule
-Discovery, link-state gossip, weighted Dijkstra, priority, TTL and dedup, ACK and retry, store-and-forward, AES-GCM, Ed25519, SQLite log & Implemented & \NTests\ tests; Chapters~\ref{ch:perf}, \ref{ch:test}\\
-Simulator, metrics and the simulation lab (API and website) & Implemented & 7 scenarios to 65 nodes; 12 API tests; \NWebPass\ of \NWebChecks\ browser checks\\
-The one device app: survivor, gateway and rescue screens; structured SOS, ``I am safe'', send a message, rescue reply, filters, history, CSV export, live activity panel, network map with link quality & Implemented & device-API tests; \NDevPass\ of \NDevChecks\ browser checks (Table~\ref{tab:devwalk}); Section~\ref{sec:shots}\\
+Engine: discovery, gossip, weighted Dijkstra, priority, TTL, dedup, ACK and retry, store and forward, AES-GCM, Ed25519, SQLite & Implemented & \NTests\ tests; Chapters~\ref{ch:perf} and~\ref{ch:test}\\
+Simulator, metrics and simulation lab (API, website) & Implemented & 7 scenarios to 65 nodes; \NWebPass\ of \NWebChecks\ browser checks\\
+Device app: survivor, gateway and rescue screens; SOS, ``I am safe'', messages, replies, filters, history, CSV, live panel, network map & Implemented & device-API tests; \NDevPass\ of \NDevChecks\ browser checks (Table~\ref{tab:devwalk})\\
 Multi-device deployment over real sockets & Implemented & 5 processes measured; two-laptop demonstration\\
-Immediate flush on a new neighbour (SNF-3); filtered history on the screens (LOG-5) & Implemented & automated tests and browser checks\\
-BLE or Wi-Fi Direct radio; per-pair key agreement; timed usability study & Not implemented & out of scope or future work\\
+Nine request types; voice input for location and message & Implemented & device-API tests; DT-19 to DT-21\\
+Flush on a new neighbour (SNF-3); filtered history (LOG-5) & Implemented & automated tests, browser checks\\
+BLE or Wi-Fi Direct radio; per-pair keys; usability study & Not built & future work\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{Screenshots and Demonstration Evidence}
 \label{sec:shots}
-All screenshots are from the running system. The device screen is the one app and the demonstration; Figures~\ref{fig:survivor}, \ref{fig:console} and~\ref{fig:activity} come from the five-process live deployment in the demonstrated story: an SOS is delivered over a relay; the rescue team replies; the gateway fails and the next SOS is held; the gateway returns and the held message is delivered. The script of that demonstration is in \texttt{docs/DEMO\_SCRIPT.md}.
+All screenshots come from five running devices (\texttt{python -m story.local}) following \texttt{docs/DEMO\_SCRIPT.md}: an SOS is delivered through a relay phone, the rescue team replies, the gateway is switched off and the next SOS is held, and the held SOS is delivered when the gateway returns.
 \begin{figure}[!htbp]
 \centering
-\begin{minipage}[t]{0.22\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_delivered.png}\end{minipage}\hfill
-\begin{minipage}[t]{0.22\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_held.png}\end{minipage}\hfill
-\begin{minipage}[t]{0.22\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_flushed.png}\end{minipage}
-\caption[The survivor's screen: delivered, held and flushed]{The survivor's screen. Left: the SOS is delivered over a relay phone and the Gateway; the rescue team's reply is shown above the progress tracker. Centre: the gateway has failed; the screen says ``Searching for a path'' and the message is ``Saved, waiting for a path''. Right: the gateway is back and the held message is delivered.}
+\begin{minipage}[b]{0.5\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_request.png}\end{minipage}\hspace{6mm}
+\begin{minipage}[b]{0.3\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_gateway.png}\end{minipage}
+\caption[The request form and the gateway view]{Left: the survivor's request form with nine request types (Medical emergency selected by default), the location box with its Speak button for voice input, and the SOS button that must be held. Right: the gateway's view, with the path to the rescue team, the network map and the nearby phones.}
+\label{fig:request}
+\end{figure}
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}[t]{0.31\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_delivered.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.31\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_held.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.31\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_survivor_flushed.png}\end{minipage}
+\caption[The survivor's screen: delivered, held and flushed]{The survivor's screen. Left: a ``Trapped'' SOS is delivered through Phone~2 and the gateway, and the rescue team's reply appears above the progress tracker. Centre: the gateway is off, the status reads ``Searching for a path'' and the new ``Injured'' SOS is ``Saved, waiting for a path''. Right: the gateway is back and the held SOS has been delivered.}
 \label{fig:survivor}
 \end{figure}
 \begin{figure}[!htbp]
 \centering
-\begin{minipage}[t]{0.43\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console.png}\end{minipage}\hfill
-\begin{minipage}[t]{0.43\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console_gwdown.png}\end{minipage}
-\caption[The rescue console, before and during a gateway outage]{The rescue console. Left: a request with its need, location, age and route, the reply already sent, the Marked safe list, filters, message history, counters, the network map with link quality and the device list. Right: with the gateway down the rescue device hears nobody (``1 of 5 devices reachable''); earlier messages remain visible.}
+\begin{minipage}[t]{0.49\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console.png}\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_rescue_console_gwdown.png}\end{minipage}
+\caption[The rescue console, before and during a gateway outage]{The rescue console. Left: the request with its type, location, age and route and the reply already sent, with counters, filters, the Marked safe list, history and a network map highlighting the route. Right: with the gateway off the rescue device can reach no one (``1 of 5 devices reachable'') and earlier requests stay visible.}
 \label{fig:console}
 \end{figure}
 \begin{figure}[!htbp]
 \centering
-\begin{minipage}[t]{0.5\textwidth}\centering\includegraphics[width=\textwidth]{figures/story_activity_console.png}\end{minipage}
-\caption[The live panel of what the device is doing]{The rescue console with the live panel ``What this device is doing'' (lower right). It words the device's own event log in plain English: ``Can now hear Gateway'', ``A message arrived here'', ``Sent a message toward Gateway'' and ``Delivery confirmed by the other side''.}
-\label{fig:activity}
+\includegraphics[width=0.58\textwidth]{figures/story_activity_console.png}
+\caption[The live panel of what the device is doing]{The rescue console after the gateway returned: the held ``Injured'' SOS has arrived, and the live panel ``What this device is doing'' (lower right) records the outage in plain English, from ``Lost contact with Gateway'' to ``Can now hear Gateway'' and ``A message arrived here''.}
+\label{fig:livepanel}
 \end{figure}
-\begin{figure}[!htbp]
-\centering
-\begin{minipage}[t]{0.42\textwidth}\centering\includegraphics[width=\textwidth]{figures/ui_rescue.png}\end{minipage}\hfill
-\begin{minipage}[t]{0.42\textwidth}\centering\includegraphics[width=\textwidth]{figures/ui_routing.png}\end{minipage}
-\caption[The simulation lab website: rescue dashboard and routing page]{The simulation lab (not part of the demonstration). Left: rescue dashboard (delivery ratio, nodes online, live mesh, SOS queue). Right: routing page (weighted versus hop-count route, cost function, a node's view of the graph). It runs many real nodes over the simulated radio and produced the experiments of Chapter~\ref{ch:perf}.}
-\label{fig:uishots}
-\end{figure}
-The mesh was also run on two physical laptops joined by a phone hotspot (Figure~\ref{fig:deploy}): an SOS was delivered across both machines, the route changed when a relay was switched off, and a message held while the gateway was off was delivered when it returned. This run was a functional demonstration and was not timed.
+The same story also ran on separate laptops joined by a phone hotspot (Figure~\ref{fig:deploy}); that run was not timed.
 
 \subsection{Functional Results}
-Of the 68 requirements, \NAuto\ are verified by automated tests alone, \NAutoUI\ with a manual screen check, \NInspect\ by inspection, \NManual\ manually, and \NPartial\ are partial (Table~\ref{tab:frsum}). The three key stories ran on real devices: an SOS reaches rescue over several hops, the mesh re-routes around a failed relay, and a message with no route is held and later delivered. The scripted browser run repeats them on the device screens together with the newer controls (Table~\ref{tab:devwalk}); \NDevPass\ of \NDevChecks\ checks pass.
+Of the 68 requirements \NAuto\ are verified by automated tests, \NAutoUI\ with a screen check, \NInspect\ by inspection and \NManual\ manually; none is partial. The key stories (multi-hop SOS, re-routing around a failed relay, hold and later delivery) ran on real devices, and the browser run repeats them with the nine request types and voice input (\NDevPass\ of \NDevChecks\ pass).
 \subsection{Performance Results}
-Table~\ref{tab:kpival} collects the measured KPIs: \CollDel\,\% delivery on 40 nodes at 20\,\% loss with failures, an SOS \SosAdv$\times$ faster under load, live SOS delivery in a median 32\,ms, relay failover in about 4.1\,s and held messages flushed in about 4.2\,s.
+Table~\ref{tab:kpival}: \CollDel\,\% delivery on 40 nodes at 20\,\% loss with failures, SOS \SosAdv$\times$ faster under load, live SOS in a median 32\,ms, failover in about 4.1\,s, held messages flushed in about 4.2\,s.
 \subsection{Comparison with Existing Systems}
-Other systems were not run, so the comparison uses documented properties (Table~\ref{tab:compare1}) and the one fair measurable baseline, hop-count routing on identical seeds (\HopW\,\% against \HopH\,\%). No claim is made about the delivery of Bridgefy, Briar, Meshtastic or Serval, which publish no comparable measurements.
+Other systems were not run, so the comparison rests on documented properties (Table~\ref{tab:compare1}) and one fair baseline, hop count on identical seeds (\HopW\,\% against \HopH\,\%); no delivery claim is made for systems that publish no measurements.
 \subsection{Achievement of Objectives}
-Table~\ref{tab:objectives} maps each objective of Section~1.4 to its evidence and status.
+Table~\ref{tab:objectives} maps each objective to its evidence.
 \begin{table}[!htbp]
 \caption{Objectives, supporting evidence and status}
 \label{tab:objectives}
@@ -81,7 +82,7 @@ O8 & web application, device screens, API tests, five processes, two laptops & A
 \end{table}
 
 \subsection{Discussion of Findings}
-Hop count is a poor proxy for delivery: a weak shortcut loses almost half the traffic under hop count and almost none under the weighted cost. Timer constants, not algorithms, set recovery and convergence (they cluster at the heartbeat timeout and the gossip interval), which shows exactly what to tune. Loss is paid for in tail latency, and priority matters only once a link queues, which is the disaster condition. Testing found real defects in code we believed finished (Section~\ref{sec:defects}).
+Hop count is a poor proxy for delivery: a weak shortcut loses almost half the traffic under hop count and almost none under the weighted cost. Timer constants, not algorithms, set recovery and convergence, which shows what to tune. Priority matters once links queue, which is the disaster condition.
 
 \subsection{Practical Applicability}
-A deployment needs devices running the node program, a topology file (or multicast discovery), a gateway or rescue device and a shared network segment. It is usable today as a campus, hospital or building safety system on laptops; a Bluetooth LE or Wi-Fi Direct transport would make it phone-to-phone.
+A deployment needs devices running the node, a topology file (or multicast), a gateway or rescue device and a shared network; it works today as a building safety system on laptops, and a radio transport would make it phone-to-phone.

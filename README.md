@@ -23,7 +23,7 @@ radio is emulated.
 - **Simulation lab (Phase 4): done.** A FastAPI and WebSocket server (`api/`), a React website
   (`ui/`) and a virtual-time simulator (`sim/`) run many real nodes over a simulated radio. It is
   not part of the demonstration; it produced the experiment results in the report.
-- **Tests:** 332 automated tests (`python -m pytest -q`) plus scripted browser checks of the device
+- **Tests:** 334 automated tests (`python -m pytest -q`) plus scripted browser checks of the device
   screens (`docs/testing/device_walkthrough.cjs`) and of the lab website (`docs/testing/ui_walkthrough.cjs`).
 
 **Not built, stated openly:** a real radio (devices talk over TCP, but only to the neighbours a
@@ -74,7 +74,8 @@ node docs/testing/device_walkthrough.cjs     # starts the five devices itself; n
 Each phase lives on its own branch, inheriting everything before it rather than merging
 back: `develop` (Phase 1) → `develop_2` (+ Phase 2) → `develop_3` (+ Phase 3) →
 `develop_4` (+ Phase 4) → `develop_5` (+ report and evaluation) → `develop_6` (final app, tests and
-documents). See `CONTRIBUTING.md` for commit conventions.
+documents) → `develop_7` (changes after the evaluation: nine SOS options, voice input, updated
+report, poster and documents). See `CONTRIBUTING.md` for commit conventions.
 
 ## Team
 

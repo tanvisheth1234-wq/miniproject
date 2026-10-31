@@ -2,35 +2,35 @@
 \label{ch:lit}
 
 \subsection{Study of Existing Systems}
-\textbf{Offline messengers.} \emph{Bridgefy}, a Bluetooth mesh messenger used in large protests, is analysed as Study~11 in Table~\ref{tab:studies}; \emph{FireChat} gave phone-to-phone messaging and is discontinued; \emph{Briar} has no server and synchronises offline over Bluetooth or Wi-Fi with end-to-end encryption~\cite{briar}. \textbf{Dedicated radios.} \emph{goTenna Mesh} uses paired radios; \emph{Meshtastic} runs on LoRa with managed flood routing, suppressing a rebroadcast when a neighbour already repeats it~\cite{meshtastic}. \textbf{Research and humanitarian systems.} The \emph{Serval Project} builds disaster phone meshes with \emph{Rhizome} store-and-forward~\cite{serval}; the \emph{DTN architecture} provides store-carry-forward across intermittent links~\cite{fall2003dtn,rfc4838}. ``n/d'' means not documented in the sources consulted.
+\textbf{Offline messengers.} \emph{Bridgefy}, a Bluetooth messenger used at large protests, is Study~11 of Table~\ref{tab:studies}; \emph{FireChat} offered phone-to-phone chat and was withdrawn; \emph{Briar} needs no server and exchanges encrypted messages over Bluetooth or Wi-Fi when devices meet~\cite{briar}. \textbf{Dedicated radios.} \emph{goTenna Mesh} pairs phones with radio units; \emph{Meshtastic} uses LoRa with a controlled flood in which a node stays silent if a neighbour already repeats the packet~\cite{meshtastic}. \textbf{Research and humanitarian work.} The \emph{Serval Project} builds disaster phone meshes with its \emph{Rhizome} store-and-forward layer~\cite{serval}; the \emph{delay-tolerant networking (DTN)} architecture keeps data and carries it across intermittent links~\cite{fall2003dtn,rfc4838}. ``n/d'' marks a property the sources do not document.
 \subsection{Review of Research Papers and Technical Resources}
 \label{sec:papers}
-Table~\ref{tab:studies} records the twelve sources studied: technique, contribution and relevance.
+Table~\ref{tab:studies} summarises the twelve sources we studied, what each contributes and what it means for EcoMesh.
 \begingroup\footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{@{}p{0.5cm}>{\raggedright\arraybackslash}p{3.5cm}p{6.3cm}p{6.0cm}@{}}
 \caption{Twelve studies: technique, contribution and relevance to EcoMesh}\label{tab:studies}\\
 \toprule \textbf{\#} & \textbf{Source} & \textbf{Technique and contribution} & \textbf{Relevance and limitation}\\ \midrule \endfirsthead
 \toprule \textbf{\#} & \textbf{Source} & \textbf{Technique and contribution} & \textbf{Relevance and limitation}\\ \midrule \endhead
-1 & DSDV, Perkins and Bhagwat 1994~\cite{perkins1994dsdv} & Proactive distance vector; sequence numbers prevent loops & Routes ready before the first SOS; hop-count metric, overhead grows with churn\\
-2 & DSR, RFC 4728~\cite{rfc4728dsr} & On-demand source routing; the full route travels in every packet & Carried path gives loop detection and ``relayed via $n$''; no retention\\
-3 & AODV, RFC 3561~\cite{rfc3561aodv} & On-demand distance vector; flooded request, reply on the reverse path & Hop-count metric; no retention, no priority\\
-4 & OLSR, RFC 3626~\cite{rfc3626olsr} & Proactive link state; multipoint relays cut flooding & Closest family to EcoMesh; hop count by default\\
-5 & OSPF v2, RFC 2328~\cite{rfc2328ospf} & Sequence-numbered link-state flooding; Dijkstra on every router & EcoMesh reuses the structure with a measured cost; built for wired networks\\
-6 & Babel, RFC 8966~\cite{rfc8966babel} & Loop-free, metric-agnostic distance vector for wireless meshes & The wireless metric must be pluggable; routing only\\
-7 & ETX, De Couto et al. 2003~\cite{decouto2003etx} & Path metric from measured delivery ratios; minimum-hop paths use lossy links & Strongest basis for our cost; we add an ACK-failure penalty\\
-8 & Epidemic routing, Vahdat and Becker 2000~\cite{vahdat2000epidemic} & Replicate a message to every node met & High delivery, high buffer use; we keep a bounded queue\\
-9 & DTN architecture, Fall 2003; RFC 4838~\cite{fall2003dtn,rfc4838} & Store-carry-forward with custody transfer & Basis of our third exit; no priority or link quality\\
-10 & Disaster-response networks, Reina et al. 2015~\cite{reina2015disaster} & Survey of MANET, VANET, DTN and sensor networks for disasters & Confirms the framing and the need for evaluated systems\\
-11 & Breaking Bridgefy, Albrecht et al. 2021~\cite{albrecht2021bridgefy} & Practical attacks on a deployed mesh messenger: tracking, no authenticity, shutdown & Sets the threat model; justifies encryption and signatures\\
-12 & AES-GCM, Ed25519, Dijkstra~\cite{nist80038d,bernstein2012ed25519,dijkstra1959} & AES-GCM; fast high-security signatures; shortest paths & The primitives and routing kernel used\\
+1 & DSDV, Perkins and Bhagwat 1994~\cite{perkins1994dsdv} & Each node keeps a table of distances in advance; numbered updates stop routing loops & Routes exist before the first SOS; counts hops only, and update traffic rises as nodes move\\
+2 & DSR, RFC 4728~\cite{rfc4728dsr} & Routes are found on demand and the whole path is written into each packet & A carried path allows loop checks and the ``relayed via $n$'' display; nothing is held\\
+3 & AODV, RFC 3561~\cite{rfc3561aodv} & A flooded request finds a destination and the reply sets up the route backwards & Counts hops; no holding of messages and no priority\\
+4 & OLSR, RFC 3626~\cite{rfc3626olsr} & Link state maintained in advance; selected relays reduce repeated broadcasts & Nearest relative of EcoMesh; still uses hop count by default\\
+5 & OSPF v2, RFC 2328~\cite{rfc2328ospf} & Numbered link-state flooding with Dijkstra run on each router & EcoMesh keeps this structure but uses a measured cost; designed for wired links\\
+6 & Babel, RFC 8966~\cite{rfc8966babel} & Loop-free distance vector for wireless meshes with any metric plugged in & Shows the wireless metric must be replaceable; covers routing only\\
+7 & ETX, De Couto et al. 2003~\cite{decouto2003etx} & Path cost from measured delivery ratios; shows that fewest-hop paths choose lossy links & Main basis for our cost; we add a penalty for acknowledgement failures\\
+8 & Epidemic routing, Vahdat and Becker 2000~\cite{vahdat2000epidemic} & Copy every message to every node encountered & Delivers well but fills buffers; we use one bounded queue instead\\
+9 & DTN architecture, Fall 2003; RFC 4838~\cite{fall2003dtn,rfc4838} & Nodes keep, carry and later pass on data, with custody handed over & Basis of our third exit; ignores priority and link quality\\
+10 & Disaster-response networks, Reina et al. 2015~\cite{reina2015disaster} & Survey of ad hoc, vehicular, delay-tolerant and sensor networks in disasters & Supports our framing and the call for systems that are evaluated\\
+11 & Breaking Bridgefy, Albrecht et al. 2021~\cite{albrecht2021bridgefy} & Attacks on a real mesh messenger: users tracked, messages unauthenticated, network shut down & Defines our threat model; motivates encryption and signatures\\
+12 & AES-GCM, Ed25519, Dijkstra~\cite{nist80038d,bernstein2012ed25519,dijkstra1959} & Authenticated encryption, fast secure signatures and shortest paths & The primitives and routing algorithm we use\\
 \bottomrule
 \end{longtable}
 \endgroup
 
 \subsection{Comparative Analysis}
 \label{sec:compare}
-Table~\ref{tab:compare1} compares the systems of Section~2.1 and the routing protocols of Table~\ref{tab:studies} with EcoMesh on six criteria: the infrastructure each needs, how it routes, whether it prioritises messages, whether it retains a message that has no route, how it protects content, and (from Section~2.1) whether it is available today.
+Table~\ref{tab:compare1} sets the systems of Section~2.1 and the protocols of Table~\ref{tab:studies} against EcoMesh: the infrastructure each needs, how it routes, whether it prioritises, whether it keeps a message that has no route, and how it protects content.
 \begin{table}[!htbp]
 \caption[Existing systems and routing protocols compared with EcoMesh]{Existing offline-communication systems and routing protocols compared with EcoMesh (n/d = not documented in the sources consulted)}
 \label{tab:compare1}
@@ -50,9 +50,9 @@ AODV, DSR, DSDV, OLSR, OSPF, Babel & none & hop count, configured or pluggable m
 \end{table}
 
 \subsection{Limitations of Existing Systems}
-Hop count, the default metric of the surveyed protocols, picks lossy links~\cite{decouto2003etx}; none prioritises an emergency message at every hop; ad hoc routing drops a message with no route while delay-tolerant systems ignore link quality and priority; and deployed messengers publish little measurement, one with no effective confidentiality or authenticity~\cite{albrecht2021bridgefy}.
+Hop count, the usual default metric, picks lossy links~\cite{decouto2003etx}; no system prioritises an emergency at each hop; ad hoc routing drops a message with no route, while delay-tolerant designs keep it but ignore link quality and priority; and deployed messengers publish little measurement, one with no effective confidentiality or authenticity~\cite{albrecht2021bridgefy}.
 \subsection{Identified Research or Engineering Gap}
 \label{sec:gap}
-\textbf{No surveyed system combines priority-aware, link-quality-weighted routing with a delay-tolerant fallback and is evaluated quantitatively under controlled failure.}
+\textbf{None of the surveyed systems joins priority-aware, link-quality-weighted routing with a delay-tolerant fallback, and none is evaluated quantitatively under controlled failures.}
 \subsection{Proposed Improvements}
-EcoMesh routes over the cost $1+5(1-q)+3f$ (Section~\ref{sec:cost}), re-applies SOS priority at every hop, keeps unroutable messages in a bounded queue that never evicts an SOS for routine traffic, authenticates and encrypts with vetted primitives, and measures all of it, including a paired weighted-versus-hop-count experiment.
+EcoMesh routes over the cost $1+5(1-q)+3f$ (Section~\ref{sec:cost}), re-applies SOS priority at each hop, holds unroutable messages in a bounded queue that never evicts an SOS for routine traffic, uses vetted cryptography, and measures all of it, including weighted against hop-count routing.

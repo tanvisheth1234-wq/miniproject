@@ -39,6 +39,11 @@ def num(x, d=1, unit=""):
     return "--" if x is None else f"{x:.{d}f}{unit}"
 
 
+def span(values, fmt):
+    lo, hi = format(min(values), fmt), format(max(values), fmt)
+    return lo if lo == hi else f"{lo}--{hi}"
+
+
 def table(name, caption, label, colspec, header, rows, font="small", note=None):
     """colspec 'AUTO:l3,r1,r1' sizes wrapped columns by relative weight so the table
     always fits the text width; anything else is a normal tabularx column spec."""
@@ -319,7 +324,7 @@ def combined_tables(scale, lossy, live, thr):
             [f"Relay switched off " + BS + f"textrightarrow{{}} sender re-routes ({fr['n']} trials)", f"median {fr['median']:.1f} s, max {fr['max']:.1f} s; every later SOS delivered" if f["all_delivered"] else "not all delivered"],
             [f"Gateway down, 5 SOS held; gateway back ({len(sf['trials'])} trials)", f"{100 * sf['flush_rate']:.0f}" + BS + f"% flushed, median {ss['median']:.1f} s, max {ss['max']:.1f} s"],
             [f"Device API response ({ap['n']} requests)", f"median {ap['median']:.0f} ms, 95th pct {ap['p95']:.0f} ms"],
-            ["Per-process memory and CPU, idle", f"{min(v['working_set_mb'] for v in idle):.0f}--{max(v['working_set_mb'] for v in idle):.0f} MB; {min(v['cpu_percent_of_one_core'] for v in idle):.1f}--{max(v['cpu_percent_of_one_core'] for v in idle):.1f}" + BS + "% of one core"],
+            ["Per-process memory and CPU, idle", f"{span([v['working_set_mb'] for v in idle], '.0f')} MB; {span([v['cpu_percent_of_one_core'] for v in idle], '.1f')}" + BS + "% of one core"],
             ["Per-process CPU while sending SOS (includes the harness polling every 20 ms)", f"up to {max(v['cpu_percent_of_one_core'] for v in load):.0f}" + BS + "% of one core"],
         ]
         table("live_summary", f"Live devices: {live['devices']} operating-system processes, real TCP sockets, real timers, on one laptop (loopback)", "tab:live", "AUTO:l5,l5",

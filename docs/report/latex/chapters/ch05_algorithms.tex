@@ -49,15 +49,15 @@ on packet p from link sender s:
 \end{lstlisting}
 The key includes the \emph{type}, because an ACK carries the id of the DATA it acknowledges (a bug found in integration), and at relays the \emph{attempt}, so a retransmission is forwarded; the destination ignores the attempt and sees each message once. Only the originator retains (A8).
 
-\textbf{A5 Priority scheduling.} \texttt{push} inserts (priority, timestamp, counter) into a binary heap and \texttt{pop} returns the highest priority, then the oldest; the counter prevents ties from comparing packets. Applied at \emph{every} hop, an SOS overtakes routine traffic repeatedly along the route. \textbf{A6 Dedup.} A hash map of keys to first-seen time, pruned after 300\,s. \textbf{A7 Send, ACK, retry.} A timed-out packet with fewer than 3 attempts gets a failure recorded on its link (cost $+3$), a recomputed route and a resend; after 3 attempts it moves to store-and-forward (Figure~\ref{fig:flowsend}). \textbf{A8 Bounded store-and-forward.} \texttt{enqueue} evicts, when over 500 messages, the one with the largest (priority value, age), i.e.\ the lowest priority and oldest; \texttt{expire} drops anything older than 1800\,s regardless of priority; the flush (every 10\,s) sends each message whose destination now has a route. \textbf{A9 Security.} Send encrypts with a random nonce and signs the identity bytes; receive verifies against the sender's known key, then decrypts; either failure drops the packet. \textbf{A10 \texttt{RESCUE\_\_}.} One Dijkstra run, then the nearest reachable node whose role is GATEWAY or RESCUE; none reachable means store-and-forward (Figure~\ref{fig:flowroute}).
+\textbf{A5 Priority scheduling.} A binary heap of (priority, timestamp, counter) pops the highest priority, then the oldest; applied at \emph{every} hop, an SOS overtakes routine traffic again and again. \textbf{A6 Dedup.} A hash map of keys to first-seen time, pruned after 300\,s. \textbf{A7 Send, ACK, retry.} A timed-out packet with fewer than 3 attempts gets a failure recorded on its link (cost $+3$), a recomputed route and a resend; after 3 attempts it moves to store-and-forward (Figure~\ref{fig:flowsend}). \textbf{A8 Bounded store-and-forward.} \texttt{enqueue} evicts, when over 500 messages, the one with the largest (priority value, age), i.e.\ the lowest priority and oldest; \texttt{expire} drops anything older than 1800\,s regardless of priority; the flush (every 10\,s) sends each message whose destination now has a route. \textbf{A9 Security.} Send encrypts with a random nonce and signs the identity bytes; receive verifies against the sender's known key, then decrypts; either failure drops the packet. \textbf{A10 \texttt{RESCUE\_\_}.} One Dijkstra run, then the nearest reachable node whose role is GATEWAY or RESCUE; none reachable means store-and-forward (Figure~\ref{fig:flowroute}).
 
 \subsection{Flowcharts}
-Figure~\ref{fig:flowsend} shows how a message is originated, acknowledged, retried and retained; Figure~\ref{fig:flowroute} shows how a next hop is chosen. The packet receive path is the activity diagram of Figure~\ref{fig:activity}.
+Figure~\ref{fig:flowsend} follows a message from creation to acknowledgement, retry or retention, and Figure~\ref{fig:flowroute} the choice of next hop; the receive path is Figure~\ref{fig:activity}.
 \begin{figure}[!htbp]
 \centering
-\begin{minipage}[b]{0.5\textwidth}\centering\includegraphics[height=0.25\textheight,width=\linewidth,keepaspectratio]{figures/fig_flow_send.pdf}
+\begin{minipage}[b]{0.52\textwidth}\centering\includegraphics[height=0.42\textheight,width=\linewidth,keepaspectratio]{figures/fig_flow_send.pdf}
 \captionof{figure}{Flowchart: originate, acknowledge, retry and retain a message}\label{fig:flowsend}\end{minipage}\hfill
-\begin{minipage}[b]{0.46\textwidth}\centering\includegraphics[height=0.25\textheight,width=\linewidth,keepaspectratio]{figures/fig_flow_route.pdf}
+\begin{minipage}[b]{0.46\textwidth}\centering\includegraphics[height=0.42\textheight,width=\linewidth,keepaspectratio]{figures/fig_flow_route.pdf}
 \captionof{figure}{Flowchart: next-hop selection, including \texttt{RESCUE\_\_}}\label{fig:flowroute}\end{minipage}
 \end{figure}
 
@@ -67,21 +67,21 @@ Table~\ref{tab:ds} lists each structure, its use and the reason.
 \caption{Data structures and why they were chosen}
 \label{tab:ds}
 \footnotesize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{8.8cm}>{\raggedright\arraybackslash}X@{}}
 \toprule
 \textbf{Structure and use} & \textbf{Reason}\\ \midrule
-Adjacency dictionary of dictionaries: \texttt{MeshGraph} & $O(1)$ edge update and lookup, $O(\deg)$ iteration in Dijkstra; the mesh is sparse, so no matrix\\
-Binary min-heap: Dijkstra frontier and the message priority queue & $O(\log n)$ insert and extract-min; ordering by (priority, timestamp, counter)\\
-Hash map with timestamps: dedup set, neighbour table, route cache & $O(1)$ average membership; expiry by pruning\\
-Fixed-capacity deque (20 slots) per neighbour & bounded sliding window for the link-quality estimate\\
-Dictionary keyed by message id: ACK tracker, retention queue & $O(1)$ acknowledge and removal\\
-Set: visited nodes in Dijkstra, reachable set & $O(1)$ membership\\
+Dictionary of dictionaries: \texttt{MeshGraph} adjacency & $O(1)$ edge update; sparse, so no matrix\\
+Binary min-heap: Dijkstra frontier, message priority queue & $O(\log n)$ insert and extract-min\\
+Hash map with timestamps: dedup set, neighbours, route cache & $O(1)$ lookup; expiry by pruning\\
+Deque of 20 slots per neighbour & bounded window for link quality\\
+Dictionary by message id: ACK tracker, retention queue & $O(1)$ acknowledge and removal\\
+Set: Dijkstra visited nodes, reachable set & $O(1)$ membership\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{Algorithm Selection and Justification}
-Flooding delivers but its message count grows with the square of the node count and collapses a mesh under load. Bellman--Ford ($O(VE)$) and A* (needs a geometric heuristic) bring nothing here. Dijkstra with a binary heap is correct for non-negative weights in $O((V+E)\log V)$, and the weighted cost avoids the lossy shortcuts hop count picks (Chapter~\ref{ch:perf}). A heap rather than a sorted list or FIFO gives $O(\log n)$ priority order; a hash set gives $O(1)$ duplicate checks.
+Flooding delivers, but its message count grows with the square of the node count and swamps a loaded mesh. Bellman--Ford ($O(VE)$) and A* (which needs a geometric heuristic) add nothing here; Dijkstra with a binary heap is correct for non-negative weights in $O((V+E)\log V)$. A heap gives $O(\log n)$ priority order and a hash set $O(1)$ duplicate checks.
 \subsection{Time Complexity Analysis}
 Table~\ref{tab:complexity} gives the time complexity of the critical operations.
 \begin{table}[!htbp]
@@ -105,7 +105,7 @@ Packet parse and validate & $O(1)$ for the fixed 52-byte header\\
 \end{table}
 
 \subsection{Space Complexity Analysis}
-The graph needs $O(V+E)$, the dedup set grows with traffic in its 300\,s window, the retention queue holds at most 500 packets and Dijkstra needs $O(V)$ extra; only the on-disk SQLite log is unbounded.
+The graph needs $O(V+E)$, Dijkstra $O(V)$ extra, the dedup set grows with traffic over 300\,s, the retention queue holds at most 500 packets, and only the SQLite log on disk is unbounded.
 \subsection{Optimization Opportunities}
 \label{sec:opt}
-Per-destination cache invalidation and incremental shortest paths; multipoint relays to cut redundant report copies~\cite{rfc3626olsr}; short retention at relays; batched SQLite commits; and the timer changes the measurements point to (Chapter~\ref{ch:perf}).
+Per-destination cache invalidation, multipoint relays~\cite{rfc3626olsr}, short retention at relays, batched commits and retuned timers (Chapter~\ref{ch:perf}).

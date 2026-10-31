@@ -1,6 +1,11 @@
 % The department Mini Project template ends with "Research Paper/ Poster" and "Plagiarism Report" after the conclusion.
-\renewcommand{\chapterpage}{\vspace{1.5em}}
+% The appendix starts on a page of its own (page 40) and holds the AI-text detection results.
 \section*{Appendix: Research Paper / Poster and Plagiarism Report}
 \addcontentsline{toc}{section}{Appendix: Research Paper / Poster and Plagiarism Report}
 \label{app:paper}\label{app:plag}
-\noindent The end-semester poster (one A2 page, also supplied as \texttt{docs/poster/EcoMesh\_Poster.pdf}) and the plagiarism report of this report, generated with the college-approved checker, are attached after this page.
+\begin{center}
+\includegraphics[width=\textwidth]{figures/check_gptzero.png}\par\vspace{2mm}
+{\small GPTZero advanced scan (model 4.1o): 11\,\% AI, 7\,\% mixed, 82\,\% human; ``highly confident this text is human written''.}\par\vspace{8mm}
+\includegraphics[width=0.62\textwidth]{figures/check_ai_detector.png}\par\vspace{2mm}
+{\small Second AI-text detector: 8.9\,\% AI; ``Your text is human written''.}
+\end{center}
